@@ -55,12 +55,18 @@
   --shadow-lg: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
 }
 
+html, body, #app {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--surface-base);
   color: var(--color-text);
-  margin: 0;
-  padding: 0;
   min-height: 100vh;
   background-image: radial-gradient(var(--color-primary) 0.5px, transparent 0.5px), radial-gradient(var(--color-secondary) 0.5px, var(--surface-base) 0.5px);
   background-size: 40px 40px;
@@ -100,8 +106,10 @@ body {
 /* Layout */
 .app-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   width: 100%;
+  overflow: hidden;
 }
 
 .app-layout.has-sidebar {
@@ -303,8 +311,11 @@ body {
 .app-main-content {
   flex-grow: 1;
   box-sizing: border-box;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
   padding: var(--space-6) var(--space-5);
+  width: auto;
 }
 
 .app-layout.has-sidebar .app-main-content {
@@ -747,10 +758,9 @@ button[type="submit"]:disabled {
 /* Modals */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -839,6 +849,18 @@ input, select, textarea, button, a {
 
 /* Responsive Styling */
 @media (max-width: 768px) {
+  html, body, #app {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .app-layout {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
   .app-layout.has-sidebar {
     flex-direction: column;
   }
@@ -905,6 +927,9 @@ input, select, textarea, button, a {
   .app-layout.has-sidebar .app-main-content {
     margin-left: 0;
     padding: var(--space-4) var(--space-3);
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
   }
 
   /* Modals on Mobile */

@@ -1,5 +1,6 @@
 import { createAsync, useSubmission, type RouteDefinition } from "@solidjs/router";
 import { Show, For, createSignal, createEffect } from "solid-js";
+import { Portal } from "solid-js/web";
 import {
   getAdminUsers,
   getAllDivisi,
@@ -43,63 +44,65 @@ export default function AdminUsers() {
       </div>
 
       <Show when={showCreate()}>
-        <div class="modal-overlay" onClick={() => setShowCreate(false)}>
-          <div class="modal modal-animate" onClick={(e) => e.stopPropagation()}>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
-              <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">Tambah Pengguna Baru</h3>
-              <button class="theme-toggle" style="font-size: 24px; padding: 0; cursor: pointer;" onClick={() => setShowCreate(false)}>×</button>
+        <Portal>
+          <div class="modal-overlay" onClick={() => setShowCreate(false)}>
+            <div class="modal modal-animate" onClick={(e) => e.stopPropagation()}>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
+                <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">Tambah Pengguna Baru</h3>
+                <button class="theme-toggle" style="font-size: 24px; padding: 0; cursor: pointer;" onClick={() => setShowCreate(false)}>×</button>
+              </div>
+              <form action={createUser} method="post">
+                <div class="form-group">
+                  <label>Username</label>
+                  <input name="username" placeholder="Masukkan username" required minLength={3} />
+                </div>
+                <div class="form-group">
+                  <label>Password</label>
+                  <input name="password" type="password" placeholder="Masukkan password" required minLength={6} />
+                </div>
+                <div class="form-group">
+                  <label>Nama Lengkap</label>
+                  <input name="fullName" placeholder="Masukkan nama lengkap" required />
+                </div>
+                <div class="form-group">
+                  <label>Email</label>
+                  <input name="email" type="email" placeholder="Masukkan email" required />
+                </div>
+                <div class="form-group">
+                  <label>Telepon</label>
+                  <input name="phone" placeholder="Masukkan nomor telepon" />
+                </div>
+                <div class="form-group">
+                  <label>Role</label>
+                  <select name="role">
+                    <option value="USER">USER</option>
+                    <option value="ADMIN">ADMIN</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Divisi</label>
+                  <select name="divisiId">
+                    <option value="">-- Pilih Divisi --</option>
+                    <For each={divisiList()}>
+                      {(d) => <option value={d.id}>{d.name}</option>}
+                    </For>
+                  </select>
+                </div>
+                <div style="display: flex; gap: var(--space-2); margin-top: var(--space-4);">
+                  <button class="btn-primary" type="submit" disabled={creating.pending}>
+                    {creating.pending ? "Menyimpan..." : "Simpan"}
+                  </button>
+                  <button class="btn-ghost" type="button" onClick={() => setShowCreate(false)}>
+                    Batal
+                  </button>
+                </div>
+                <Show when={creating.result instanceof Error}>
+                  <div class="alert-error">{(creating.result as Error).message}</div>
+                </Show>
+              </form>
             </div>
-            <form action={createUser} method="post">
-              <div class="form-group">
-                <label>Username</label>
-                <input name="username" placeholder="Masukkan username" required minLength={3} />
-              </div>
-              <div class="form-group">
-                <label>Password</label>
-                <input name="password" type="password" placeholder="Masukkan password" required minLength={6} />
-              </div>
-              <div class="form-group">
-                <label>Nama Lengkap</label>
-                <input name="fullName" placeholder="Masukkan nama lengkap" required />
-              </div>
-              <div class="form-group">
-                <label>Email</label>
-                <input name="email" type="email" placeholder="Masukkan email" required />
-              </div>
-              <div class="form-group">
-                <label>Telepon</label>
-                <input name="phone" placeholder="Masukkan nomor telepon" />
-              </div>
-              <div class="form-group">
-                <label>Role</label>
-                <select name="role">
-                  <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Divisi</label>
-                <select name="divisiId">
-                  <option value="">-- Pilih Divisi --</option>
-                  <For each={divisiList()}>
-                    {(d) => <option value={d.id}>{d.name}</option>}
-                  </For>
-                </select>
-              </div>
-              <div style="display: flex; gap: var(--space-2); margin-top: var(--space-4);">
-                <button class="btn-primary" type="submit" disabled={creating.pending}>
-                  {creating.pending ? "Menyimpan..." : "Simpan"}
-                </button>
-                <button class="btn-ghost" type="button" onClick={() => setShowCreate(false)}>
-                  Batal
-                </button>
-              </div>
-              <Show when={creating.result instanceof Error}>
-                <div class="alert-error">{(creating.result as Error).message}</div>
-              </Show>
-            </form>
           </div>
-        </div>
+        </Portal>
       </Show>
 
       <table class="data-table">
