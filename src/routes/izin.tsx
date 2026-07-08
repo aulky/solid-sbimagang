@@ -1,4 +1,9 @@
-import { createAsync, useSubmission, useAction, type RouteDefinition } from "@solidjs/router";
+import {
+  createAsync,
+  useSubmission,
+  useAction,
+  type RouteDefinition,
+} from "@solidjs/router";
 import { For, Show, createSignal, createEffect } from "solid-js";
 import { Portal } from "solid-js/web";
 import { getUserIzinList, submitIzin } from "~/lib";
@@ -105,13 +110,23 @@ export default function Izin() {
     <main class="p-4" style="max-width: 900px; margin: 0 auto;">
       <h1 class="page-title">Pengajuan Izin Magang</h1>
 
-      <div class="form-card" style="max-width: 100%; margin-bottom: var(--space-5);">
-        <h2 style="margin-top: 0; font-family: var(--font-headline); font-weight: 700; font-size: 1.5rem; margin-bottom: var(--space-4);">Ajukan Izin Baru</h2>
+      <div
+        class="form-card"
+        style="max-width: 100%; margin-bottom: var(--space-5);"
+      >
+        <h2 style="margin-top: 0; font-family: var(--font-headline); font-weight: 700; font-size: 1.5rem; margin-bottom: var(--space-4);">
+          Ajukan Izin Baru
+        </h2>
 
         <form onSubmit={handleOpenConfirm}>
           <div class="form-group">
             <label for="type">Tipe Perizinan</label>
-            <select id="type" value={type()} onChange={(e) => setType(e.currentTarget.value)} required>
+            <select
+              id="type"
+              value={type()}
+              onChange={(e) => setType(e.currentTarget.value)}
+              required
+            >
               <option value="">-- Pilih Tipe --</option>
               <option value="SAKIT">Sakit</option>
               <option value="IZIN">Izin (Keperluan Mendesak)</option>
@@ -122,11 +137,23 @@ export default function Izin() {
           <div style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
             <div class="form-group" style="flex: 1; min-width: 200px;">
               <label for="startDate">Tanggal Mulai</label>
-              <input type="date" id="startDate" value={startDate()} onInput={(e) => setStartDate(e.currentTarget.value)} required />
+              <input
+                type="date"
+                id="startDate"
+                value={startDate()}
+                onInput={(e) => setStartDate(e.currentTarget.value)}
+                required
+              />
             </div>
             <div class="form-group" style="flex: 1; min-width: 200px;">
               <label for="endDate">Tanggal Selesai</label>
-              <input type="date" id="endDate" value={endDate()} onInput={(e) => setEndDate(e.currentTarget.value)} required />
+              <input
+                type="date"
+                id="endDate"
+                value={endDate()}
+                onInput={(e) => setEndDate(e.currentTarget.value)}
+                required
+              />
             </div>
           </div>
 
@@ -142,12 +169,18 @@ export default function Izin() {
             />
           </div>
 
-          <button class="btn-primary" type="submit" style="width: auto; padding: 0 var(--space-5); height: 42px;">
+          <button
+            class="btn-primary"
+            type="submit"
+            style="width: auto; padding: 0 var(--space-5); height: 42px;"
+          >
             Ajukan Izin
           </button>
 
           <Show when={errorMessage()}>
-            <div class="alert-error" style="margin-top: var(--space-3);">{errorMessage()}</div>
+            <div class="alert-error" style="margin-top: var(--space-3);">
+              {errorMessage()}
+            </div>
           </Show>
         </form>
       </div>
@@ -156,10 +189,22 @@ export default function Izin() {
       <Show when={showConfirm()}>
         <Portal>
           <div class="modal-overlay" onClick={() => setShowConfirm(false)}>
-            <div class="modal modal-animate" onClick={(e) => e.stopPropagation()} style="max-width: 460px;">
+            <div
+              class="modal modal-animate"
+              onClick={(e) => e.stopPropagation()}
+              style="max-width: 460px;"
+            >
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
-                <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">Konfirmasi Pengajuan</h3>
-                <button class="theme-toggle" style="font-size: 24px; padding: 0; cursor: pointer;" onClick={() => setShowConfirm(false)}>×</button>
+                <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">
+                  Konfirmasi Pengajuan
+                </h3>
+                <button
+                  class="theme-toggle"
+                  style="font-size: 24px; padding: 0; cursor: pointer;"
+                  onClick={() => setShowConfirm(false)}
+                >
+                  ×
+                </button>
               </div>
 
               <div style="text-align: left; margin-bottom: var(--space-4); font-size: 14px; line-height: 1.5;">
@@ -171,10 +216,22 @@ export default function Izin() {
                     <strong>Tipe:</strong> {type()}
                   </div>
                   <div>
-                    <strong>Tanggal Mulai:</strong> {new Date(startDate()).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                    <strong>Tanggal Mulai:</strong>{" "}
+                    {new Date(startDate()).toLocaleDateString("id-ID", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </div>
                   <div>
-                    <strong>Tanggal Selesai:</strong> {new Date(endDate()).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                    <strong>Tanggal Selesai:</strong>{" "}
+                    {new Date(endDate()).toLocaleDateString("id-ID", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </div>
                   <div style="word-break: break-word;">
                     <strong>Alasan:</strong> {reason()}
@@ -183,10 +240,21 @@ export default function Izin() {
               </div>
 
               <div style="display: flex; gap: var(--space-3);">
-                <button class="btn-ghost" style="flex: 1;" type="button" onClick={() => setShowConfirm(false)}>
+                <button
+                  class="btn-ghost"
+                  style="flex: 1;"
+                  type="button"
+                  onClick={() => setShowConfirm(false)}
+                >
                   Batal
                 </button>
-                <button class="btn-primary" style="flex: 1;" type="button" onClick={handleFinalSubmit} disabled={submitting.pending}>
+                <button
+                  class="btn-primary"
+                  style="flex: 1;"
+                  type="button"
+                  onClick={handleFinalSubmit}
+                  disabled={submitting.pending}
+                >
                   {submitting.pending ? "Mengirim..." : "Ya, Kirim"}
                 </button>
               </div>
@@ -196,7 +264,9 @@ export default function Izin() {
       </Show>
 
       {/* History Section */}
-      <h2 style="margin-top: var(--space-5); font-family: var(--font-headline); font-weight: 700; font-size: 1.5rem; margin-bottom: var(--space-3); color: var(--color-text);">Riwayat Pengajuan Izin</h2>
+      <h2 style="margin-top: var(--space-5); font-family: var(--font-headline); font-weight: 700; font-size: 1.5rem; margin-bottom: var(--space-3); color: var(--color-text);">
+        Riwayat Pengajuan Izin
+      </h2>
 
       <Show when={izinList()} fallback={<p>Memuat...</p>}>
         {(list) => (
@@ -218,7 +288,10 @@ export default function Izin() {
                     when={paginatedList().length > 0}
                     fallback={
                       <tr>
-                        <td colspan="6" style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);">
+                        <td
+                          colspan="6"
+                          style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
+                        >
                           Belum ada riwayat pengajuan izin magang.
                         </td>
                       </tr>
@@ -230,16 +303,33 @@ export default function Izin() {
                           <td style="font-family: var(--font-mono); font-size: 13px;">
                             {(currentPage() - 1) * itemsPerPage + i() + 1}
                           </td>
-                          <td>{new Date(r.startDate).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}</td>
-                          <td>{new Date(r.endDate).toLocaleDateString("id-ID", { year: "numeric", month: "long", day: "numeric" })}</td>
+                          <td>
+                            {new Date(r.startDate).toLocaleDateString("id-ID", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </td>
+                          <td>
+                            {new Date(r.endDate).toLocaleDateString("id-ID", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </td>
                           <td>
                             <span class="badge badge-izin">{r.type}</span>
                           </td>
-                          <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title={r.reason}>
+                          <td
+                            style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                            title={r.reason}
+                          >
                             {r.reason}
                           </td>
                           <td>
-                            <span class={statusBadge(r.status)}>{r.status}</span>
+                            <span class={statusBadge(r.status)}>
+                              {r.status}
+                            </span>
                           </td>
                         </tr>
                       )}
@@ -253,7 +343,8 @@ export default function Izin() {
             <Show when={list().length > 0}>
               <div class="pagination-container">
                 <div class="pagination-info">
-                  Menampilkan {paginatedList().length} dari {list().length} pengajuan izin
+                  Menampilkan {paginatedList().length} dari {list().length}{" "}
+                  pengajuan izin
                 </div>
                 <div class="pagination-buttons">
                   <button
@@ -263,7 +354,9 @@ export default function Izin() {
                   >
                     Sebelumnya
                   </button>
-                  <For each={Array.from({ length: totalPages() }, (_, i) => i + 1)}>
+                  <For
+                    each={Array.from({ length: totalPages() }, (_, i) => i + 1)}
+                  >
                     {(page) => (
                       <button
                         class="btn-pagination"

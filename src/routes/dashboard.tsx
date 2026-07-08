@@ -1,6 +1,16 @@
-import { createAsync, useSubmission, type RouteDefinition } from "@solidjs/router";
+import {
+  createAsync,
+  useSubmission,
+  type RouteDefinition,
+} from "@solidjs/router";
 import { Show } from "solid-js";
-import { getUser, getTodayAttendance, checkIn, checkOut, getAttendanceHistory } from "~/lib";
+import {
+  getUser,
+  getTodayAttendance,
+  checkIn,
+  checkOut,
+  getAttendanceHistory,
+} from "~/lib";
 
 export const route = {
   preload: () => {
@@ -19,12 +29,16 @@ export default function Dashboard() {
 
   const now = () => {
     const d = new Date();
-    return d.toLocaleDateString("id-ID", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }) + " — " + d.toLocaleTimeString("id-ID");
+    return (
+      d.toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }) +
+      " — " +
+      d.toLocaleTimeString("id-ID")
+    );
   };
 
   const monthStats = () => {
@@ -58,7 +72,11 @@ export default function Dashboard() {
             <div>
               <p class="stat-label">Belum Check-In</p>
               <form action={checkIn} method="post">
-                <button class="btn-primary" type="submit" disabled={checkingIn.pending}>
+                <button
+                  class="btn-primary"
+                  type="submit"
+                  disabled={checkingIn.pending}
+                >
                   {checkingIn.pending ? "Memproses..." : "Check-In"}
                 </button>
               </form>
@@ -75,7 +93,11 @@ export default function Dashboard() {
                 when={att().checkOut}
                 fallback={
                   <form action={checkOut} method="post">
-                    <button class="btn-primary" type="submit" disabled={checkingOut.pending}>
+                    <button
+                      class="btn-primary"
+                      type="submit"
+                      disabled={checkingOut.pending}
+                    >
                       {checkingOut.pending ? "Memproses..." : "Check-Out"}
                     </button>
                   </form>

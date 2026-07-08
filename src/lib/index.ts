@@ -230,6 +230,84 @@ export const getAdminStats = query(async () => {
   return { totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin };
 }, "adminStats");
 
+export const getTodayAttendanceStatus = query(async () => {
+  "use server";
+  await requireAdmin();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const totalInterns = await db.user.count({
+    where: { role: "USER", isActive: true }
+  });
+
+  const attendanceToday = await db.absensi.groupBy({
+    by: ["status"],
+    where: { date: today },
+    _count: { id: true }
+  });
+
+  const counts = { HADIR: 0, TELAT: 0, IZIN: 0, ALPHA: 0 };
+  let totalCheckedIn = 0;
+  for (const group of attendanceToday) {
+    const status = group.status as keyof typeof counts;
+    counts[status] = group._count.id;
+    totalCheckedIn += group._count.id;
+  }
+
+  const belumAbsen = Math.max(0, totalInterns - totalCheckedIn);
+
+  return {
+    ...counts,
+    belumAbsen,
+    totalInterns
+  };
+}, "todayAttendanceStatus");
+
+export const getInternTrendData = query(async () => {
+  "use server";
+  await requireAdmin();
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const attendanceHistory = await db.absensi.findMany({
+    where: { date: { gte: thirtyDaysAgo } },
+    select: { date: true, status: true },
+    orderBy: { date: "asc" }
+  });
+
+  const dailyData: Record<string, { hadir: number; telat: number; izin: number; total: number }> = {};
+  for (const record of attendanceHistory) {
+    const dateStr = record.date.toISOString().split("T")[0];
+    if (!dailyData[dateStr]) {
+      dailyData[dateStr] = { hadir: 0, telat: 0, izin: 0, total: 0 };
+    }
+    if (record.status === "HADIR") dailyData[dateStr].hadir++;
+    else if (record.status === "TELAT") dailyData[dateStr].telat++;
+    else if (record.status === "IZIN") dailyData[dateStr].izin++;
+    dailyData[dateStr].total++;
+  }
+
+  const users = await db.user.findMany({
+    where: { role: "USER" },
+    select: { createdAt: true },
+    orderBy: { createdAt: "asc" }
+  });
+
+  const registrationTrend: Record<string, number> = {};
+  let runningCount = 0;
+  for (const u of users) {
+    const dateStr = u.createdAt.toISOString().split("T")[0];
+    runningCount++;
+    registrationTrend[dateStr] = runningCount;
+  }
+
+  return {
+    dailyAttendanceTrend: Object.entries(dailyData).map(([date, stats]) => ({ date, ...stats })),
+    registrationTrend: Object.entries(registrationTrend).map(([date, count]) => ({ date, count }))
+  };
+}, "internTrendData");
+
 // ========== ADMIN: USERS CRUD ==========
 
 export const getAdminUsers = query(async () => {

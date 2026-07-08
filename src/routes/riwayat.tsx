@@ -57,7 +57,10 @@ export default function Riwayat() {
                     when={paginatedRecords().length > 0}
                     fallback={
                       <tr>
-                        <td colspan="6" style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);">
+                        <td
+                          colspan="6"
+                          style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
+                        >
                           Belum ada riwayat absensi.
                         </td>
                       </tr>
@@ -69,10 +72,29 @@ export default function Riwayat() {
                           <td style="font-family: var(--font-mono); font-size: 13px;">
                             {(currentPage() - 1) * itemsPerPage + i() + 1}
                           </td>
-                          <td>{new Date(r.date).toLocaleDateString("id-ID", { weekday: "short", year: "numeric", month: "short", day: "numeric" })}</td>
-                          <td style="font-family: var(--font-mono);">{r.checkIn ? new Date(r.checkIn).toLocaleTimeString("id-ID") : "-"}</td>
-                          <td style="font-family: var(--font-mono);">{r.checkOut ? new Date(r.checkOut).toLocaleTimeString("id-ID") : "-"}</td>
-                          <td><span class={statusBadge(r.status)}>{r.status}</span></td>
+                          <td>
+                            {new Date(r.date).toLocaleDateString("id-ID", {
+                              weekday: "short",
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </td>
+                          <td style="font-family: var(--font-mono);">
+                            {r.checkIn
+                              ? new Date(r.checkIn).toLocaleTimeString("id-ID")
+                              : "-"}
+                          </td>
+                          <td style="font-family: var(--font-mono);">
+                            {r.checkOut
+                              ? new Date(r.checkOut).toLocaleTimeString("id-ID")
+                              : "-"}
+                          </td>
+                          <td>
+                            <span class={statusBadge(r.status)}>
+                              {r.status}
+                            </span>
+                          </td>
                           <td>{r.notes ?? "-"}</td>
                         </tr>
                       )}
@@ -85,7 +107,8 @@ export default function Riwayat() {
             {/* Pagination Controls */}
             <div class="pagination-container">
               <div class="pagination-info">
-                Menampilkan {paginatedRecords().length} dari {records().length} riwayat
+                Menampilkan {paginatedRecords().length} dari {records().length}{" "}
+                riwayat
               </div>
               <div class="pagination-buttons">
                 <button
@@ -95,7 +118,9 @@ export default function Riwayat() {
                 >
                   Sebelumnya
                 </button>
-                <For each={Array.from({ length: totalPages() }, (_, i) => i + 1)}>
+                <For
+                  each={Array.from({ length: totalPages() }, (_, i) => i + 1)}
+                >
                   {(page) => (
                     <button
                       class="btn-pagination"

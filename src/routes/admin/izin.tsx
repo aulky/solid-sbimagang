@@ -1,11 +1,15 @@
-import { createAsync, useSubmission, type RouteDefinition } from "@solidjs/router";
+import {
+  createAsync,
+  useSubmission,
+  type RouteDefinition,
+} from "@solidjs/router";
 import { For, Show, createSignal } from "solid-js";
 import { getAdminIzin, approveIzin } from "~/lib";
 
 export const route = {
   preload() {
     getAdminIzin();
-  }
+  },
 } satisfies RouteDefinition;
 
 export default function AdminIzin() {
@@ -51,7 +55,10 @@ export default function AdminIzin() {
               when={records() && records()!.length > 0}
               fallback={
                 <tr>
-                  <td colspan="8" style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);">
+                  <td
+                    colspan="8"
+                    style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
+                  >
                     Belum ada pengajuan izin.
                   </td>
                 </tr>
@@ -59,8 +66,12 @@ export default function AdminIzin() {
             >
               <For each={paginatedRecords()}>
                 {(row, idx) => {
-                  const startDate = new Date(row.startDate).toLocaleDateString("id-ID");
-                  const endDate = new Date(row.endDate).toLocaleDateString("id-ID");
+                  const startDate = new Date(row.startDate).toLocaleDateString(
+                    "id-ID",
+                  );
+                  const endDate = new Date(row.endDate).toLocaleDateString(
+                    "id-ID",
+                  );
 
                   return (
                     <tr>
@@ -69,10 +80,22 @@ export default function AdminIzin() {
                       </td>
                       <td>
                         <strong>{row.user.fullName}</strong>
-                        <div style="font-size: 12px; color: var(--color-text-secondary);">@{row.user.username}</div>
+                        <div style="font-size: 12px; color: var(--color-text-secondary);">
+                          @{row.user.username}
+                        </div>
                         <Show when={row.user.phone}>
                           <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 4px;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; stroke: currentColor;">
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              style="flex-shrink: 0; stroke: currentColor;"
+                            >
                               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                             </svg>
                             <span>{row.user.phone}</span>
@@ -84,7 +107,10 @@ export default function AdminIzin() {
                       </td>
                       <td>{startDate}</td>
                       <td>{endDate}</td>
-                      <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title={row.reason}>
+                      <td
+                        style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        title={row.reason}
+                      >
                         {row.reason}
                       </td>
                       <td>
@@ -97,7 +123,11 @@ export default function AdminIzin() {
                           <div style="display: flex; gap: var(--space-2);">
                             <form action={approveIzin} method="post">
                               <input type="hidden" name="id" value={row.id} />
-                              <input type="hidden" name="status" value="APPROVED" />
+                              <input
+                                type="hidden"
+                                name="status"
+                                value="APPROVED"
+                              />
                               <button
                                 type="submit"
                                 class="btn-secondary"
@@ -109,7 +139,11 @@ export default function AdminIzin() {
                             </form>
                             <form action={approveIzin} method="post">
                               <input type="hidden" name="id" value={row.id} />
-                              <input type="hidden" name="status" value="REJECTED" />
+                              <input
+                                type="hidden"
+                                name="status"
+                                value="REJECTED"
+                              />
                               <button
                                 type="submit"
                                 class="btn-danger"
@@ -122,7 +156,9 @@ export default function AdminIzin() {
                           </div>
                         </Show>
                         <Show when={row.status !== "PENDING"}>
-                          <span style="color: var(--color-text-secondary); font-size: 13px;">—</span>
+                          <span style="color: var(--color-text-secondary); font-size: 13px;">
+                            —
+                          </span>
                         </Show>
                       </td>
                     </tr>
@@ -138,7 +174,8 @@ export default function AdminIzin() {
       <Show when={records() && records()!.length > 0}>
         <div class="pagination-container">
           <div class="pagination-info">
-            Menampilkan {paginatedRecords().length} dari {records()!.length} pengajuan izin
+            Menampilkan {paginatedRecords().length} dari {records()!.length}{" "}
+            pengajuan izin
           </div>
           <div class="pagination-buttons">
             <button
