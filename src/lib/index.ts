@@ -73,11 +73,15 @@ export const logout = action(async () => {
 
 // ========== ABSENSI (ATTENDANCE) ==========
 
+const getLocalDateAsUTC = () => {
+  const d = new Date();
+  return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+};
+
 export const getTodayAttendance = query(async () => {
   "use server";
   const user = await requireUser();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getLocalDateAsUTC();
   const record = await db.absensi.findUnique({
     where: { userId_date: { userId: user.id, date: today } }
   });
@@ -88,8 +92,7 @@ export const checkIn = action(async () => {
   "use server";
   const user = await requireUser();
   const now = new Date();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getLocalDateAsUTC();
 
   const existing = await db.absensi.findUnique({
     where: { userId_date: { userId: user.id, date: today } }
@@ -119,8 +122,7 @@ export const checkOut = action(async () => {
   "use server";
   const user = await requireUser();
   const now = new Date();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getLocalDateAsUTC();
 
   const existing = await db.absensi.findUnique({
     where: { userId_date: { userId: user.id, date: today } }
@@ -151,11 +153,16 @@ export const getAttendanceHistory = query(async () => {
 
 // ========== IZIN (LEAVE REQUEST) ==========
 
+const parseLocalDateAsUTC = (dateStr: string) => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+};
+
 export const submitIzin = action(async (formData: FormData) => {
   "use server";
   const user = await requireUser();
-  const startDate = new Date(String(formData.get("startDate")));
-  const endDate = new Date(String(formData.get("endDate")));
+  const startDate = parseLocalDateAsUTC(String(formData.get("startDate")));
+  const endDate = parseLocalDateAsUTC(String(formData.get("endDate")));
   const type = String(formData.get("type")) as "SAKIT" | "IZIN" | "CUTI";
   const reason = String(formData.get("reason"));
 

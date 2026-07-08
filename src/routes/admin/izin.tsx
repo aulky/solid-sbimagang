@@ -1,5 +1,5 @@
 import { createAsync, useSubmission, type RouteDefinition } from "@solidjs/router";
-import { For, Show } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 import { getAdminIzin, approveIzin } from "~/lib";
 
 export const route = {
@@ -11,6 +11,22 @@ export const route = {
 export default function AdminIzin() {
   const records = createAsync(() => getAdminIzin());
   const approving = useSubmission(approveIzin);
+
+  // Pagination setup
+  const [currentPage, setCurrentPage] = createSignal(1);
+  const itemsPerPage = 10;
+
+  const totalPages = () => {
+    const list = records();
+    return list ? Math.max(1, Math.ceil(list.length / itemsPerPage)) : 1;
+  };
+
+  const paginatedRecords = () => {
+    const list = records();
+    if (!list) return [];
+    const start = (currentPage() - 1) * itemsPerPage;
+    return list.slice(start, start + itemsPerPage);
+  };
 
   return (
     <main>
@@ -41,17 +57,27 @@ export default function AdminIzin() {
                 </tr>
               }
             >
-              <For each={records()}>
+              <For each={paginatedRecords()}>
                 {(row, idx) => {
                   const startDate = new Date(row.startDate).toLocaleDateString("id-ID");
                   const endDate = new Date(row.endDate).toLocaleDateString("id-ID");
 
                   return (
                     <tr>
-                      <td style="font-family: var(--font-mono); font-size: 13px;">{idx() + 1}</td>
+                      <td style="font-family: var(--font-mono); font-size: 13px;">
+                        {(currentPage() - 1) * itemsPerPage + idx() + 1}
+                      </td>
                       <td>
                         <strong>{row.user.fullName}</strong>
                         <div style="font-size: 12px; color: var(--color-text-secondary);">@{row.user.username}</div>
+                        <Show when={row.user.phone}>
+                          <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; stroke: currentColor;">
+                              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                            </svg>
+                            <span>{row.user.phone}</span>
+                          </div>
+                        </Show>
                       </td>
                       <td>
                         <span class="badge badge-izin">{row.type}</span>
@@ -107,6 +133,42 @@ export default function AdminIzin() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      <Show when={records() && records()!.length > 0}>
+        <div class="pagination-container">
+          <div class="pagination-info">
+            Menampilkan {paginatedRecords().length} dari {records()!.length} pengajuan izin
+          </div>
+          <div class="pagination-buttons">
+            <button
+              class="btn-pagination"
+              disabled={currentPage() === 1}
+              onClick={() => setCurrentPage(currentPage() - 1)}
+            >
+              Sebelumnya
+            </button>
+            <For each={Array.from({ length: totalPages() }, (_, i) => i + 1)}>
+              {(page) => (
+                <button
+                  class="btn-pagination"
+                  classList={{ active: currentPage() === page }}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              )}
+            </For>
+            <button
+              class="btn-pagination"
+              disabled={currentPage() === totalPages()}
+              onClick={() => setCurrentPage(currentPage() + 1)}
+            >
+              Berikutnya
+            </button>
+          </div>
+        </div>
+      </Show>
     </main>
   );
 }

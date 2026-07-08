@@ -1,6 +1,7 @@
-import { Router, useLocation, useNavigate } from "@solidjs/router";
+import { Router, useLocation, useNavigate, useIsRouting } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { Suspense, Show, createSignal, onMount, createEffect } from "solid-js";
+import { Portal } from "solid-js/web";
 import { createAsync } from "@solidjs/router";
 import { getUser, logout } from "~/lib";
 import "./app.css";
@@ -55,7 +56,9 @@ export default function App() {
       root={(props) => {
         const location = useLocation();
         const navigate = useNavigate();
+        const isRouting = useIsRouting();
         const [theme, setTheme] = createSignal("light");
+        const [showLogoutConfirm, setShowLogoutConfirm] = createSignal(false);
 
         onMount(() => {
           const saved = localStorage.getItem("theme");
@@ -75,6 +78,9 @@ export default function App() {
           const u = user();
           const path = location.pathname;
 
+          // Close logout modal on any route transition or user state change
+          setShowLogoutConfirm(false);
+
           if (isLoginPage()) return;
 
           if (u === undefined) return; // Wait for load
@@ -92,6 +98,12 @@ export default function App() {
 
         return (
           <Suspense fallback={<div class="loading-screen">Memuat...</div>}>
+            <Show when={isRouting()}>
+              <div class="loading-bar-container">
+                <div class="loading-bar"></div>
+              </div>
+            </Show>
+
             <div class="app-layout" classList={{ "has-sidebar": !!user() }}>
               <Show when={user()}>
                 {(u) => (
@@ -215,12 +227,41 @@ export default function App() {
 
                     <div class="sidebar-footer">
                       <ThemeToggle theme={theme} setTheme={setTheme} />
-                      <form action={logout} method="post" style="margin: 0; width: 100%;">
-                        <button class="btn-logout-sidebar" type="submit">Keluar</button>
-                      </form>
+                      <button class="btn-logout-sidebar" type="button" onClick={() => setShowLogoutConfirm(true)}>Keluar</button>
                     </div>
                   </aside>
                 )}
+              </Show>
+
+              {/* Logout Confirmation Modal */}
+              <Show when={showLogoutConfirm()}>
+                <Portal>
+                  <div class="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
+                    <div class="modal modal-animate" onClick={(e) => e.stopPropagation()} style="max-width: 400px; text-align: center;">
+                      <div style="margin-bottom: var(--space-4);">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: var(--space-3);">
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                          <polyline points="16 17 21 12 16 7" />
+                          <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <h3 style="margin: 0 0 var(--space-2) 0; font-family: var(--font-headline); font-weight: 700; font-size: 1.25rem;">Konfirmasi Keluar</h3>
+                        <p style="margin: 0; color: var(--color-text-secondary); font-size: 14px;">
+                          Apakah Anda yakin ingin keluar dari sistem?
+                        </p>
+                      </div>
+                      <div style="display: flex; gap: var(--space-3); justify-content: center;">
+                        <button class="btn-ghost" style="width: auto; padding: 0 var(--space-4); height: 40px;" type="button" onClick={() => setShowLogoutConfirm(false)}>
+                          Batal
+                        </button>
+                        <form action={logout} method="post" style="margin: 0;">
+                          <button class="btn-danger" style="width: auto; padding: 0 var(--space-4); height: 40px;" type="submit">
+                            Ya, Keluar
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </Portal>
               </Show>
 
               <main class="app-main-content">
