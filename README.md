@@ -144,7 +144,7 @@ Buat berkas konfigurasi situs baru di `/etc/nginx/sites-available/absensi-sbi` d
 ```nginx
 server {
     listen 80;
-    server_name absensi.tup.web.id; # Ganti dengan domain Anda
+    server_name domain.com; # Ganti dengan domain Anda
 
     # Redirect HTTP ke HTTPS demi keamanan session cookie
     return 301 https://$host$request_uri;
@@ -152,11 +152,11 @@ server {
 
 server {
     listen 443 ssl;
-    server_name absensi.tup.web.id;
+    server_name domain.com;
 
     # Konfigurasi Sertifikat SSL (Let's Encrypt / Certbot)
-    ssl_certificate /etc/letsencrypt/live/absensi.tup.web.id/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/absensi.tup.web.id/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/domain.com/privkey.pem;
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
