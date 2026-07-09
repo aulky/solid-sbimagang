@@ -13,6 +13,15 @@ export const route = {
   },
 } satisfies RouteDefinition;
 
+const statusText = (status: string) => {
+  const map: Record<string, string> = {
+    PENDING: "Menunggu",
+    APPROVED: "Disetujui",
+    REJECTED: "Ditolak",
+  };
+  return map[status] || status;
+};
+
 export default function AdminIzin() {
   const records = createAsync(() => getAdminIzin());
   const approving = useSubmission(approveIzin);
@@ -216,7 +225,7 @@ export default function AdminIzin() {
                       </td>
                       <td>
                         <span class={`badge badge-${row.status.toLowerCase()}`}>
-                          {row.status}
+                          {statusText(row.status)}
                         </span>
                       </td>
                       <td>

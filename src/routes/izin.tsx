@@ -23,6 +23,15 @@ const statusBadge = (status: string) =>
         ? "badge-rejected"
         : "badge-pending";
 
+const statusText = (status: string) => {
+  const map: Record<string, string> = {
+    PENDING: "Menunggu",
+    APPROVED: "Disetujui",
+    REJECTED: "Ditolak",
+  };
+  return map[status] || status;
+};
+
 export default function Izin() {
   const izinList = createAsync(() => getUserIzinList());
   const submitting = useSubmission(submitIzin);
@@ -308,7 +317,7 @@ export default function Izin() {
                           </td>
                           <td>
                             <span class={statusBadge(r.status)}>
-                              {r.status}
+                              {statusText(r.status)}
                             </span>
                           </td>
                         </tr>

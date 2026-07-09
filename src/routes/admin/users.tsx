@@ -88,10 +88,13 @@ export default function AdminUsers() {
   });
 
   // Close modal on successful user update
+  let prevUpdatingPending = false;
   createEffect(() => {
-    if (updating.result && !((updating.result as any) instanceof Error)) {
+    const pending = !!updating.pending;
+    if (prevUpdatingPending && !pending && !updating.error) {
       setEditingUser(null);
     }
+    prevUpdatingPending = pending;
   });
 
   // Close modal on successful user deletion

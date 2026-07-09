@@ -65,10 +65,13 @@ export default function AdminDivisi() {
   });
 
   // Close modal on successful division update
+  let prevUpdatingPending = false;
   createEffect(() => {
-    if (updating.result && !((updating.result as any) instanceof Error)) {
+    const pending = !!updating.pending;
+    if (prevUpdatingPending && !pending && !updating.error) {
       setEditingDivisi(null);
     }
+    prevUpdatingPending = pending;
   });
 
   // Close modal on successful division deletion
