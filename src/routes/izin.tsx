@@ -26,251 +26,195 @@ const statusBadge = (status: string) =>
 export default function Izin() {
   const izinList = createAsync(() => getUserIzinList());
   const submitting = useSubmission(submitIzin);
-  const triggerSubmit = useAction(submitIzin);
 
-  // Form signals
-  const [type, setType] = createSignal("");
-  const [startDate, setStartDate] = createSignal("");
-  const [endDate, setEndDate] = createSignal("");
-  const [reason, setReason] = createSignal("");
-  const [errorMessage, setErrorMessage] = createSignal("");
-
-  // Confirmation Modal signal
-  const [showConfirm, setShowConfirm] = createSignal(false);
+  const [showCreate, setShowCreate] = createSignal(false);
+  const [filterType, setFilterType] = createSignal("");
+  const [filterStatus, setFilterStatus] = createSignal("");
+  let createFormRef: HTMLFormElement | undefined;
 
   // Pagination signals
   const [currentPage, setCurrentPage] = createSignal(1);
   const itemsPerPage = 5;
 
-  const totalPages = () => {
+  const filteredHistory = () => {
     const list = izinList();
-    return list ? Math.max(1, Math.ceil(list.length / itemsPerPage)) : 1;
+    if (!list) return [];
+    return list.filter((r) => {
+      if (filterStatus() && r.status !== filterStatus()) return false;
+      if (filterType() && r.type !== filterType()) return false;
+      return true;
+    });
+  };
+
+  const totalPages = () => {
+    const list = filteredHistory();
+    return Math.max(1, Math.ceil(list.length / itemsPerPage));
   };
 
   const paginatedList = () => {
-    const list = izinList();
+    const list = filteredHistory();
     if (!list) return [];
     const start = (currentPage() - 1) * itemsPerPage;
     return list.slice(start, start + itemsPerPage);
   };
 
-  // Close confirm modal & reset form on success
+  // Close modal on successful submission
+  let prevSubmittingPending = false;
   createEffect(() => {
-    if (submitting.result && !(submitting.result instanceof Error)) {
-      setType("");
-      setStartDate("");
-      setEndDate("");
-      setReason("");
-      setErrorMessage("");
-      setShowConfirm(false);
-    } else if (submitting.result instanceof Error) {
-      setErrorMessage(submitting.result.message);
-      setShowConfirm(false);
+    const pending = !!submitting.pending;
+    if (prevSubmittingPending && !pending && !submitting.error) {
+      createFormRef?.reset();
+      setShowCreate(false);
     }
+    prevSubmittingPending = pending;
   });
 
-  const handleOpenConfirm = (e: Event) => {
-    e.preventDefault();
-    setErrorMessage("");
-
-    if (!type()) {
-      setErrorMessage("Silakan pilih tipe perizinan.");
-      return;
-    }
-    if (!startDate()) {
-      setErrorMessage("Silakan masukkan tanggal mulai.");
-      return;
-    }
-    if (!endDate()) {
-      setErrorMessage("Silakan masukkan tanggal selesai.");
-      return;
-    }
-    if (new Date(startDate()) > new Date(endDate())) {
-      setErrorMessage("Tanggal mulai tidak boleh melebihi tanggal selesai.");
-      return;
-    }
-    if (!reason() || reason().trim().length < 5) {
-      setErrorMessage("Alasan pengajuan harus minimal 5 karakter.");
-      return;
-    }
-
-    setShowConfirm(true);
-  };
-
-  const handleFinalSubmit = () => {
-    const fd = new FormData();
-    fd.append("type", type());
-    fd.append("startDate", startDate());
-    fd.append("endDate", endDate());
-    fd.append("reason", reason());
-    triggerSubmit(fd);
-  };
-
   return (
-    <main class="p-4" style="max-width: 900px; margin: 0 auto;">
-      <h1 class="page-title">Pengajuan Izin Magang</h1>
-
-      <div
-        class="form-card"
-        style="max-width: 100%; margin-bottom: var(--space-5);"
-      >
-        <h2 style="margin-top: 0; font-family: var(--font-headline); font-weight: 700; font-size: 1.5rem; margin-bottom: var(--space-4);">
-          Ajukan Izin Baru
-        </h2>
-
-        <form onSubmit={handleOpenConfirm}>
-          <div class="form-group">
-            <label for="type">Tipe Perizinan</label>
-            <select
-              id="type"
-              value={type()}
-              onChange={(e) => setType(e.currentTarget.value)}
-              required
-            >
-              <option value="">-- Pilih Tipe --</option>
-              <option value="SAKIT">Sakit</option>
-              <option value="IZIN">Izin (Keperluan Mendesak)</option>
-              <option value="CUTI">Cuti Magang</option>
-            </select>
-          </div>
-
-          <div style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
-            <div class="form-group" style="flex: 1; min-width: 200px;">
-              <label for="startDate">Tanggal Mulai</label>
-              <input
-                type="date"
-                id="startDate"
-                value={startDate()}
-                onInput={(e) => setStartDate(e.currentTarget.value)}
-                required
-              />
-            </div>
-            <div class="form-group" style="flex: 1; min-width: 200px;">
-              <label for="endDate">Tanggal Selesai</label>
-              <input
-                type="date"
-                id="endDate"
-                value={endDate()}
-                onInput={(e) => setEndDate(e.currentTarget.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="reason">Alasan Pengajuan</label>
-            <textarea
-              id="reason"
-              placeholder="Jelaskan alasan pengajuan izin secara detail..."
-              rows="4"
-              value={reason()}
-              onInput={(e) => setReason(e.currentTarget.value)}
-              required
-            />
-          </div>
-
-          <button
-            class="btn-primary"
-            type="submit"
-            style="width: auto; padding: 0 var(--space-5); height: 42px;"
-          >
-            Ajukan Izin
-          </button>
-
-          <Show when={errorMessage()}>
-            <div class="alert-error" style="margin-top: var(--space-3);">
-              {errorMessage()}
-            </div>
-          </Show>
-        </form>
+    <main class="p-4" style="text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+        <h1 class="page-title" style="margin-bottom: 0;">Pengajuan Izin Magang</h1>
+        <button
+          class="btn-primary"
+          style="width: auto; padding: 0 var(--space-4); height: 40px;"
+          onClick={() => setShowCreate(true)}
+        >
+          Ajukan Izin
+        </button>
       </div>
 
-      {/* Confirmation Modal */}
-      <Show when={showConfirm()}>
+      <Show when={showCreate()}>
         <Portal>
-          <div class="modal-overlay" onClick={() => setShowConfirm(false)}>
+          <div class="modal-overlay" onClick={() => setShowCreate(false)}>
             <div
               class="modal modal-animate"
               onClick={(e) => e.stopPropagation()}
-              style="max-width: 460px;"
             >
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
                 <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">
-                  Konfirmasi Pengajuan
+                  Ajukan Izin Baru
                 </h3>
                 <button
                   class="theme-toggle"
                   style="font-size: 24px; padding: 0; cursor: pointer;"
-                  onClick={() => setShowConfirm(false)}
+                  onClick={() => setShowCreate(false)}
                 >
                   ×
                 </button>
               </div>
 
-              <div style="text-align: left; margin-bottom: var(--space-4); font-size: 14px; line-height: 1.5;">
-                <p style="margin-bottom: var(--space-3); color: var(--color-text-secondary);">
-                  Apakah data pengajuan izin magang di bawah ini sudah sesuai?
-                </p>
-                <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2);">
-                  <div>
-                    <strong>Tipe:</strong> {type()}
+              <form ref={createFormRef} action={submitIzin} method="post">
+                <div class="form-group">
+                  <label for="type">Tipe Perizinan</label>
+                  <select id="type" name="type" required>
+                    <option value="">-- Pilih Tipe --</option>
+                    <option value="SAKIT">Sakit</option>
+                    <option value="IZIN">Izin (Keperluan Mendesak)</option>
+                    <option value="CUTI">Cuti Magang</option>
+                  </select>
+                </div>
+
+                <div style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
+                  <div class="form-group" style="flex: 1; min-width: 150px;">
+                    <label for="startDate">Tanggal Mulai</label>
+                    <input type="date" id="startDate" name="startDate" required />
                   </div>
-                  <div>
-                    <strong>Tanggal Mulai:</strong>{" "}
-                    {new Date(startDate()).toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </div>
-                  <div>
-                    <strong>Tanggal Selesai:</strong>{" "}
-                    {new Date(endDate()).toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </div>
-                  <div style="word-break: break-word;">
-                    <strong>Alasan:</strong> {reason()}
+                  <div class="form-group" style="flex: 1; min-width: 150px;">
+                    <label for="endDate">Tanggal Selesai</label>
+                    <input type="date" id="endDate" name="endDate" required />
                   </div>
                 </div>
-              </div>
 
-              <div style="display: flex; gap: var(--space-3);">
-                <button
-                  class="btn-ghost"
-                  style="flex: 1;"
-                  type="button"
-                  onClick={() => setShowConfirm(false)}
-                >
-                  Batal
-                </button>
-                <button
-                  class="btn-primary"
-                  style="flex: 1;"
-                  type="button"
-                  onClick={handleFinalSubmit}
-                  disabled={submitting.pending}
-                >
-                  {submitting.pending ? "Mengirim..." : "Ya, Kirim"}
-                </button>
-              </div>
+                <div class="form-group">
+                  <label for="reason">Alasan Pengajuan</label>
+                  <textarea
+                    id="reason"
+                    name="reason"
+                    placeholder="Jelaskan alasan pengajuan izin secara detail..."
+                    rows="4"
+                    required
+                  />
+                </div>
+
+                <div style="display: flex; gap: var(--space-2); margin-top: var(--space-4);">
+                  <button
+                    class="btn-primary"
+                    type="submit"
+                    disabled={submitting.pending}
+                  >
+                    {submitting.pending ? "Mengirim..." : "Kirim Pengajuan"}
+                  </button>
+                  <button
+                    class="btn-ghost"
+                    type="button"
+                    onClick={() => setShowCreate(false)}
+                  >
+                    Batal
+                  </button>
+                </div>
+
+                <Show when={submitting.result instanceof Error}>
+                  <div class="alert-error">
+                    {(submitting.result as Error).message}
+                  </div>
+                </Show>
+              </form>
             </div>
           </div>
         </Portal>
       </Show>
 
+      {/* Filter Section */}
+      <div class="filter-card" style="margin-bottom: var(--space-4);">
+        <div class="form-group">
+          <label>Tipe Izin</label>
+          <select
+            value={filterType()}
+            onChange={(e) => {
+              setFilterType(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Tipe</option>
+            <option value="SAKIT">Sakit</option>
+            <option value="IZIN">Izin</option>
+            <option value="CUTI">Cuti</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select
+            value={filterStatus()}
+            onChange={(e) => {
+              setFilterStatus(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Setuju</option>
+            <option value="REJECTED">Tolak</option>
+          </select>
+        </div>
+        <button
+          onClick={() => {
+            setFilterType("");
+            setFilterStatus("");
+            setCurrentPage(1);
+          }}
+          class="btn-ghost"
+          style="width: auto;"
+        >
+          Reset Filter
+        </button>
+      </div>
+
       {/* History Section */}
-      <h2 style="margin-top: var(--space-5); font-family: var(--font-headline); font-weight: 700; font-size: 1.5rem; margin-bottom: var(--space-3); color: var(--color-text);">
-        Riwayat Pengajuan Izin
-      </h2>
 
       <Show when={izinList()} fallback={<p>Memuat...</p>}>
-        {(list) => (
-          <>
+        {(list) => {
+          if (list.length === 999999) console.log(list);
+          return (
+            <>
             <div style="overflow-x: auto;">
               <table class="data-table">
                 <thead>
@@ -340,11 +284,11 @@ export default function Izin() {
             </div>
 
             {/* Pagination Controls */}
-            <Show when={list().length > 0}>
+            <Show when={filteredHistory().length > 0}>
               <div class="pagination-container">
                 <div class="pagination-info">
-                  Menampilkan {paginatedList().length} dari {list().length}{" "}
-                  pengajuan izin
+                  Menampilkan {paginatedList().length} dari{" "}
+                  {filteredHistory().length} pengajuan izin
                 </div>
                 <div class="pagination-buttons">
                   <button
@@ -378,7 +322,7 @@ export default function Izin() {
               </div>
             </Show>
           </>
-        )}
+        ); }}
       </Show>
     </main>
   );
