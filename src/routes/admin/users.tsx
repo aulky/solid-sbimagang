@@ -95,10 +95,13 @@ export default function AdminUsers() {
   });
 
   // Close modal on successful user deletion
+  let prevDeletingPending = false;
   createEffect(() => {
-    if (deleting.result && !((deleting.result as any) instanceof Error)) {
+    const pending = !!deleting.pending;
+    if (prevDeletingPending && !pending && !deleting.error) {
       setDeletingUser(null);
     }
+    prevDeletingPending = pending;
   });
 
   return (

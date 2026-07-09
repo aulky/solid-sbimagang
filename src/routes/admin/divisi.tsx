@@ -72,10 +72,13 @@ export default function AdminDivisi() {
   });
 
   // Close modal on successful division deletion
+  let prevDeletingPending = false;
   createEffect(() => {
-    if (deleting.result && !((deleting.result as any) instanceof Error)) {
+    const pending = !!deleting.pending;
+    if (prevDeletingPending && !pending && !deleting.error) {
       setDeletingDivisi(null);
     }
+    prevDeletingPending = pending;
   });
 
   return (

@@ -1009,6 +1009,14 @@ a {
   font-weight: 700;
 }
 
+.mobile-header {
+  display: none;
+}
+
+.mobile-sidebar-backdrop {
+  display: none;
+}
+
 /* Pagination Styling */
 .pagination-container {
   display: flex;
@@ -1116,54 +1124,107 @@ a {
     flex-direction: column;
   }
 
-  .app-sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
-    border-right: none;
+  /* Mobile Header & Hamburger (Mobile - visible) */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: var(--surface-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--color-border);
-    padding: var(--space-3);
+    padding: 0 var(--space-4);
+    z-index: 990;
+    box-sizing: border-box;
+  }
+
+  .hamburger-btn {
+    font-size: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text);
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 995;
+  }
+
+  /* Slide-out Sidebar Drawer on Mobile */
+  .app-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 260px !important;
+    height: 100vh !important;
+    z-index: 1000 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    background-color: var(--surface-base) !important;
+    border-right: 1px solid var(--color-border) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: var(--space-4) !important;
+    box-shadow: var(--shadow-lg) !important;
+    box-sizing: border-box !important;
+  }
+
+  .app-sidebar.open {
+    transform: translateX(0) !important;
   }
 
   .sidebar-header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: none;
-    padding-bottom: 0;
-    margin-bottom: var(--space-3);
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    padding-bottom: var(--space-3) !important;
+    margin-bottom: var(--space-3) !important;
   }
 
   .sidebar-logo {
-    height: 24px !important;
+    height: 50px !important;
+    margin-bottom: var(--space-2) !important;
   }
 
   .sidebar-user {
-    padding: var(--space-2) 0;
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: var(--space-3);
-    margin-top: 0 !important;
+    padding: var(--space-3) 0 !important;
+    border-top: 1px solid var(--color-border) !important;
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    margin-top: var(--space-3) !important;
   }
 
   .sidebar-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-bottom: var(--space-3);
-    overflow-x: auto;
-    padding-bottom: var(--space-1);
-    scrollbar-width: none;
-  }
-
-  .sidebar-nav::-webkit-scrollbar {
-    display: none;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    gap: var(--space-2) !important;
+    margin-bottom: var(--space-3) !important;
+    overflow-y: auto !important;
+    width: 100% !important;
+    padding-bottom: 0 !important;
   }
 
   .sidebar-nav .nav-link {
-    font-size: 13px;
-    padding: var(--space-2) var(--space-3);
-    white-space: nowrap;
+    font-size: 14px !important;
+    padding: var(--space-2) var(--space-3) !important;
+    white-space: normal !important;
   }
 
   .sidebar-nav .nav-link:hover {
@@ -1171,16 +1232,17 @@ a {
   }
 
   .sidebar-footer {
-    border-top: none;
-    padding-top: 0;
+    border-top: 1px solid var(--color-border) !important;
+    padding-top: var(--space-3) !important;
   }
 
   .app-layout.has-sidebar .app-main-content {
-    margin-left: 0;
-    padding: var(--space-4) var(--space-3);
-    height: auto;
-    max-height: none;
-    overflow-y: visible;
+    margin-left: 0 !important;
+    padding: var(--space-4) var(--space-3) !important;
+    padding-top: 70px !important; /* height of header + offset */
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
   }
 
   /* Modals on Mobile */

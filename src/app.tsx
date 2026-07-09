@@ -83,8 +83,9 @@ export default function App() {
         const [theme, setTheme] = createSignal("light");
         const [showLogoutConfirm, setShowLogoutConfirm] = createSignal(false);
         const [showProfileDropdown, setShowProfileDropdown] = createSignal(
-          location.pathname === "/profil"
+          location.pathname === "/profil",
         );
+        const [mobileSidebarOpen, setMobileSidebarOpen] = createSignal(false);
 
         onMount(() => {
           const saved = localStorage.getItem("theme");
@@ -107,6 +108,12 @@ export default function App() {
           } else {
             setShowProfileDropdown(false);
           }
+        });
+
+        createEffect(() => {
+          // Close mobile sidebar on route transition
+          location.pathname;
+          setMobileSidebarOpen(false);
         });
 
         createEffect(() => {
@@ -171,7 +178,45 @@ export default function App() {
             <div class="app-layout" classList={{ "has-sidebar": !!user() }}>
               <Show when={user()}>
                 {(u) => (
-                  <aside class="app-sidebar">
+                  <>
+                    <header class="mobile-header no-print">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <img
+                          src={
+                            theme() === "dark"
+                              ? "/logo-sbi-putih.png"
+                              : "/logo-sbi.png"
+                          }
+                          alt="PT SBI Logo"
+                          style="height: 24px; width: auto; object-fit: contain;"
+                        />
+                        <span style="font-family: var(--font-headline); font-weight: 700; font-size: 14px; color: var(--color-text);">
+                          Absensi Magang
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        class="hamburger-btn"
+                        onClick={() =>
+                          setMobileSidebarOpen(!mobileSidebarOpen())
+                        }
+                        title="Menu"
+                      >
+                        ☰
+                      </button>
+                    </header>
+
+                    <Show when={mobileSidebarOpen()}>
+                      <div
+                        class="mobile-sidebar-backdrop no-print"
+                        onClick={() => setMobileSidebarOpen(false)}
+                      />
+                    </Show>
+
+                    <aside
+                      class="app-sidebar"
+                      classList={{ open: mobileSidebarOpen() }}
+                    >
                     <div
                       class="sidebar-header"
                       style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px;"
@@ -384,9 +429,7 @@ export default function App() {
                             active: location.pathname === "/profil",
                           }}
                         >
-                          <div
-                            style="display: flex; align-items: center; gap: var(--space-2);"
-                          >
+                          <div style="display: flex; align-items: center; gap: var(--space-2);">
                             <svg
                               width="18"
                               height="18"
@@ -523,9 +566,7 @@ export default function App() {
                             active: location.pathname === "/profil",
                           }}
                         >
-                          <div
-                            style="display: flex; align-items: center; gap: var(--space-2);"
-                          >
+                          <div style="display: flex; align-items: center; gap: var(--space-2);">
                             <svg
                               width="18"
                               height="18"
@@ -613,8 +654,9 @@ export default function App() {
                       </button>
                     </div>
                   </aside>
-                )}
-              </Show>
+                </>
+              )}
+            </Show>
 
               {/* Logout Confirmation Modal */}
               <Show when={showLogoutConfirm()}>

@@ -18,7 +18,7 @@ export default function AdminSettings() {
 
       <Show when={settings()} fallback={<p>Memuat pengaturan...</p>}>
         {(data) => (
-          <div class="form-card" style="max-width: 100%;">
+          <div class="settings-card">
             <h3 style="margin-top: 0; font-family: var(--font-headline); font-weight: 700; margin-bottom: var(--space-4);">
               Konfigurasi Absensi
             </h3>
