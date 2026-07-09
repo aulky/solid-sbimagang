@@ -356,7 +356,6 @@ export default function App() {
                         <button
                           type="button"
                           class="nav-link"
-                          style="width: 100%; text-align: left; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;"
                           onClick={() =>
                             setShowProfileDropdown(!showProfileDropdown())
                           }
@@ -496,7 +495,6 @@ export default function App() {
                         <button
                           type="button"
                           class="nav-link"
-                          style="width: 100%; text-align: left; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;"
                           onClick={() =>
                             setShowProfileDropdown(!showProfileDropdown())
                           }

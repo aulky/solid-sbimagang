@@ -326,6 +326,18 @@ body {
   box-shadow: var(--shadow-color);
 }
 
+.sidebar-nav button.nav-link {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: none;
+}
+
 .sidebar-nav .nav-link svg {
   flex-shrink: 0;
   stroke: currentColor;
