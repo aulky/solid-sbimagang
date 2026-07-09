@@ -510,16 +510,16 @@ export default function AdminUsers() {
                     <td>
                       <span
                         class={`badge ${
-                          u.status === "AKTIF"
+                          (u as any).status === "AKTIF"
                             ? "badge-approved"
-                            : u.status === "DITANGGUHKAN"
+                            : (u as any).status === "DITANGGUHKAN"
                               ? "badge-pending"
                               : "badge-rejected"
                         }`}
                       >
-                        {u.status === "AKTIF"
+                        {(u as any).status === "AKTIF"
                           ? "Aktif"
-                          : u.status === "DITANGGUHKAN"
+                          : (u as any).status === "DITANGGUHKAN"
                             ? "Ditangguhkan"
                             : "Nonaktif"}
                       </span>

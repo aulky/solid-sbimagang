@@ -27,7 +27,7 @@ export const getUser = query(async () => {
       where: { id: userId },
       include: { divisi: true },
     });
-    if (!user || user.status === "NONAKTIF") throw new Error("User invalid");
+    if (!user || (user as any).status === "NONAKTIF") throw new Error("User invalid");
     return {
       id: user.id,
       username: user.username,
@@ -38,7 +38,7 @@ export const getUser = query(async () => {
       divisi: user.divisi?.name ?? null,
       divisiId: user.divisiId,
       avatar: user.avatar,
-      status: user.status,
+      status: (user as any).status,
     };
   } catch {
     await logoutSession();
@@ -129,7 +129,7 @@ export const updateSystemSettings = action(async (formData: FormData) => {
 export const checkIn = action(async () => {
   "use server";
   const user = await requireUser();
-  if (user.status === "DITANGGUHKAN") {
+  if ((user as any).status === "DITANGGUHKAN") {
     return new Error(
       "Akun Anda sedang ditangguhkan. Anda tidak dapat melakukan absensi.",
     );
@@ -169,7 +169,7 @@ export const checkIn = action(async () => {
 export const checkOut = action(async () => {
   "use server";
   const user = await requireUser();
-  if (user.status === "DITANGGUHKAN") {
+  if ((user as any).status === "DITANGGUHKAN") {
     return new Error(
       "Akun Anda sedang ditangguhkan. Anda tidak dapat melakukan absensi.",
     );
@@ -214,7 +214,7 @@ const parseLocalDateAsUTC = (dateStr: string) => {
 export const submitIzin = action(async (formData: FormData) => {
   "use server";
   const user = await requireUser();
-  if (user.status === "DITANGGUHKAN") {
+  if ((user as any).status === "DITANGGUHKAN") {
     return new Error(
       "Akun Anda sedang ditangguhkan. Anda tidak dapat mengajukan izin.",
     );

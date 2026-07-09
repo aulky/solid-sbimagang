@@ -109,7 +109,7 @@ export default function Dashboard() {
                   <div>
                     <p>
                       <span class="stat-label">Check-Out:</span>{" "}
-                      {new Date(co()).toLocaleTimeString("id-ID")}
+                      {new Date(co() as Date).toLocaleTimeString("id-ID")}
                     </p>
                     <span
                       class={`badge ${

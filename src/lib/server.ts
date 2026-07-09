@@ -36,10 +36,10 @@ export async function login(username: string, password: string) {
   if (!user || !verifyPassword(password, user.password)) {
     throw new Error("Username atau password salah");
   }
-  if (user.status === "NONAKTIF") {
+  if ((user as any).status === "NONAKTIF") {
     throw new Error("Akun Anda dinonaktifkan. Silakan hubungi admin.");
   }
-  
+
   return user;
 }
 
@@ -92,7 +92,7 @@ export async function requireUser() {
     where: { id: userId },
     include: { divisi: true },
   });
-  if (!user || user.status === "NONAKTIF") {
+  if (!user || (user as any).status === "NONAKTIF") {
     await logout();
     throw new Error("Unauthorized");
   }
