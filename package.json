@@ -5,7 +5,10 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "vite start",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:reset": "prisma db push --force-reset",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate"
   },
   "devDependencies": {
     "@types/node": "^24.7.0"

@@ -82,6 +82,9 @@ export default function App() {
         const isRouting = useIsRouting();
         const [theme, setTheme] = createSignal("light");
         const [showLogoutConfirm, setShowLogoutConfirm] = createSignal(false);
+        const [showProfileDropdown, setShowProfileDropdown] = createSignal(
+          location.pathname === "/profil"
+        );
 
         onMount(() => {
           const saved = localStorage.getItem("theme");
@@ -95,6 +98,14 @@ export default function App() {
           ) {
             document.documentElement.setAttribute("data-theme", "dark");
             setTheme("dark");
+          }
+        });
+
+        createEffect(() => {
+          if (location.pathname === "/profil") {
+            setShowProfileDropdown(true);
+          } else {
+            setShowProfileDropdown(false);
           }
         });
 
@@ -339,8 +350,77 @@ export default function App() {
                             <circle cx="12" cy="12" r="3" />
                             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                           </svg>
-                          <span>Pengaturan</span>
+                          <span>Pengaturan Sistem</span>
                         </a>
+
+                        <button
+                          type="button"
+                          class="nav-link"
+                          style="width: 100%; text-align: left; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;"
+                          onClick={() =>
+                            setShowProfileDropdown(!showProfileDropdown())
+                          }
+                          classList={{
+                            active: location.pathname === "/profil",
+                          }}
+                        >
+                          <div
+                            style="display: flex; align-items: center; gap: var(--space-2);"
+                          >
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                              <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <span>Profil Saya</span>
+                          </div>
+                          <span
+                            style={{
+                              "font-size": "10px",
+                              transition: "transform 0.2s",
+                              transform: showProfileDropdown()
+                                ? "rotate(180deg)"
+                                : "rotate(0deg)",
+                            }}
+                          >
+                            ▼
+                          </span>
+                        </button>
+                        <Show when={showProfileDropdown()}>
+                          <div class="nav-dropdown">
+                            <a
+                              class="nav-sub-link"
+                              classList={{
+                                active:
+                                  location.pathname === "/profil" &&
+                                  (!location.search ||
+                                    location.search.includes("tab=profile")),
+                              }}
+                              href="/profil?tab=profile"
+                            >
+                              Ubah Profil
+                            </a>
+                            <a
+                              class="nav-sub-link"
+                              classList={{
+                                active:
+                                  location.pathname === "/profil" &&
+                                  location.search.includes("tab=password"),
+                              }}
+                              href="/profil?tab=password"
+                            >
+                              Ubah Sandi
+                            </a>
+                          </div>
+                        </Show>
                       </Show>
 
                       <Show when={u().role === "USER"}>
@@ -413,28 +493,74 @@ export default function App() {
                           </svg>
                           <span>Pengajuan Izin</span>
                         </a>
-                        <a
+                        <button
+                          type="button"
                           class="nav-link"
+                          style="width: 100%; text-align: left; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;"
+                          onClick={() =>
+                            setShowProfileDropdown(!showProfileDropdown())
+                          }
                           classList={{
                             active: location.pathname === "/profil",
                           }}
-                          href="/profil"
                         >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
+                          <div
+                            style="display: flex; align-items: center; gap: var(--space-2);"
                           >
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
-                          </svg>
-                          <span>Profil Saya</span>
-                        </a>
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                              <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <span>Profil Saya</span>
+                          </div>
+                          <span
+                            style={{
+                              "font-size": "10px",
+                              transition: "transform 0.2s",
+                              transform: showProfileDropdown()
+                                ? "rotate(180deg)"
+                                : "rotate(0deg)",
+                            }}
+                          >
+                            ▼
+                          </span>
+                        </button>
+                        <Show when={showProfileDropdown()}>
+                          <div class="nav-dropdown">
+                            <a
+                              class="nav-sub-link"
+                              classList={{
+                                active:
+                                  location.pathname === "/profil" &&
+                                  (!location.search ||
+                                    location.search.includes("tab=profile")),
+                              }}
+                              href="/profil?tab=profile"
+                            >
+                              Ubah Profil
+                            </a>
+                            <a
+                              class="nav-sub-link"
+                              classList={{
+                                active:
+                                  location.pathname === "/profil" &&
+                                  location.search.includes("tab=password"),
+                              }}
+                              href="/profil?tab=password"
+                            >
+                              Ubah Sandi
+                            </a>
+                          </div>
+                        </Show>
                       </Show>
                     </nav>
 

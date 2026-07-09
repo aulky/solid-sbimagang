@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://root:285211@localhost:3306/absensi_sbi"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {

@@ -256,6 +256,36 @@ export const updateProfile = action(async (formData: FormData) => {
   return redirect("/profil");
 });
 
+export const changePassword = action(async (formData: FormData) => {
+  "use server";
+  const user = await requireUser();
+  const oldPassword = String(formData.get("oldPassword"));
+  const newPassword = String(formData.get("newPassword"));
+  const confirmPassword = String(formData.get("confirmPassword"));
+
+  if (newPassword !== confirmPassword) {
+    return new Error("Password baru dan konfirmasi password tidak cocok.");
+  }
+
+  const pwdError = validatePassword(newPassword);
+  if (pwdError) return new Error(pwdError);
+
+  const dbUser = await db.user.findUnique({ where: { id: user.id } });
+  const verifyPasswordImport = (await import("./server")).verifyPassword;
+  const hashPasswordImport = (await import("./server")).hashPassword;
+
+  if (!dbUser || !verifyPasswordImport(oldPassword, dbUser.password)) {
+    return new Error("Password saat ini salah.");
+  }
+
+  await db.user.update({
+    where: { id: user.id },
+    data: { password: hashPasswordImport(newPassword) },
+  });
+
+  return { success: true };
+});
+
 // ========== ADMIN: DASHBOARD ==========
 
 export const getAdminStats = query(async () => {
