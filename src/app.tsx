@@ -221,18 +221,21 @@ export default function App() {
                       class="sidebar-header"
                       style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px;"
                     >
-                      <img
-                        src={
-                          theme() === "dark"
-                            ? "/logo-sbi-putih.png"
-                            : "/logo-sbi.png"
-                        }
-                        alt="PT SBI Logo"
-                        class="sidebar-logo"
-                        style="height: 28px; width: auto; object-fit: contain;"
-                      />
-                      <span class="sidebar-title">Absensi Magang</span>
-                      <span class="sidebar-subtitle">PT SBI Cilacap</span>
+                      <a
+                        href={u().role === "ADMIN" ? "/admin/dashboard" : "/dashboard"}
+                        style="display: flex; justify-content: center; width: 100%;"
+                      >
+                        <img
+                          src={
+                            theme() === "dark"
+                              ? "/logo-sbi-putih.png"
+                              : "/logo-sbi.png"
+                          }
+                          alt="PT SBI Logo"
+                          class="sidebar-logo"
+                          style="height: 28px; width: auto; object-fit: contain; cursor: pointer;"
+                        />
+                      </a>
                     </div>
 
                     <nav class="sidebar-nav">
