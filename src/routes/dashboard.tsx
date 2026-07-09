@@ -112,7 +112,7 @@ export default function Dashboard() {
                       {new Date(co()).toLocaleTimeString("id-ID")}
                     </p>
                     <span
-                      class={
+                      class={`badge ${
                         att().status === "HADIR"
                           ? "badge-hadir"
                           : att().status === "TELAT"
@@ -120,7 +120,7 @@ export default function Dashboard() {
                             : att().status === "ALPHA"
                               ? "badge-alpha"
                               : "badge-izin"
-                      }
+                      }`}
                     >
                       {att().status}
                     </span>

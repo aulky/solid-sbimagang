@@ -27,7 +27,7 @@ export const getUser = query(async () => {
       where: { id: userId },
       include: { divisi: true },
     });
-    if (!user || !user.isActive) throw new Error("User invalid");
+    if (!user || user.status === "NONAKTIF") throw new Error("User invalid");
     return {
       id: user.id,
       username: user.username,
@@ -38,7 +38,7 @@ export const getUser = query(async () => {
       divisi: user.divisi?.name ?? null,
       divisiId: user.divisiId,
       avatar: user.avatar,
-      isActive: user.isActive,
+      status: user.status,
     };
   } catch {
     await logoutSession();
@@ -129,6 +129,11 @@ export const updateSystemSettings = action(async (formData: FormData) => {
 export const checkIn = action(async () => {
   "use server";
   const user = await requireUser();
+  if (user.status === "DITANGGUHKAN") {
+    return new Error(
+      "Akun Anda sedang ditangguhkan. Anda tidak dapat melakukan absensi.",
+    );
+  }
   const now = new Date();
   const today = getLocalDateAsUTC();
 
@@ -164,6 +169,11 @@ export const checkIn = action(async () => {
 export const checkOut = action(async () => {
   "use server";
   const user = await requireUser();
+  if (user.status === "DITANGGUHKAN") {
+    return new Error(
+      "Akun Anda sedang ditangguhkan. Anda tidak dapat melakukan absensi.",
+    );
+  }
   const now = new Date();
   const today = getLocalDateAsUTC();
 
@@ -204,6 +214,11 @@ const parseLocalDateAsUTC = (dateStr: string) => {
 export const submitIzin = action(async (formData: FormData) => {
   "use server";
   const user = await requireUser();
+  if (user.status === "DITANGGUHKAN") {
+    return new Error(
+      "Akun Anda sedang ditangguhkan. Anda tidak dapat mengajukan izin.",
+    );
+  }
   const startDate = parseLocalDateAsUTC(String(formData.get("startDate")));
   const endDate = parseLocalDateAsUTC(String(formData.get("endDate")));
   const type = String(formData.get("type")) as "SAKIT" | "IZIN" | "CUTI";
@@ -328,7 +343,7 @@ export const getAdminStats = query(async () => {
 
   const [totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin] =
     await Promise.all([
-      db.user.count({ where: { role: "USER", isActive: true } }),
+      db.user.count({ where: { role: "USER", status: { not: "NONAKTIF" } } }),
       db.divisi.count(),
       db.absensi.count({ where: { date: today, status: "HADIR" } }),
       db.absensi.count({ where: { date: today, status: "TELAT" } }),
@@ -345,7 +360,7 @@ export const getTodayAttendanceStatus = query(async () => {
   today.setHours(0, 0, 0, 0);
 
   const totalInterns = await db.user.count({
-    where: { role: "USER", isActive: true },
+    where: { role: "USER", status: { not: "NONAKTIF" } },
   });
 
   const attendanceToday = await db.absensi.groupBy({
@@ -463,7 +478,7 @@ export const createUser = action(async (formData: FormData) => {
       phone: phone || null,
       role,
       divisiId,
-      isActive: true,
+      status: "AKTIF",
     },
   });
   return redirect("/admin/users");
@@ -480,11 +495,11 @@ export const updateUser = action(async (formData: FormData) => {
   const divisiId = formData.get("divisiId")
     ? String(formData.get("divisiId"))
     : null;
-  const isActive = formData.get("isActive") === "true";
+  const status = String(formData.get("status") || "AKTIF");
 
   await db.user.update({
     where: { id },
-    data: { fullName, email, phone: phone || null, role, divisiId, isActive },
+    data: { fullName, email, phone: phone || null, role, divisiId, status },
   });
   return redirect("/admin/users");
 });

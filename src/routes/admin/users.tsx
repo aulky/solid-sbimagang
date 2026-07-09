@@ -262,8 +262,9 @@ export default function AdminUsers() {
             }}
           >
             <option value="">Semua Status</option>
-            <option value="true">Aktif</option>
-            <option value="false">Nonaktif</option>
+            <option value="AKTIF">Aktif</option>
+            <option value="DITANGGUHKAN">Ditangguhkan</option>
+            <option value="NONAKTIF">Nonaktif</option>
           </select>
         </div>
         <div class="form-group">
@@ -364,11 +365,14 @@ export default function AdminUsers() {
                   </div>
                   <div class="form-group">
                     <label>Status</label>
-                    <select name="isActive">
-                      <option value="true" selected={user().isActive}>
+                    <select name="status">
+                      <option value="AKTIF" selected={user().status === "AKTIF"}>
                         Aktif
                       </option>
-                      <option value="false" selected={!user().isActive}>
+                      <option value="DITANGGUHKAN" selected={user().status === "DITANGGUHKAN"}>
+                        Ditangguhkan
+                      </option>
+                      <option value="NONAKTIF" selected={user().status === "NONAKTIF"}>
                         Nonaktif
                       </option>
                     </select>
@@ -505,9 +509,19 @@ export default function AdminUsers() {
                     </td>
                     <td>
                       <span
-                        class={`badge ${u.isActive ? "badge-approved" : "badge-rejected"}`}
+                        class={`badge ${
+                          u.status === "AKTIF"
+                            ? "badge-approved"
+                            : u.status === "DITANGGUHKAN"
+                              ? "badge-pending"
+                              : "badge-rejected"
+                        }`}
                       >
-                        {u.isActive ? "Aktif" : "Nonaktif"}
+                        {u.status === "AKTIF"
+                          ? "Aktif"
+                          : u.status === "DITANGGUHKAN"
+                            ? "Ditangguhkan"
+                            : "Nonaktif"}
                       </span>
                     </td>
                     <td>

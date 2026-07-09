@@ -316,7 +316,7 @@ export default function Izin() {
                             </Show>
                           </td>
                           <td>
-                            <span class={statusBadge(r.status)}>
+                            <span class={`badge ${statusBadge(r.status)}`}>
                               {statusText(r.status)}
                             </span>
                           </td>

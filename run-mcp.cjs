@@ -1,6 +1,6 @@
 const { spawn } = require('child_process');
 
-async function callTool(name, arguments) {
+async function callTool(name, args) {
   return new Promise((resolve, reject) => {
     const env = { ...process.env, DESIGNMD_API_KEY: 'dk_33b90a5b01fd8e5002e0560c0f9c0677b3c8788a' };
     const child = spawn('npx.cmd', ['designmd-mcp'], { env, shell: true });
@@ -73,7 +73,7 @@ async function callTool(name, arguments) {
         clientInfo: { name: 'run-mcp', version: '1.0.0' }
       });
       sendNotification('notifications/initialized', {});
-      const result = await sendRequest('tools/call', { name, arguments });
+      const result = await sendRequest('tools/call', { name, arguments: args });
       child.stdin.end();
       resolve(result);
     })().catch(err => {

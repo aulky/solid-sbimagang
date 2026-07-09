@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/client"
+  output   = "./"
 }
 
 datasource db {
@@ -46,7 +46,7 @@ model User {
   divisiId  String?
   divisi    Divisi?  @relation(fields: [divisiId], references: [id], onDelete: SetNull)
   avatar    String?
-  isActive  Boolean  @default(true)
+  status    String   @default("AKTIF")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

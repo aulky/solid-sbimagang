@@ -1232,7 +1232,7 @@ export namespace Prisma {
     role: $Enums.Role | null
     divisiId: string | null
     avatar: string | null
-    isActive: boolean | null
+    status: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1247,7 +1247,7 @@ export namespace Prisma {
     role: $Enums.Role | null
     divisiId: string | null
     avatar: string | null
-    isActive: boolean | null
+    status: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1262,7 +1262,7 @@ export namespace Prisma {
     role: number
     divisiId: number
     avatar: number
-    isActive: number
+    status: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1279,7 +1279,7 @@ export namespace Prisma {
     role?: true
     divisiId?: true
     avatar?: true
-    isActive?: true
+    status?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1294,7 +1294,7 @@ export namespace Prisma {
     role?: true
     divisiId?: true
     avatar?: true
-    isActive?: true
+    status?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1309,7 +1309,7 @@ export namespace Prisma {
     role?: true
     divisiId?: true
     avatar?: true
-    isActive?: true
+    status?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1397,7 +1397,7 @@ export namespace Prisma {
     role: $Enums.Role
     divisiId: string | null
     avatar: string | null
-    isActive: boolean
+    status: string
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -1429,7 +1429,7 @@ export namespace Prisma {
     role?: boolean
     divisiId?: boolean
     avatar?: boolean
-    isActive?: boolean
+    status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     divisi?: boolean | User$divisiArgs<ExtArgs>
@@ -1449,7 +1449,7 @@ export namespace Prisma {
     role?: boolean
     divisiId?: boolean
     avatar?: boolean
-    isActive?: boolean
+    status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -1478,7 +1478,7 @@ export namespace Prisma {
       role: $Enums.Role
       divisiId: string | null
       avatar: string | null
-      isActive: boolean
+      status: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -1862,7 +1862,7 @@ export namespace Prisma {
     readonly role: FieldRef<"User", 'Role'>
     readonly divisiId: FieldRef<"User", 'String'>
     readonly avatar: FieldRef<"User", 'String'>
-    readonly isActive: FieldRef<"User", 'Boolean'>
+    readonly status: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -5048,7 +5048,7 @@ export namespace Prisma {
     role: 'role',
     divisiId: 'divisiId',
     avatar: 'avatar',
-    isActive: 'isActive',
+    status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -5137,13 +5137,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -5194,7 +5187,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     divisiId?: StringNullableFilter<"User"> | string | null
     avatar?: StringNullableFilter<"User"> | string | null
-    isActive?: BoolFilter<"User"> | boolean
+    status?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     divisi?: XOR<DivisiNullableRelationFilter, DivisiWhereInput> | null
@@ -5212,7 +5205,7 @@ export namespace Prisma {
     role?: SortOrder
     divisiId?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
-    isActive?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     divisi?: DivisiOrderByWithRelationInput
@@ -5233,7 +5226,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     divisiId?: StringNullableFilter<"User"> | string | null
     avatar?: StringNullableFilter<"User"> | string | null
-    isActive?: BoolFilter<"User"> | boolean
+    status?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     divisi?: XOR<DivisiNullableRelationFilter, DivisiWhereInput> | null
@@ -5251,7 +5244,7 @@ export namespace Prisma {
     role?: SortOrder
     divisiId?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
-    isActive?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -5272,7 +5265,7 @@ export namespace Prisma {
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
     divisiId?: StringNullableWithAggregatesFilter<"User"> | string | null
     avatar?: StringNullableWithAggregatesFilter<"User"> | string | null
-    isActive?: BoolWithAggregatesFilter<"User"> | boolean
+    status?: StringWithAggregatesFilter<"User"> | string
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -5512,7 +5505,7 @@ export namespace Prisma {
     phone?: string | null
     role?: $Enums.Role
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     divisi?: DivisiCreateNestedOneWithoutUsersInput
@@ -5530,7 +5523,7 @@ export namespace Prisma {
     role?: $Enums.Role
     divisiId?: string | null
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     absensi?: AbsensiUncheckedCreateNestedManyWithoutUserInput
@@ -5546,7 +5539,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     divisi?: DivisiUpdateOneWithoutUsersNestedInput
@@ -5564,7 +5557,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisiId?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     absensi?: AbsensiUncheckedUpdateManyWithoutUserNestedInput
@@ -5581,7 +5574,7 @@ export namespace Prisma {
     role?: $Enums.Role
     divisiId?: string | null
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -5595,7 +5588,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -5610,7 +5603,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisiId?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -5904,11 +5897,6 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[]
@@ -5960,7 +5948,7 @@ export namespace Prisma {
     role?: SortOrder
     divisiId?: SortOrder
     avatar?: SortOrder
-    isActive?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -5975,7 +5963,7 @@ export namespace Prisma {
     role?: SortOrder
     divisiId?: SortOrder
     avatar?: SortOrder
-    isActive?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -5990,7 +5978,7 @@ export namespace Prisma {
     role?: SortOrder
     divisiId?: SortOrder
     avatar?: SortOrder
-    isActive?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6037,14 +6025,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRoleFilter<$PrismaModel>
     _max?: NestedEnumRoleFilter<$PrismaModel>
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -6311,10 +6291,6 @@ export namespace Prisma {
     set?: $Enums.Role
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -6506,11 +6482,6 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[]
@@ -6586,14 +6557,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRoleFilter<$PrismaModel>
     _max?: NestedEnumRoleFilter<$PrismaModel>
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -6881,7 +6844,7 @@ export namespace Prisma {
     phone?: string | null
     role?: $Enums.Role
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     absensi?: AbsensiCreateNestedManyWithoutUserInput
@@ -6897,7 +6860,7 @@ export namespace Prisma {
     phone?: string | null
     role?: $Enums.Role
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     absensi?: AbsensiUncheckedCreateNestedManyWithoutUserInput
@@ -6943,7 +6906,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     divisiId?: StringNullableFilter<"User"> | string | null
     avatar?: StringNullableFilter<"User"> | string | null
-    isActive?: BoolFilter<"User"> | boolean
+    status?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
   }
@@ -6957,7 +6920,7 @@ export namespace Prisma {
     phone?: string | null
     role?: $Enums.Role
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     divisi?: DivisiCreateNestedOneWithoutUsersInput
@@ -6974,7 +6937,7 @@ export namespace Prisma {
     role?: $Enums.Role
     divisiId?: string | null
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     izin?: IzinUncheckedCreateNestedManyWithoutUserInput
@@ -7005,7 +6968,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     divisi?: DivisiUpdateOneWithoutUsersNestedInput
@@ -7022,7 +6985,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisiId?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     izin?: IzinUncheckedUpdateManyWithoutUserNestedInput
@@ -7037,7 +7000,7 @@ export namespace Prisma {
     phone?: string | null
     role?: $Enums.Role
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     divisi?: DivisiCreateNestedOneWithoutUsersInput
@@ -7054,7 +7017,7 @@ export namespace Prisma {
     role?: $Enums.Role
     divisiId?: string | null
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     absensi?: AbsensiUncheckedCreateNestedManyWithoutUserInput
@@ -7085,7 +7048,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     divisi?: DivisiUpdateOneWithoutUsersNestedInput
@@ -7102,7 +7065,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisiId?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     absensi?: AbsensiUncheckedUpdateManyWithoutUserNestedInput
@@ -7221,7 +7184,7 @@ export namespace Prisma {
     phone?: string | null
     role?: $Enums.Role
     avatar?: string | null
-    isActive?: boolean
+    status?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7235,7 +7198,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     absensi?: AbsensiUpdateManyWithoutUserNestedInput
@@ -7251,7 +7214,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     absensi?: AbsensiUncheckedUpdateManyWithoutUserNestedInput
@@ -7267,7 +7230,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

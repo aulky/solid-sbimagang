@@ -150,7 +150,7 @@ export default function Riwayat() {
                               : "-"}
                           </td>
                           <td>
-                            <span class={statusBadge(r.status)}>
+                            <span class={`badge ${statusBadge(r.status)}`}>
                               {r.status}
                             </span>
                           </td>
