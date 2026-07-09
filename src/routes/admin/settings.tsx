@@ -67,8 +67,8 @@ export default function AdminSettings() {
                 {updating.pending ? "Menyimpan..." : "Simpan Pengaturan"}
               </button>
 
-              <Show when={updating.result instanceof Error}>
-                <div class="alert-error">{(updating.result as Error).message}</div>
+              <Show when={(updating.result as any) instanceof Error}>
+                <div class="alert-error">{((updating.result as any) as Error).message}</div>
               </Show>
             </form>
           </div>

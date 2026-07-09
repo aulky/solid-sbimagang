@@ -87,7 +87,9 @@ export default function Dashboard() {
             <div>
               <p>
                 <span class="stat-label">Check-In:</span>{" "}
-                {new Date(att().checkIn).toLocaleTimeString("id-ID")}
+                {att().checkIn
+                  ? new Date(att().checkIn as Date).toLocaleTimeString("id-ID")
+                  : "-"}
               </p>
               <Show
                 when={att().checkOut}

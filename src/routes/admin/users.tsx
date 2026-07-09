@@ -89,7 +89,7 @@ export default function AdminUsers() {
 
   // Close modal on successful user update
   createEffect(() => {
-    if (updating.result && !(updating.result instanceof Error)) {
+    if (updating.result && !((updating.result as any) instanceof Error)) {
       setEditingUser(null);
     }
   });
@@ -383,9 +383,9 @@ export default function AdminUsers() {
                       Batal
                     </button>
                   </div>
-                  <Show when={updating.result instanceof Error}>
+                  <Show when={(updating.result as any) instanceof Error}>
                     <div class="alert-error">
-                      {(updating.result as Error).message}
+                      {((updating.result as any) as Error).message}
                     </div>
                   </Show>
                 </form>

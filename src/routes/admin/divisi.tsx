@@ -66,7 +66,7 @@ export default function AdminDivisi() {
 
   // Close modal on successful division update
   createEffect(() => {
-    if (updating.result && !(updating.result instanceof Error)) {
+    if (updating.result && !((updating.result as any) instanceof Error)) {
       setEditingDivisi(null);
     }
   });
@@ -210,9 +210,9 @@ export default function AdminDivisi() {
                       Batal
                     </button>
                   </div>
-                  <Show when={updating.result instanceof Error}>
+                  <Show when={(updating.result as any) instanceof Error}>
                     <div class="alert-error">
-                      {(updating.result as Error).message}
+                      {((updating.result as any) as Error).message}
                     </div>
                   </Show>
                 </form>
