@@ -59,81 +59,126 @@ Aplikasi ini menyediakan panel untuk dua kategori pengguna:
 
 ---
 
-## 3. Panduan Setup: Zero to Production
+## 3. Panduan Setup Lengkap (Zero to Running)
+
+Proyek ini dapat dikonfigurasi dan dijalankan menggunakan **NPM** atau **PNPM** sebagai package manager. Pilih salah satu alur perintah di bawah ini dari awal hingga akhir.
 
 ### Tahap 1: Persiapan Awal
-1. Pastikan mesin Anda telah menginstal **Node.js (versi >= 22)** dan **MySQL Server**.
-2. Clone repositori ini ke direktori lokal Anda.
+1. Pastikan server lokal Anda telah terinstal **Node.js (versi >= 22)** dan **MySQL Server**.
+2. Clone repositori ini ke folder kerja lokal Anda.
 
-### Tahap 2: Instalasi Dependensi
-Jalankan perintah berikut pada terminal di folder proyek:
+### Tahap 2: Instalasi Dependensi & Setup File `.env`
+Salin file template `.env.example` ke file `.env` baru:
 ```bash
-npm install
+# Salin konfigurasi env
+cp .env.example .env
+```
+Buka file `.env` tersebut dan sesuaikan baris `DATABASE_URL` dengan username, kata sandi, dan nama basis data MySQL Anda:
+```env
+DATABASE_URL="mysql://username:password_mysql_anda@localhost:3306/absensi_sbi"
+SESSION_SECRET="kunci_acak_rahasia_untuk_enkripsi_cookie_sesi"
+COOKIE_SECURE=false
 ```
 
-### Tahap 3: Konfigurasi Variabel Lingkungan (.env)
-1. Salin berkas `.env.example` menjadi `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-2. Sesuaikan nilai di dalam `.env` dengan konfigurasi database MySQL lokal Anda:
-   ```env
-   DATABASE_URL="mysql://username:password@localhost:3306/absensi_sbi"
-   SESSION_SECRET="gunakan_kunci_sesi_acak_yang_panjang_dan_rumit"
-   COOKIE_SECURE=false
-   ```
-   * *Catatan*: Pada server lokal (HTTP / IP Address), atur `COOKIE_SECURE=false`. Jika dideploy dengan HTTPS, ubah menjadi `COOKIE_SECURE=true`.
+Jalankan perintah berikut untuk menginstal seluruh package dependensi:
 
-### Tahap 4: Inisialisasi Database
-Jalankan perintah berikut untuk mereset database dan menginisialisasi tabel-tabel kosong baru sesuai skema Prisma:
-```bash
-npm run db:reset
-```
-*Skrip ini akan menghapus semua database target secara bersih dan menyelaraskan tabel absensi magang dalam keadaan kosong.*
+* **Menggunakan NPM**:
+  ```bash
+  npm install
+  ```
+* **Menggunakan PNPM**:
+  ```bash
+  pnpm install
+  ```
 
-### Tahap 5: Mendaftarkan Akun Administrator Default
-Jalankan perintah seeding di terminal untuk membuat akun admin perdana:
-```bash
-node seed-admin.js
-```
+### Tahap 3: Inisialisasi Database (Reset & Sync)
+Perintah ini akan menyelaraskan database MySQL Anda sesuai dengan struktur tabel yang ditentukan di skema ORM Prisma (dalam keadaan kosong):
+
+* **Menggunakan NPM**:
+  ```bash
+  npm run db:reset
+  ```
+* **Menggunakan PNPM**:
+  ```bash
+  pnpm run db:reset
+  ```
+
+### Tahap 4: Daftarkan Akun Admin & Data Dummy (Seeding)
+Jalankan perintah berikut untuk mengisi database dengan data divisi, akun pengguna uji coba (budi & siti), serta akun administrator utama:
+
+* **Menggunakan NPM**:
+  ```bash
+  npm run db:seed
+  ```
+* **Menggunakan PNPM**:
+  ```bash
+  pnpm run db:seed
+  ```
+
 Kredensial login admin default setelah eksekusi seed berhasil:
 * **Username**: `admin`
-* **Password**: `Password123!`
-
-Setelah akun berhasil terdaftar, berkas `seed-admin.js` akan otomatis dihapus demi menjaga keamanan kredensial.
+* **Password**: `admin123456`
 
 ---
 
-## 4. Konfigurasi Deployment di Server Produksi (Production)
+## 4. Panduan Menjalankan di Localhost (Debug / Development)
 
-Untuk melakukan deployment aplikasi di server produksi, Anda membutuhkan infrastruktur berikut:
+Untuk menjalankan server dalam mode pengembangan dengan dukungan pelacakan error (debug) dan hot-reload (perubahan kode langsung diterapkan ke browser tanpa restart):
 
-### 1. Perangkat Lunak yang Harus Diinstal di VPS / Server
-* **Node.js** (v22 atau lebih baru)
-* **NPM** atau **PNPM**
-* **MySQL Server** (v8.0 atau lebih baru)
-* **PM2** (Process Manager untuk menjalankan aplikasi Node secara background & auto-restart):
+* **Menggunakan NPM**:
   ```bash
-  npm install -g pm2
+  npm run dev
   ```
-* **Nginx** (Web Server bertindak sebagai Reverse Proxy)
+* **Menggunakan PNPM**:
+  ```bash
+  pnpm run dev
+  ```
+Buka browser pada alamat IP atau port lokal yang ditunjukkan (default: `http://localhost:3000` atau `http://localhost:5173`).
 
-### 2. Langkah Kompilasi (Build) Aplikasi
-1. Buka folder proyek di server produksi.
-2. Buat file `.env` produksi dengan `COOKIE_SECURE=true` (wajib menggunakan HTTPS).
-3. Jalankan kompilasi untuk mode produksi:
-   ```bash
-   npm run build
-   ```
-   Kompilasi ini akan menghasilkan direktori `.output/` yang siap dijalankan sebagai layanan server Node mandiri.
+---
 
-### 3. Konfigurasi PM2 Process Manager
-Jalankan aplikasi SolidStart di background menggunakan PM2:
-```bash
-pm2 start .output/server/index.mjs --name "absensi-sbi"
+## 5. Panduan Deployment & Menjalankan di Server Produksi (Production)
+
+Untuk mempublikasikan aplikasi pada VPS / Server produksi (Zero to Production):
+
+### Langkah 1: Kompilasi Proyek (Build)
+Jalankan proses bundling aset dan server-side rendering:
+
+* **Menggunakan NPM**:
+  ```bash
+  npm run build
+  ```
+* **Menggunakan PNPM**:
+  ```bash
+  pnpm run build
+  ```
+Kompilasi ini akan menghasilkan direktori `.output/` yang siap dideploy.
+
+### Langkah 2: Konfigurasi File `.env` Produksi
+Sebelum menjalankan aplikasi di server produksi, edit berkas `.env` Anda dan pastikan nilai keamanan cookie diatur ke `true` (wajib menggunakan sertifikat SSL HTTPS):
+```env
+COOKIE_SECURE=true
 ```
-Untuk mengaktifkan PM2 agar otomatis berjalan saat VPS / Server reboot:
+
+### Langkah 3: Menjalankan Mode Produksi Mandiri (Tanpa PM2)
+Jika ingin melakukan pengujian cepat mode produksi secara manual:
+
+* **Menggunakan NPM**:
+  ```bash
+  npm run start
+  ```
+* **Menggunakan PNPM**:
+  ```bash
+  pnpm run start
+  ```
+
+### Langkah 4: Menjalankan Mode Latar Belakang (Menggunakan PM2)
+Untuk menjaga aplikasi tetap hidup secara kontinu di background server produksi:
 ```bash
+# Jalankan menggunakan Process Manager PM2
+pm2 start .output/server/index.mjs --name "absensi-sbi"
+
+# Daftarkan PM2 ke startup OS agar otomatis menyala saat server reboot
 pm2 startup
 pm2 save
 ```

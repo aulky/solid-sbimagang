@@ -52,7 +52,7 @@ async function main() {
       email: "admin@solusibangunindonesia.co.id",
       phone: "081234567890",
       role: "ADMIN",
-      isActive: true
+      status: "AKTIF"
     }
   });
 
@@ -67,7 +67,7 @@ async function main() {
       phone: "089876543210",
       role: "USER",
       divisiId: divisiIT.id,
-      isActive: true
+      status: "AKTIF"
     }
   });
 
@@ -82,7 +82,7 @@ async function main() {
       phone: "085678901234",
       role: "USER",
       divisiId: divisiHR.id,
-      isActive: true
+      status: "AKTIF"
     }
   });
 
