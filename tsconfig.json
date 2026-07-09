@@ -15,5 +15,6 @@
     "paths": {
       "~/*": ["./src/*"]
     }
-  }
+  },
+  "exclude": ["node_modules", ".nitro", ".output", "dist", ".vinxi", ".wrangler"]
 }
