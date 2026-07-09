@@ -1,6 +1,7 @@
 import { action, query, redirect } from "@solidjs/router";
 import { promises as fs } from "fs";
 import path from "path";
+import crypto from "crypto";
 import { db } from "./db";
 import {
   getSession,
@@ -207,11 +208,28 @@ export const submitIzin = action(async (formData: FormData) => {
   const endDate = parseLocalDateAsUTC(String(formData.get("endDate")));
   const type = String(formData.get("type")) as "SAKIT" | "IZIN" | "CUTI";
   const reason = String(formData.get("reason"));
+  const file = formData.get("attachment") as File | null;
 
   if (!reason || reason.length < 5)
     return new Error("Alasan minimal 5 karakter.");
   if (startDate > endDate)
     return new Error("Tanggal mulai tidak boleh setelah tanggal selesai.");
+
+  let attachmentPath: string | null = null;
+  if (file && file.size > 0 && file.name) {
+    if (!file.type.startsWith("image/")) {
+      return new Error("Berkas lampiran harus berupa gambar (PNG/JPG/JPEG).");
+    }
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const extension = path.extname(file.name) || ".png";
+    const filename = `${crypto.randomBytes(16).toString("hex")}${extension}`;
+    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+
+    await fs.mkdir(uploadsDir, { recursive: true });
+    await fs.writeFile(path.join(uploadsDir, filename), buffer);
+    attachmentPath = `/uploads/${filename}`;
+  }
 
   await db.izin.create({
     data: {
@@ -220,6 +238,7 @@ export const submitIzin = action(async (formData: FormData) => {
       endDate,
       type,
       reason,
+      attachment: attachmentPath,
       status: "PENDING",
     },
   });

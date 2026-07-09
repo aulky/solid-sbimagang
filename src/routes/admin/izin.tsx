@@ -4,6 +4,7 @@ import {
   type RouteDefinition,
 } from "@solidjs/router";
 import { For, Show, createSignal } from "solid-js";
+import { Portal } from "solid-js/web";
 import { getAdminIzin, approveIzin } from "~/lib";
 
 export const route = {
@@ -15,6 +16,7 @@ export const route = {
 export default function AdminIzin() {
   const records = createAsync(() => getAdminIzin());
   const approving = useSubmission(approveIzin);
+  const [viewingAttachment, setViewingAttachment] = createSignal<string | null>(null);
 
   // Filter signals
   const [searchQuery, setSearchQuery] = createSignal("");
@@ -125,6 +127,7 @@ export default function AdminIzin() {
               <th>Tanggal Mulai</th>
               <th>Tanggal Selesai</th>
               <th>Alasan</th>
+              <th>Lampiran</th>
               <th>Status</th>
               <th>Aksi</th>
             </tr>
@@ -135,7 +138,7 @@ export default function AdminIzin() {
               fallback={
                 <tr>
                   <td
-                    colspan="8"
+                    colspan="9"
                     style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
                   >
                     Belum ada pengajuan izin.
@@ -191,6 +194,25 @@ export default function AdminIzin() {
                         title={row.reason}
                       >
                         {row.reason}
+                      </td>
+                      <td>
+                        <Show
+                          when={row.attachment}
+                          fallback={
+                            <span style="color: var(--color-text-secondary); font-size: 13px;">
+                              —
+                            </span>
+                          }
+                        >
+                          <button
+                            type="button"
+                            class="btn-secondary"
+                            style="width: auto; height: 32px; padding: 0 12px; font-size: 12px; display: inline-flex;"
+                            onClick={() => setViewingAttachment(row.attachment)}
+                          >
+                            Lihat Surat
+                          </button>
+                        </Show>
                       </td>
                       <td>
                         <span class={`badge badge-${row.status.toLowerCase()}`}>
@@ -284,6 +306,55 @@ export default function AdminIzin() {
             </button>
           </div>
         </div>
+      </Show>
+
+      <Show when={viewingAttachment()}>
+        {(url) => (
+          <Portal>
+            <div
+              class="modal-overlay"
+              onClick={() => setViewingAttachment(null)}
+            >
+              <div
+                class="modal modal-animate"
+                onClick={(e) => e.stopPropagation()}
+                style="max-width: 600px; text-align: center;"
+              >
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
+                  <h3
+                    style="margin: 0; font-family: var(--font-headline); font-weight: 700;"
+                  >
+                    Surat Keterangan Sakit
+                  </h3>
+                  <button
+                    class="theme-toggle"
+                    style="font-size: 24px; padding: 0; cursor: pointer;"
+                    onClick={() => setViewingAttachment(null)}
+                  >
+                    ×
+                  </button>
+                </div>
+                <img
+                  src={url()}
+                  alt="Surat Sakit"
+                  style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--radius-md); box-shadow: var(--shadow-md);"
+                />
+                <div
+                  style="margin-top: var(--space-4); display: flex; justify-content: center;"
+                >
+                  <button
+                    class="btn-ghost"
+                    type="button"
+                    onClick={() => setViewingAttachment(null)}
+                    style="width: auto; padding: 0 var(--space-4);"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Portal>
+        )}
       </Show>
     </main>
   );

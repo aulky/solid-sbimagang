@@ -102,7 +102,12 @@ export default function Izin() {
                 </button>
               </div>
 
-              <form ref={createFormRef} action={submitIzin} method="post">
+              <form
+                ref={createFormRef}
+                action={submitIzin}
+                method="post"
+                enctype="multipart/form-data"
+              >
                 <div class="form-group">
                   <label for="type">Tipe Perizinan</label>
                   <select id="type" name="type" required>
@@ -132,6 +137,16 @@ export default function Izin() {
                     placeholder="Jelaskan alasan pengajuan izin secara detail..."
                     rows="4"
                     required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="attachment">Lampiran Bukti / Surat Sakit (Gambar)</label>
+                  <input
+                    type="file"
+                    id="attachment"
+                    name="attachment"
+                    accept="image/*"
                   />
                 </div>
 
