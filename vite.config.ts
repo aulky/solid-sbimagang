@@ -7,5 +7,8 @@ export default defineConfig({
     solidStart(),
     nitro()
   ],
-  ssr: { external: ["@prisma/client"] }
+  ssr: { external: ["@prisma/client"] },
+  server: {
+    allowedHosts: ["absensi.tup.web.id"]
+  }
 });

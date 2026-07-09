@@ -109,6 +109,27 @@ export default function App() {
           }
         });
 
+        createEffect(() => {
+          const titleMap: Record<string, string> = {
+            "/dashboard": "Dashboard",
+            "/riwayat": "Riwayat Absensi",
+            "/izin": "Pengajuan Izin",
+            "/profil": "Profil Saya",
+            "/login": "Masuk Sistem",
+            "/unauthorized": "Akses Ditolak",
+            "/admin/dashboard": "Dashboard Admin",
+            "/admin/users": "Kelola Pengguna",
+            "/admin/divisi": "Kelola Divisi",
+            "/admin/absensi": "Monitor Absensi",
+            "/admin/izin": "Kelola Pengajuan Izin",
+            "/admin/laporan": "Laporan Absensi",
+            "/admin/settings": "Pengaturan Sistem",
+          };
+          const path = location.pathname;
+          const pageTitle = titleMap[path] || "Absensi Magang";
+          document.title = `${pageTitle} | PT Solusi Bangun Indonesia`;
+        });
+
         const isLoginPage = () =>
           location.pathname === "/login" ||
           location.pathname === "/unauthorized";
