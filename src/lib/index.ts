@@ -217,12 +217,25 @@ export const submitIzin = action(async (formData: FormData) => {
 
   let attachmentPath: string | null = null;
   if (file && file.size > 0 && file.name) {
-    if (!file.type.startsWith("image/")) {
-      return new Error("Berkas lampiran harus berupa gambar (PNG/JPG/JPEG).");
+    const extension = path.extname(file.name).toLowerCase();
+    const allowedExtensions = [".png", ".jpg", ".jpeg", ".pdf"];
+    const allowedMimeTypes = [
+      "image/png",
+      "image/jpeg",
+      "image/jpg",
+      "application/pdf",
+    ];
+
+    if (
+      !allowedExtensions.includes(extension) ||
+      !allowedMimeTypes.includes(file.type)
+    ) {
+      return new Error(
+        "Format berkas lampiran harus berupa gambar (JPG, PNG) atau PDF.",
+      );
     }
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const extension = path.extname(file.name) || ".png";
     const filename = `${crypto.randomBytes(16).toString("hex")}${extension}`;
     const uploadsDir = path.join(process.cwd(), "public", "uploads");
 

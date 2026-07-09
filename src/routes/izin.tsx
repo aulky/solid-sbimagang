@@ -30,6 +30,7 @@ export default function Izin() {
   const [showCreate, setShowCreate] = createSignal(false);
   const [filterType, setFilterType] = createSignal("");
   const [filterStatus, setFilterStatus] = createSignal("");
+  const [viewingAttachment, setViewingAttachment] = createSignal<string | null>(null);
   let createFormRef: HTMLFormElement | undefined;
 
   // Pagination signals
@@ -141,12 +142,12 @@ export default function Izin() {
                 </div>
 
                 <div class="form-group">
-                  <label for="attachment">Lampiran Bukti / Surat Sakit (Gambar)</label>
+                  <label for="attachment">Lampiran Bukti / Surat Sakit (Gambar / PDF)</label>
                   <input
                     type="file"
                     id="attachment"
                     name="attachment"
-                    accept="image/*"
+                    accept="image/png, image/jpeg, image/jpg, application/pdf"
                   />
                 </div>
 
@@ -239,6 +240,7 @@ export default function Izin() {
                     <th>Tanggal Selesai</th>
                     <th>Tipe</th>
                     <th>Alasan</th>
+                    <th>Lampiran</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -248,7 +250,7 @@ export default function Izin() {
                     fallback={
                       <tr>
                         <td
-                          colspan="6"
+                          colspan="7"
                           style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
                         >
                           Belum ada riwayat pengajuan izin magang.
@@ -284,6 +286,25 @@ export default function Izin() {
                             title={r.reason}
                           >
                             {r.reason}
+                          </td>
+                          <td>
+                            <Show
+                              when={r.attachment}
+                              fallback={
+                                <span style="color: var(--color-text-secondary); font-size: 13px;">
+                                  —
+                                </span>
+                              }
+                            >
+                              <button
+                                type="button"
+                                class="btn-secondary"
+                                style="width: auto; height: 32px; padding: 0 12px; font-size: 12px; display: inline-flex;"
+                                onClick={() => setViewingAttachment(r.attachment)}
+                              >
+                                Lihat Surat
+                              </button>
+                            </Show>
                           </td>
                           <td>
                             <span class={statusBadge(r.status)}>
@@ -338,6 +359,83 @@ export default function Izin() {
             </Show>
           </>
         ); }}
+      </Show>
+
+      <Show when={viewingAttachment()}>
+        {(url) => (
+          <Portal>
+            <div
+              class="modal-overlay"
+              onClick={() => setViewingAttachment(null)}
+            >
+              <div
+                class="modal modal-animate"
+                onClick={(e) => e.stopPropagation()}
+                style="max-width: 600px; text-align: center;"
+              >
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
+                  <h3
+                    style="margin: 0; font-family: var(--font-headline); font-weight: 700;"
+                  >
+                    Surat Keterangan Sakit
+                  </h3>
+                  <button
+                    class="theme-toggle"
+                    style="font-size: 24px; padding: 0; cursor: pointer;"
+                    onClick={() => setViewingAttachment(null)}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <Show
+                  when={viewingAttachment()?.toLowerCase().endsWith(".pdf")}
+                  fallback={
+                    <img
+                      src={url()}
+                      alt="Surat Sakit"
+                      style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--radius-md); box-shadow: var(--shadow-md);"
+                    />
+                  }
+                >
+                  <object
+                    data={url()}
+                    type="application/pdf"
+                    width="100%"
+                    height="500px"
+                    style="border-radius: var(--radius-md); border: 1px solid var(--color-border);"
+                  >
+                    <p style="font-size: 14px; color: var(--color-text-secondary); margin-bottom: 15px;">
+                      Pratinjau PDF tidak didukung langsung oleh browser Anda.
+                    </p>
+                    <a
+                      href={url()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="btn-primary"
+                      style="text-decoration: none; display: inline-flex; width: auto; padding: 0 var(--space-4);"
+                    >
+                      Buka / Unduh PDF
+                    </a>
+                  </object>
+                </Show>
+
+                <div
+                  style="margin-top: var(--space-4); display: flex; justify-content: center;"
+                >
+                  <button
+                    class="btn-ghost"
+                    type="button"
+                    onClick={() => setViewingAttachment(null)}
+                    style="width: auto; padding: 0 var(--space-4);"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Portal>
+        )}
       </Show>
     </main>
   );

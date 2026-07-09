@@ -334,11 +334,24 @@ export default function AdminIzin() {
                     ×
                   </button>
                 </div>
-                <img
-                  src={url()}
-                  alt="Surat Sakit"
-                  style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--radius-md); box-shadow: var(--shadow-md);"
-                />
+                <Show
+                  when={viewingAttachment()?.toLowerCase().endsWith(".pdf")}
+                  fallback={
+                    <img
+                      src={url()}
+                      alt="Surat Sakit"
+                      style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--radius-md); box-shadow: var(--shadow-md);"
+                    />
+                  }
+                >
+                  <embed
+                    src={url()}
+                    type="application/pdf"
+                    width="100%"
+                    height="500px"
+                    style="border-radius: var(--radius-md); border: 1px solid var(--color-border);"
+                  />
+                </Show>
                 <div
                   style="margin-top: var(--space-4); display: flex; justify-content: center;"
                 >
