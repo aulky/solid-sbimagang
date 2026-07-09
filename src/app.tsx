@@ -188,7 +188,7 @@ export default function App() {
                               : "/logo-sbi.png"
                           }
                           alt="PT SBI Logo"
-                          style="height: 24px; width: auto; object-fit: contain;"
+                          style="height: 28px; width: auto; object-fit: contain;"
                         />
                         <span style="font-family: var(--font-headline); font-weight: 700; font-size: 14px; color: var(--color-text);">
                           Absensi Magang

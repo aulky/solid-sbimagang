@@ -222,7 +222,7 @@ body {
 }
 
 .sidebar-logo {
-  height: 50px;
+  height: 28px;
   margin-bottom: var(--space-2);
 }
 
@@ -1143,6 +1143,12 @@ a {
     box-sizing: border-box;
   }
 
+  .mobile-header img {
+    height: 28px !important;
+    width: auto !important;
+    object-fit: contain !important;
+  }
+
   .hamburger-btn {
     font-size: 24px;
     background: transparent;
@@ -1199,7 +1205,7 @@ a {
   }
 
   .sidebar-logo {
-    height: 50px !important;
+    height: 28px !important;
     margin-bottom: var(--space-2) !important;
   }
 
