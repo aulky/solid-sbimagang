@@ -1,4 +1,6 @@
 import { action, query, redirect } from "@solidjs/router";
+import { promises as fs } from "fs";
+import path from "path";
 import { db } from "./db";
 import {
   getSession,
@@ -9,7 +11,7 @@ import {
   validateUsername,
   requireUser,
   requireAdmin,
-  hashPassword
+  hashPassword,
 } from "./server";
 
 // ========== AUTH ==========
@@ -22,7 +24,7 @@ export const getUser = query(async () => {
     if (userId === undefined) throw new Error("No user id");
     const user = await db.user.findUnique({
       where: { id: userId },
-      include: { divisi: true }
+      include: { divisi: true },
     });
     if (!user || !user.isActive) throw new Error("User invalid");
     return {
@@ -35,7 +37,7 @@ export const getUser = query(async () => {
       divisi: user.divisi?.name ?? null,
       divisiId: user.divisiId,
       avatar: user.avatar,
-      isActive: user.isActive
+      isActive: user.isActive,
     };
   } catch {
     await logoutSession();
@@ -56,7 +58,7 @@ export const loginOrRegister = action(async (formData: FormData) => {
       ? register(username, password)
       : login(username, password));
     const session = await getSession();
-    await session.update(d => {
+    await session.update((d) => {
       d.userId = user.id;
     });
   } catch (err) {
@@ -83,10 +85,45 @@ export const getTodayAttendance = query(async () => {
   const user = await requireUser();
   const today = getLocalDateAsUTC();
   const record = await db.absensi.findUnique({
-    where: { userId_date: { userId: user.id, date: today } }
+    where: { userId_date: { userId: user.id, date: today } },
   });
   return record;
 }, "todayAttendance");
+
+const getSettings = async () => {
+  const filePath = path.join(process.cwd(), "settings.json");
+  try {
+    const data = await fs.readFile(filePath, "utf-8");
+    return JSON.parse(data);
+  } catch {
+    return {
+      jamMasuk: "08:00",
+      toleransiMenit: 0,
+      lokasiKantor: "Kantor PT. SBI Cilacap",
+    };
+  }
+};
+
+export const getSystemSettings = query(async () => {
+  "use server";
+  await requireAdmin();
+  return getSettings();
+}, "systemSettings");
+
+export const updateSystemSettings = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const jamMasuk = String(formData.get("jamMasuk") || "08:00");
+  const toleransiMenit = Number(formData.get("toleransiMenit") || 0);
+  const lokasiKantor = String(
+    formData.get("lokasiKantor") || "Kantor PT. SBI Cilacap",
+  );
+
+  const settings = { jamMasuk, toleransiMenit, lokasiKantor };
+  const filePath = path.join(process.cwd(), "settings.json");
+  await fs.writeFile(filePath, JSON.stringify(settings, null, 2), "utf-8");
+  return redirect("/admin/dashboard");
+});
 
 export const checkIn = action(async () => {
   "use server";
@@ -95,14 +132,19 @@ export const checkIn = action(async () => {
   const today = getLocalDateAsUTC();
 
   const existing = await db.absensi.findUnique({
-    where: { userId_date: { userId: user.id, date: today } }
+    where: { userId_date: { userId: user.id, date: today } },
   });
   if (existing?.checkIn) {
     return new Error("Anda sudah Check-In hari ini.");
   }
 
-  // Jam kerja: 08:00. Check-in > 08:00 = TELAT
-  const status = now.getHours() >= 8 && now.getMinutes() > 0 ? "TELAT" : "HADIR";
+  const settings = await getSettings();
+  const [tHour, tMin] = settings.jamMasuk.split(":").map(Number);
+  const limitMinutes = tHour * 60 + tMin + Number(settings.toleransiMenit || 0);
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const status = nowMinutes > limitMinutes ? "TELAT" : "HADIR";
+  const location = settings.lokasiKantor || "Kantor PT. SBI Cilacap";
 
   await db.absensi.upsert({
     where: { userId_date: { userId: user.id, date: today } },
@@ -112,8 +154,8 @@ export const checkIn = action(async () => {
       date: today,
       checkIn: now,
       status,
-      location: "Kantor PT. SBI Cilacap"
-    }
+      location,
+    },
   });
   return redirect("/dashboard");
 });
@@ -125,7 +167,7 @@ export const checkOut = action(async () => {
   const today = getLocalDateAsUTC();
 
   const existing = await db.absensi.findUnique({
-    where: { userId_date: { userId: user.id, date: today } }
+    where: { userId_date: { userId: user.id, date: today } },
   });
   if (!existing?.checkIn) {
     return new Error("Anda belum Check-In hari ini.");
@@ -136,7 +178,7 @@ export const checkOut = action(async () => {
 
   await db.absensi.update({
     where: { id: existing.id },
-    data: { checkOut: now }
+    data: { checkOut: now },
   });
   return redirect("/dashboard");
 });
@@ -147,7 +189,7 @@ export const getAttendanceHistory = query(async () => {
   return db.absensi.findMany({
     where: { userId: user.id },
     orderBy: { date: "desc" },
-    take: 30
+    take: 30,
   });
 }, "attendanceHistory");
 
@@ -166,8 +208,10 @@ export const submitIzin = action(async (formData: FormData) => {
   const type = String(formData.get("type")) as "SAKIT" | "IZIN" | "CUTI";
   const reason = String(formData.get("reason"));
 
-  if (!reason || reason.length < 5) return new Error("Alasan minimal 5 karakter.");
-  if (startDate > endDate) return new Error("Tanggal mulai tidak boleh setelah tanggal selesai.");
+  if (!reason || reason.length < 5)
+    return new Error("Alasan minimal 5 karakter.");
+  if (startDate > endDate)
+    return new Error("Tanggal mulai tidak boleh setelah tanggal selesai.");
 
   await db.izin.create({
     data: {
@@ -176,8 +220,8 @@ export const submitIzin = action(async (formData: FormData) => {
       endDate,
       type,
       reason,
-      status: "PENDING"
-    }
+      status: "PENDING",
+    },
   });
   return redirect("/izin");
 });
@@ -188,7 +232,7 @@ export const getUserIzinList = query(async () => {
   return db.izin.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
-    take: 20
+    take: 20,
   });
 }, "userIzinList");
 
@@ -201,12 +245,13 @@ export const updateProfile = action(async (formData: FormData) => {
   const email = String(formData.get("email"));
   const phone = String(formData.get("phone") || "");
 
-  if (!fullName || fullName.length < 2) return new Error("Nama lengkap minimal 2 karakter.");
+  if (!fullName || fullName.length < 2)
+    return new Error("Nama lengkap minimal 2 karakter.");
   if (!email || !email.includes("@")) return new Error("Email tidak valid.");
 
   await db.user.update({
     where: { id: user.id },
-    data: { fullName, email, phone: phone || null }
+    data: { fullName, email, phone: phone || null },
   });
   return redirect("/profil");
 });
@@ -219,13 +264,14 @@ export const getAdminStats = query(async () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const [totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin] = await Promise.all([
-    db.user.count({ where: { role: "USER", isActive: true } }),
-    db.divisi.count(),
-    db.absensi.count({ where: { date: today, status: "HADIR" } }),
-    db.absensi.count({ where: { date: today, status: "TELAT" } }),
-    db.izin.count({ where: { status: "PENDING" } }),
-  ]);
+  const [totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin] =
+    await Promise.all([
+      db.user.count({ where: { role: "USER", isActive: true } }),
+      db.divisi.count(),
+      db.absensi.count({ where: { date: today, status: "HADIR" } }),
+      db.absensi.count({ where: { date: today, status: "TELAT" } }),
+      db.izin.count({ where: { status: "PENDING" } }),
+    ]);
 
   return { totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin };
 }, "adminStats");
@@ -237,13 +283,13 @@ export const getTodayAttendanceStatus = query(async () => {
   today.setHours(0, 0, 0, 0);
 
   const totalInterns = await db.user.count({
-    where: { role: "USER", isActive: true }
+    where: { role: "USER", isActive: true },
   });
 
   const attendanceToday = await db.absensi.groupBy({
     by: ["status"],
     where: { date: today },
-    _count: { id: true }
+    _count: { id: true },
   });
 
   const counts = { HADIR: 0, TELAT: 0, IZIN: 0, ALPHA: 0 };
@@ -259,7 +305,7 @@ export const getTodayAttendanceStatus = query(async () => {
   return {
     ...counts,
     belumAbsen,
-    totalInterns
+    totalInterns,
   };
 }, "todayAttendanceStatus");
 
@@ -273,10 +319,13 @@ export const getInternTrendData = query(async () => {
   const attendanceHistory = await db.absensi.findMany({
     where: { date: { gte: thirtyDaysAgo } },
     select: { date: true, status: true },
-    orderBy: { date: "asc" }
+    orderBy: { date: "asc" },
   });
 
-  const dailyData: Record<string, { hadir: number; telat: number; izin: number; total: number }> = {};
+  const dailyData: Record<
+    string,
+    { hadir: number; telat: number; izin: number; total: number }
+  > = {};
   for (const record of attendanceHistory) {
     const dateStr = record.date.toISOString().split("T")[0];
     if (!dailyData[dateStr]) {
@@ -291,7 +340,7 @@ export const getInternTrendData = query(async () => {
   const users = await db.user.findMany({
     where: { role: "USER" },
     select: { createdAt: true },
-    orderBy: { createdAt: "asc" }
+    orderBy: { createdAt: "asc" },
   });
 
   const registrationTrend: Record<string, number> = {};
@@ -303,8 +352,13 @@ export const getInternTrendData = query(async () => {
   }
 
   return {
-    dailyAttendanceTrend: Object.entries(dailyData).map(([date, stats]) => ({ date, ...stats })),
-    registrationTrend: Object.entries(registrationTrend).map(([date, count]) => ({ date, count }))
+    dailyAttendanceTrend: Object.entries(dailyData).map(([date, stats]) => ({
+      date,
+      ...stats,
+    })),
+    registrationTrend: Object.entries(registrationTrend).map(
+      ([date, count]) => ({ date, count }),
+    ),
   };
 }, "internTrendData");
 
@@ -315,7 +369,7 @@ export const getAdminUsers = query(async () => {
   await requireAdmin();
   return db.user.findMany({
     include: { divisi: true },
-    orderBy: { createdAt: "desc" }
+    orderBy: { createdAt: "desc" },
   });
 }, "adminUsers");
 
@@ -328,7 +382,9 @@ export const createUser = action(async (formData: FormData) => {
   const email = String(formData.get("email"));
   const phone = String(formData.get("phone") || "");
   const role = String(formData.get("role")) as "ADMIN" | "USER";
-  const divisiId = formData.get("divisiId") ? String(formData.get("divisiId")) : null;
+  const divisiId = formData.get("divisiId")
+    ? String(formData.get("divisiId"))
+    : null;
 
   let error = validateUsername(username) || validatePassword(password);
   if (error) return new Error(error);
@@ -345,8 +401,8 @@ export const createUser = action(async (formData: FormData) => {
       phone: phone || null,
       role,
       divisiId,
-      isActive: true
-    }
+      isActive: true,
+    },
   });
   return redirect("/admin/users");
 });
@@ -359,12 +415,14 @@ export const updateUser = action(async (formData: FormData) => {
   const email = String(formData.get("email"));
   const phone = String(formData.get("phone") || "");
   const role = String(formData.get("role")) as "ADMIN" | "USER";
-  const divisiId = formData.get("divisiId") ? String(formData.get("divisiId")) : null;
+  const divisiId = formData.get("divisiId")
+    ? String(formData.get("divisiId"))
+    : null;
   const isActive = formData.get("isActive") === "true";
 
   await db.user.update({
     where: { id },
-    data: { fullName, email, phone: phone || null, role, divisiId, isActive }
+    data: { fullName, email, phone: phone || null, role, divisiId, isActive },
   });
   return redirect("/admin/users");
 });
@@ -384,7 +442,7 @@ export const getAdminDivisi = query(async () => {
   await requireAdmin();
   return db.divisi.findMany({
     include: { _count: { select: { users: true } } },
-    orderBy: { createdAt: "desc" }
+    orderBy: { createdAt: "desc" },
   });
 }, "adminDivisi");
 
@@ -398,7 +456,8 @@ export const createDivisi = action(async (formData: FormData) => {
   await requireAdmin();
   const name = String(formData.get("name"));
   const description = String(formData.get("description") || "");
-  if (!name || name.length < 2) return new Error("Nama divisi minimal 2 karakter.");
+  if (!name || name.length < 2)
+    return new Error("Nama divisi minimal 2 karakter.");
   await db.divisi.create({ data: { name, description: description || null } });
   return redirect("/admin/divisi");
 });
@@ -409,7 +468,10 @@ export const updateDivisi = action(async (formData: FormData) => {
   const id = String(formData.get("id"));
   const name = String(formData.get("name"));
   const description = String(formData.get("description") || "");
-  await db.divisi.update({ where: { id }, data: { name, description: description || null } });
+  await db.divisi.update({
+    where: { id },
+    data: { name, description: description || null },
+  });
   return redirect("/admin/divisi");
 });
 
@@ -429,7 +491,7 @@ export const getAdminAbsensi = query(async () => {
   return db.absensi.findMany({
     include: { user: { include: { divisi: true } } },
     orderBy: { date: "desc" },
-    take: 100
+    take: 100,
   });
 }, "adminAbsensi");
 
@@ -440,7 +502,7 @@ export const getAdminIzin = query(async () => {
   await requireAdmin();
   return db.izin.findMany({
     include: { user: true },
-    orderBy: { createdAt: "desc" }
+    orderBy: { createdAt: "desc" },
   });
 }, "adminIzin");
 
@@ -448,14 +510,20 @@ export const approveIzin = action(async (formData: FormData) => {
   "use server";
   const admin = await requireAdmin();
   const id = String(formData.get("id"));
-  const statusAction = String(formData.get("status")) as "APPROVED" | "REJECTED";
+  const statusAction = String(formData.get("status")) as
+    | "APPROVED"
+    | "REJECTED";
 
   const izin = await db.izin.findUnique({ where: { id } });
   if (!izin) return new Error("Pengajuan izin tidak ditemukan.");
 
   await db.izin.update({
     where: { id },
-    data: { status: statusAction, approvedBy: admin.id, approvedAt: new Date() }
+    data: {
+      status: statusAction,
+      approvedBy: admin.id,
+      approvedAt: new Date(),
+    },
   });
 
   // If approved, mark attendance records as IZIN for the date range
@@ -467,13 +535,16 @@ export const approveIzin = action(async (formData: FormData) => {
       dateOnly.setHours(0, 0, 0, 0);
       await db.absensi.upsert({
         where: { userId_date: { userId: izin.userId, date: dateOnly } },
-        update: { status: "IZIN", notes: `Izin: ${izin.type} - ${izin.reason}` },
+        update: {
+          status: "IZIN",
+          notes: `Izin: ${izin.type} - ${izin.reason}`,
+        },
         create: {
           userId: izin.userId,
           date: dateOnly,
           status: "IZIN",
-          notes: `Izin: ${izin.type} - ${izin.reason}`
-        }
+          notes: `Izin: ${izin.type} - ${izin.reason}`,
+        },
       });
     }
   }
@@ -483,19 +554,22 @@ export const approveIzin = action(async (formData: FormData) => {
 
 // ========== ADMIN: LAPORAN ==========
 
-export const getLaporan = query(async (startDate?: string, endDate?: string) => {
-  "use server";
-  await requireAdmin();
-  const where: any = {};
-  if (startDate) where.date = { gte: new Date(startDate) };
-  if (endDate) where.date = { ...where.date, lte: new Date(endDate) };
+export const getLaporan = query(
+  async (startDate?: string, endDate?: string) => {
+    "use server";
+    await requireAdmin();
+    const where: any = {};
+    if (startDate) where.date = { gte: new Date(startDate) };
+    if (endDate) where.date = { ...where.date, lte: new Date(endDate) };
 
-  return db.absensi.findMany({
-    where,
-    include: { user: { include: { divisi: true } } },
-    orderBy: { date: "desc" }
-  });
-}, "laporan");
+    return db.absensi.findMany({
+      where,
+      include: { user: { include: { divisi: true } } },
+      orderBy: { date: "desc" },
+    });
+  },
+  "laporan",
+);
 
 // ========== ADMIN: EXPORT CSV ==========
 
@@ -504,16 +578,23 @@ export const exportCSV = query(async () => {
   await requireAdmin();
   const records = await db.absensi.findMany({
     include: { user: { include: { divisi: true } } },
-    orderBy: { date: "desc" }
+    orderBy: { date: "desc" },
   });
 
-  const header = "Nama,Username,Divisi,Tanggal,Check-In,Check-Out,Status,Catatan\n";
-  const rows = records.map(r => {
-    const date = new Date(r.date).toLocaleDateString("id-ID");
-    const ci = r.checkIn ? new Date(r.checkIn).toLocaleTimeString("id-ID") : "-";
-    const co = r.checkOut ? new Date(r.checkOut).toLocaleTimeString("id-ID") : "-";
-    return `"${r.user.fullName}","${r.user.username}","${r.user.divisi?.name ?? '-'}","${date}","${ci}","${co}","${r.status}","${r.notes ?? ''}"`;
-  }).join("\n");
+  const header =
+    "Nama,Username,Divisi,Tanggal,Check-In,Check-Out,Status,Catatan\n";
+  const rows = records
+    .map((r) => {
+      const date = new Date(r.date).toLocaleDateString("id-ID");
+      const ci = r.checkIn
+        ? new Date(r.checkIn).toLocaleTimeString("id-ID")
+        : "-";
+      const co = r.checkOut
+        ? new Date(r.checkOut).toLocaleTimeString("id-ID")
+        : "-";
+      return `"${r.user.fullName}","${r.user.username}","${r.user.divisi?.name ?? "-"}","${date}","${ci}","${co}","${r.status}","${r.notes ?? ""}"`;
+    })
+    .join("\n");
 
   return header + rows;
 }, "exportCSV");

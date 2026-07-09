@@ -1,6 +1,6 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
 import { For, Show, createSignal } from "solid-js";
-import { getAdminAbsensi, getAllDivisi, exportCSV } from "~/lib";
+import { getAdminAbsensi, getAllDivisi } from "~/lib";
 
 export const route = {
   preload() {
@@ -26,24 +26,103 @@ export default function Laporan() {
     return Math.max(1, Math.ceil(list.length / itemsPerPage));
   };
 
-  const downloadCSV = async () => {
-    try {
-      const csvContent = await exportCSV();
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute(
-        "download",
-        `laporan_absensi_${new Date().toISOString().slice(0, 10)}.csv`,
-      );
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (e) {
-      alert("Gagal melakukan export CSV: " + String(e));
+  const downloadXLSX = () => {
+    const list = filteredRecords();
+    if (!list || list.length === 0) {
+      alert("Tidak ada data untuk diexport.");
+      return;
     }
+
+    let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta charset="utf-8" />
+  <!--[if gte mso 9]>
+  <xml>
+    <x:ExcelWorkbook>
+      <x:ExcelWorksheets>
+        <x:ExcelWorksheet>
+          <x:Name>Laporan Absensi</x:Name>
+          <x:WorksheetOptions>
+            <x:DisplayGridlines/>
+          </x:WorksheetOptions>
+        </x:ExcelWorksheet>
+      </x:ExcelWorksheets>
+    </x:ExcelWorkbook>
+  </xml>
+  <![endif]-->
+  <style>
+    body { font-family: sans-serif; }
+    table { border-collapse: collapse; width: 100%; }
+    th { background-color: #E11D48; color: #ffffff; font-weight: bold; border: 1px solid #cccccc; padding: 10px; text-align: left; }
+    td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+    .status-hadir { color: #16A34A; font-weight: bold; }
+    .status-telat { color: #D97706; font-weight: bold; }
+    .status-izin { color: #2563EB; font-weight: bold; }
+    .status-alpha { color: #DC2626; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>Laporan Kehadiran Anak Magang</h2>
+  <p>PT. Solusi Bangun Indonesia Cilacap</p>
+  <table>
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama Lengkap</th>
+        <th>Username</th>
+        <th>Divisi</th>
+        <th>Tanggal</th>
+        <th>Check-In</th>
+        <th>Check-Out</th>
+        <th>Status</th>
+        <th>Catatan</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+    list.forEach((r, idx) => {
+      const date = new Date(r.date).toLocaleDateString("id-ID");
+      const ci = r.checkIn
+        ? new Date(r.checkIn).toLocaleTimeString("id-ID")
+        : "-";
+      const co = r.checkOut
+        ? new Date(r.checkOut).toLocaleTimeString("id-ID")
+        : "-";
+      const statusClass = `status-${r.status.toLowerCase()}`;
+      html += `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${r.user.fullName}</td>
+        <td>@${r.user.username}</td>
+        <td>${r.user.divisi?.name ?? "-"}</td>
+        <td>${date}</td>
+        <td>${ci}</td>
+        <td>${co}</td>
+        <td><span class="${statusClass}">${r.status}</span></td>
+        <td>${r.notes ?? "-"}</td>
+      </tr>`;
+    });
+
+    html += `
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+    const blob = new Blob([html], {
+      type: "application/vnd.ms-excel;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `laporan_absensi_${new Date().toISOString().slice(0, 10)}.xls`,
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const printReport = () => {
@@ -90,11 +169,11 @@ export default function Laporan() {
         </h1>
         <div style="display: flex; gap: var(--space-2);">
           <button
-            onClick={downloadCSV}
+            onClick={downloadXLSX}
             class="btn-primary"
             style="width: auto; padding: 0 var(--space-3); height: 38px;"
           >
-            Export CSV (Excel)
+            Export Excel
           </button>
           <button
             onClick={printReport}
@@ -106,14 +185,8 @@ export default function Laporan() {
         </div>
       </div>
 
-      <div
-        class="form-card no-print"
-        style="max-width: 900px; padding: var(--space-3) var(--space-4); margin-bottom: var(--space-4); display: flex; flex-direction: row; gap: var(--space-3); align-items: flex-end; flex-wrap: wrap;"
-      >
-        <div
-          class="form-group"
-          style="margin-bottom: 0; flex: 2; min-width: 180px;"
-        >
+      <div class="filter-card no-print" style="margin-bottom: var(--space-4);">
+        <div class="form-group">
           <label>Cari Nama</label>
           <input
             type="text"
@@ -125,10 +198,7 @@ export default function Laporan() {
             }}
           />
         </div>
-        <div
-          class="form-group"
-          style="margin-bottom: 0; flex: 1.5; min-width: 160px;"
-        >
+        <div class="form-group">
           <label>Pilih Divisi</label>
           <select
             value={filterDivisi()}
@@ -143,10 +213,7 @@ export default function Laporan() {
             </For>
           </select>
         </div>
-        <div
-          class="form-group"
-          style="margin-bottom: 0; flex: 1; min-width: 140px;"
-        >
+        <div class="form-group">
           <label>Tanggal Mulai</label>
           <input
             type="date"
@@ -157,10 +224,7 @@ export default function Laporan() {
             }}
           />
         </div>
-        <div
-          class="form-group"
-          style="margin-bottom: 0; flex: 1; min-width: 140px;"
-        >
+        <div class="form-group">
           <label>Tanggal Selesai</label>
           <input
             type="date"
@@ -180,7 +244,7 @@ export default function Laporan() {
             setCurrentPage(1);
           }}
           class="btn-ghost"
-          style="width: auto; height: 40px; padding: 0 var(--space-3);"
+          style="width: auto;"
         >
           Reset Filter
         </button>
@@ -335,6 +399,10 @@ export default function Laporan() {
 
       <style>{`
         @media print {
+          @page {
+            size: landscape;
+            margin: 15mm;
+          }
           .no-print {
             display: none !important;
           }
@@ -344,6 +412,7 @@ export default function Laporan() {
           body {
             background: #ffffff !important;
             color: #000000 !important;
+            font-family: sans-serif !important;
           }
           main {
             padding: 0 !important;
@@ -351,17 +420,30 @@ export default function Laporan() {
           .data-table {
             background: #ffffff !important;
             box-shadow: none !important;
-            border: 1px solid #000000 !important;
+            border: 1px solid #cbd5e1 !important;
+            width: 100% !important;
+            border-collapse: collapse !important;
           }
-          .data-table th, .data-table td {
-            border-bottom: 1px solid #000000 !important;
-            color: #000000 !important;
+          .data-table th {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            border: 1px solid #94a3b8 !important;
+            font-weight: bold !important;
+            padding: 8px 10px !important;
+          }
+          .data-table td {
+            border: 1px solid #cbd5e1 !important;
+            color: #334155 !important;
+            padding: 8px 10px !important;
           }
           .badge {
             background: transparent !important;
-            border: 1px solid #000000 !important;
-            color: #000000 !important;
-            padding: 2px 6px !important;
+            border: 1.5px solid #475569 !important;
+            color: #475569 !important;
+            padding: 2px 8px !important;
+            border-radius: 4px !important;
+            font-size: 11px !important;
+            font-weight: bold !important;
           }
         }
       `}</style>

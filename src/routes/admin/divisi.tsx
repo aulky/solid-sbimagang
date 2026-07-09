@@ -54,11 +54,14 @@ export default function AdminDivisi() {
   const deleting = useSubmission(deleteDivisi);
 
   // Close modal on successful division creation and reset form
+  let prevCreatingPending = false;
   createEffect(() => {
-    if (creating.result && !(creating.result instanceof Error)) {
+    const pending = !!creating.pending;
+    if (prevCreatingPending && !pending && !creating.error) {
       createFormRef?.reset();
       setShowCreate(false);
     }
+    prevCreatingPending = pending;
   });
 
   // Close modal on successful division update

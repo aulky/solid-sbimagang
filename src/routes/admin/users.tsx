@@ -32,18 +32,42 @@ export default function AdminUsers() {
   } | null>(null);
   let createFormRef: HTMLFormElement | undefined;
 
+  // Filter signals
+  const [searchQuery, setSearchQuery] = createSignal("");
+  const [filterRole, setFilterRole] = createSignal("");
+  const [filterStatus, setFilterStatus] = createSignal("");
+  const [filterDivisi, setFilterDivisi] = createSignal("");
+
   // Pagination setup
   const [currentPage, setCurrentPage] = createSignal(1);
   const itemsPerPage = 10;
 
-  const totalPages = () => {
+  // Filter logic
+  const filteredUsers = () => {
     const list = users();
-    return list ? Math.max(1, Math.ceil(list.length / itemsPerPage)) : 1;
+    if (!list) return [];
+    return list.filter((u) => {
+      if (filterRole() && u.role !== filterRole()) return false;
+      if (filterStatus() && String(u.isActive) !== filterStatus()) return false;
+      if (filterDivisi() && u.divisiId !== filterDivisi()) return false;
+
+      const q = searchQuery().toLowerCase().trim();
+      if (q) {
+        const nameMatch = u.fullName.toLowerCase().includes(q);
+        const usernameMatch = u.username.toLowerCase().includes(q);
+        if (!nameMatch && !usernameMatch) return false;
+      }
+      return true;
+    });
+  };
+
+  const totalPages = () => {
+    const list = filteredUsers();
+    return Math.max(1, Math.ceil(list.length / itemsPerPage));
   };
 
   const paginatedUsers = () => {
-    const list = users();
-    if (!list) return [];
+    const list = filteredUsers();
     const start = (currentPage() - 1) * itemsPerPage;
     return list.slice(start, start + itemsPerPage);
   };
@@ -53,11 +77,14 @@ export default function AdminUsers() {
   const deleting = useSubmission(deleteUser);
 
   // Close modal on successful user creation and reset form
+  let prevCreatingPending = false;
   createEffect(() => {
-    if (creating.result && !(creating.result instanceof Error)) {
+    const pending = !!creating.pending;
+    if (prevCreatingPending && !pending && !creating.error) {
       createFormRef?.reset();
       setShowCreate(false);
     }
+    prevCreatingPending = pending;
   });
 
   // Close modal on successful user update
@@ -191,6 +218,77 @@ export default function AdminUsers() {
           </div>
         </Portal>
       </Show>
+
+      <div class="filter-card" style="margin-bottom: var(--space-4);">
+        <div class="form-group">
+          <label>Cari Nama/Username</label>
+          <input
+            type="text"
+            placeholder="Cari nama/username..."
+            value={searchQuery()}
+            onInput={(e) => {
+              setSearchQuery(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
+        <div class="form-group">
+          <label>Pilih Role</label>
+          <select
+            value={filterRole()}
+            onChange={(e) => {
+              setFilterRole(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Role</option>
+            <option value="USER">USER</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Pilih Status</label>
+          <select
+            value={filterStatus()}
+            onChange={(e) => {
+              setFilterStatus(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Status</option>
+            <option value="true">Aktif</option>
+            <option value="false">Nonaktif</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Pilih Divisi</label>
+          <select
+            value={filterDivisi()}
+            onChange={(e) => {
+              setFilterDivisi(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Divisi</option>
+            <For each={divisiList()}>
+              {(d) => <option value={d.id}>{d.name}</option>}
+            </For>
+          </select>
+        </div>
+        <button
+          onClick={() => {
+            setSearchQuery("");
+            setFilterRole("");
+            setFilterStatus("");
+            setFilterDivisi("");
+            setCurrentPage(1);
+          }}
+          class="btn-ghost"
+          style="width: auto;"
+        >
+          Reset Filter
+        </button>
+      </div>
 
       <Show when={editingUser()}>
         {(user) => (

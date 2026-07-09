@@ -1,15 +1,17 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
 import { For, Show, createSignal } from "solid-js";
-import { getAdminAbsensi } from "~/lib";
+import { getAdminAbsensi, getAllDivisi } from "~/lib";
 
 export const route = {
   preload() {
     getAdminAbsensi();
+    getAllDivisi();
   },
 } satisfies RouteDefinition;
 
 export default function AdminAbsensi() {
   const records = createAsync(() => getAdminAbsensi());
+  const divisiList = createAsync(() => getAllDivisi());
 
   // Get local today date as YYYY-MM-DD
   const getTodayString = () => {
@@ -21,6 +23,9 @@ export default function AdminAbsensi() {
   };
 
   const [filterDate, setFilterDate] = createSignal(getTodayString());
+  const [searchQuery, setSearchQuery] = createSignal("");
+  const [filterDivisi, setFilterDivisi] = createSignal("");
+  const [filterStatus, setFilterStatus] = createSignal("");
 
   // Pagination setup
   const [currentPage, setCurrentPage] = createSignal(1);
@@ -34,10 +39,21 @@ export default function AdminAbsensi() {
   const filteredRecords = () => {
     const list = records();
     if (!list) return [];
-    if (!filterDate()) return list;
     return list.filter((r) => {
-      const rDate = new Date(r.date).toISOString().slice(0, 10);
-      return rDate === filterDate();
+      if (filterDate()) {
+        const rDate = new Date(r.date).toISOString().slice(0, 10);
+        if (rDate !== filterDate()) return false;
+      }
+      if (filterStatus() && r.status !== filterStatus()) return false;
+      if (filterDivisi() && r.user.divisiId !== filterDivisi()) return false;
+
+      const q = searchQuery().toLowerCase().trim();
+      if (q) {
+        const nameMatch = r.user.fullName.toLowerCase().includes(q);
+        const usernameMatch = r.user.username.toLowerCase().includes(q);
+        if (!nameMatch && !usernameMatch) return false;
+      }
+      return true;
     });
   };
 
@@ -49,35 +65,80 @@ export default function AdminAbsensi() {
 
   return (
     <main>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3); text-align: left;">
         <h1 class="page-title" style="margin-bottom: 0;">
           Monitor Absensi
         </h1>
+      </div>
 
-        <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;">
-          <label style="font-family: var(--font-headline); font-weight: 600; font-size: 14px; color: var(--color-text-secondary);">
-            Tanggal:
-          </label>
+      <div class="filter-card" style="margin-bottom: var(--space-4);">
+        <div class="form-group">
+          <label>Cari Nama/Username</label>
+          <input
+            type="text"
+            placeholder="Cari nama/username..."
+            value={searchQuery()}
+            onInput={(e) => {
+              setSearchQuery(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
+        <div class="form-group">
+          <label>Tanggal</label>
           <input
             type="date"
             value={filterDate()}
             onInput={(e) => {
               setFilterDate(e.currentTarget.value);
-              setCurrentPage(1); // Reset page on filter change
-            }}
-            style="width: auto; height: 38px; padding: 6px 12px; font-size: 14px;"
-          />
-          <button
-            onClick={() => {
-              setFilterDate("");
               setCurrentPage(1);
             }}
-            class="btn-ghost"
-            style="width: auto; height: 38px; padding: 0 var(--space-3);"
-          >
-            Semua Hari
-          </button>
+          />
         </div>
+        <div class="form-group">
+          <label>Status Kehadiran</label>
+          <select
+            value={filterStatus()}
+            onChange={(e) => {
+              setFilterStatus(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Status</option>
+            <option value="HADIR">HADIR</option>
+            <option value="TELAT">TELAT</option>
+            <option value="IZIN">IZIN</option>
+            <option value="ALPHA">ALPHA</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Pilih Divisi</label>
+          <select
+            value={filterDivisi()}
+            onChange={(e) => {
+              setFilterDivisi(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Divisi</option>
+            <For each={divisiList()}>
+              {(d) => <option value={d.id}>{d.name}</option>}
+            </For>
+          </select>
+        </div>
+        <button
+          onClick={() => {
+            setSearchQuery("");
+            setFilterDate(getTodayString());
+            setFilterStatus("");
+            setFilterDivisi("");
+            setCurrentPage(1);
+          }}
+          class="btn-ghost"
+          style="width: auto;"
+        >
+          Reset Filter
+        </button>
       </div>
 
       <div style="overflow-x: auto;">

@@ -16,14 +16,18 @@ export function validatePassword(password: unknown) {
 
 export function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
+  const hash = crypto
+    .pbkdf2Sync(password, salt, 1000, 64, "sha512")
+    .toString("hex");
   return `${salt}:${hash}`;
 }
 
 export function verifyPassword(password: string, stored: string): boolean {
   const [salt, hash] = stored.split(":");
   if (!salt || !hash) return false;
-  const verifyHash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
+  const verifyHash = crypto
+    .pbkdf2Sync(password, salt, 1000, 64, "sha512")
+    .toString("hex");
   return hash === verifyHash;
 }
 
@@ -40,7 +44,7 @@ export async function login(username: string, password: string) {
 
 export async function logout() {
   const session = await getSession();
-  await session.update(d => {
+  await session.update((d) => {
     d.userId = undefined;
   });
 }
@@ -57,14 +61,16 @@ export async function register(username: string, password: string) {
       fullName: username,
       email: `${username}@magang.sbi.co.id`,
       role: "USER",
-      isActive: true
-    }
+      isActive: true,
+    },
   });
 }
 
 export function getSession() {
   return useSession({
-    password: process.env.SESSION_SECRET ?? "areallylongsecretthatyoushouldreplace_solusibangunindonesia_cilacap_2026"
+    password:
+      process.env.SESSION_SECRET ??
+      "areallylongsecretthatyoushouldreplace_solusibangunindonesia_cilacap_2026",
   });
 }
 
@@ -76,7 +82,7 @@ export async function requireUser() {
   }
   const user = await db.user.findUnique({
     where: { id: userId },
-    include: { divisi: true }
+    include: { divisi: true },
   });
   if (!user || !user.isActive) {
     await logout();

@@ -16,18 +16,40 @@ export default function AdminIzin() {
   const records = createAsync(() => getAdminIzin());
   const approving = useSubmission(approveIzin);
 
+  // Filter signals
+  const [searchQuery, setSearchQuery] = createSignal("");
+  const [filterType, setFilterType] = createSignal("");
+  const [filterStatus, setFilterStatus] = createSignal("");
+
   // Pagination setup
   const [currentPage, setCurrentPage] = createSignal(1);
   const itemsPerPage = 10;
 
-  const totalPages = () => {
+  // Filter logic
+  const filteredRecords = () => {
     const list = records();
-    return list ? Math.max(1, Math.ceil(list.length / itemsPerPage)) : 1;
+    if (!list) return [];
+    return list.filter((r) => {
+      if (filterStatus() && r.status !== filterStatus()) return false;
+      if (filterType() && r.type !== filterType()) return false;
+
+      const query = searchQuery().toLowerCase().trim();
+      if (query) {
+        const nameMatch = r.user.fullName.toLowerCase().includes(query);
+        const usernameMatch = r.user.username.toLowerCase().includes(query);
+        if (!nameMatch && !usernameMatch) return false;
+      }
+      return true;
+    });
+  };
+
+  const totalPages = () => {
+    const list = filteredRecords();
+    return Math.max(1, Math.ceil(list.length / itemsPerPage));
   };
 
   const paginatedRecords = () => {
-    const list = records();
-    if (!list) return [];
+    const list = filteredRecords();
     const start = (currentPage() - 1) * itemsPerPage;
     return list.slice(start, start + itemsPerPage);
   };
@@ -35,6 +57,63 @@ export default function AdminIzin() {
   return (
     <main>
       <h1 class="page-title">Kelola Pengajuan Izin</h1>
+
+      <div class="filter-card" style="margin-bottom: var(--space-4);">
+        <div class="form-group">
+          <label>Cari Nama</label>
+          <input
+            type="text"
+            placeholder="Cari nama atau username..."
+            value={searchQuery()}
+            onInput={(e) => {
+              setSearchQuery(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
+        <div class="form-group">
+          <label>Tipe Izin</label>
+          <select
+            value={filterType()}
+            onChange={(e) => {
+              setFilterType(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Tipe</option>
+            <option value="SAKIT">Sakit</option>
+            <option value="IZIN">Izin</option>
+            <option value="CUTI">Cuti</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select
+            value={filterStatus()}
+            onChange={(e) => {
+              setFilterStatus(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Setuju</option>
+            <option value="REJECTED">Tolak</option>
+          </select>
+        </div>
+        <button
+          onClick={() => {
+            setSearchQuery("");
+            setFilterType("");
+            setFilterStatus("");
+            setCurrentPage(1);
+          }}
+          class="btn-ghost"
+          style="width: auto;"
+        >
+          Reset Filter
+        </button>
+      </div>
 
       <div style="overflow-x: auto;">
         <table class="data-table">

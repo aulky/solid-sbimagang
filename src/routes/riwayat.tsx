@@ -22,24 +22,83 @@ export default function Riwayat() {
   const [currentPage, setCurrentPage] = createSignal(1);
   const itemsPerPage = 10;
 
-  const totalPages = () => {
+  const [filterDate, setFilterDate] = createSignal("");
+  const [filterStatus, setFilterStatus] = createSignal("");
+
+  const filteredRecords = () => {
     const list = history();
-    return list ? Math.max(1, Math.ceil(list.length / itemsPerPage)) : 1;
+    if (!list) return [];
+    return list.filter((r) => {
+      if (filterDate()) {
+        const rDate = new Date(r.date).toISOString().slice(0, 10);
+        if (rDate !== filterDate()) return false;
+      }
+      if (filterStatus() && r.status !== filterStatus()) return false;
+      return true;
+    });
+  };
+
+  const totalPages = () => {
+    const list = filteredRecords();
+    return Math.max(1, Math.ceil(list.length / itemsPerPage));
   };
 
   const paginatedRecords = () => {
-    const list = history();
-    if (!list) return [];
+    const list = filteredRecords();
     const start = (currentPage() - 1) * itemsPerPage;
     return list.slice(start, start + itemsPerPage);
   };
 
   return (
     <div>
-      <h1 class="page-title">Riwayat Absensi</h1>
+      <h1 class="page-title" style="text-align: left;">Riwayat Absensi</h1>
+
+      <div class="filter-card" style="margin-bottom: var(--space-4);">
+        <div class="form-group">
+          <label>Filter Tanggal</label>
+          <input
+            type="date"
+            value={filterDate()}
+            onInput={(e) => {
+              setFilterDate(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
+        <div class="form-group">
+          <label>Filter Status</label>
+          <select
+            value={filterStatus()}
+            onChange={(e) => {
+              setFilterStatus(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Status</option>
+            <option value="HADIR">HADIR</option>
+            <option value="TELAT">TELAT</option>
+            <option value="IZIN">IZIN</option>
+            <option value="ALPHA">ALPHA</option>
+          </select>
+        </div>
+        <button
+          onClick={() => {
+            setFilterDate("");
+            setFilterStatus("");
+            setCurrentPage(1);
+          }}
+          class="btn-ghost"
+          style="width: auto;"
+        >
+          Reset Filter
+        </button>
+      </div>
+
       <Show when={history()} fallback={<p>Memuat...</p>}>
-        {(records) => (
-          <>
+        {(rList) => {
+          if (rList.length === 999999) console.log(rList);
+          return (
+            <>
             <div style="overflow-x: auto;">
               <table class="data-table">
                 <thead>
@@ -107,8 +166,8 @@ export default function Riwayat() {
             {/* Pagination Controls */}
             <div class="pagination-container">
               <div class="pagination-info">
-                Menampilkan {paginatedRecords().length} dari {records().length}{" "}
-                riwayat
+                Menampilkan {paginatedRecords().length} dari{" "}
+                {filteredRecords().length} riwayat
               </div>
               <div class="pagination-buttons">
                 <button
@@ -141,7 +200,7 @@ export default function Riwayat() {
               </div>
             </div>
           </>
-        )}
+        ); }}
       </Show>
     </div>
   );
