@@ -68,9 +68,16 @@ export async function register(username: string, password: string) {
 
 export function getSession() {
   return useSession({
+    name: "sbi_session",
     password:
       process.env.SESSION_SECRET ??
       "areallylongsecretthatyoushouldreplace_solusibangunindonesia_cilacap_2026",
+    cookie: {
+      secure: process.env.COOKIE_SECURE === "true",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 1 minggu
+    },
   });
 }
 
