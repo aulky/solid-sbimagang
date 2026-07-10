@@ -980,6 +980,34 @@ button[type="submit"]:disabled {
   }
 }
 
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.password-toggle-btn:hover {
+  color: var(--color-primary);
+}
+
+.password-input-container input {
+  padding-right: 40px !important;
+}
+
 .login-card,
 .form-card,
 .stat-card {
