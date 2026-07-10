@@ -18,7 +18,7 @@ export default createHandler(() => (
           ? "https"
           : "http";
       const origin = `${protocol}://${host}`;
-      const logoUrl = `${origin}/logo-sbi.png`;
+      const logoUrl = `${origin}/logo-sbi-seo.png`;
 
       const titleMap: Record<string, string> = {
         "/dashboard": "Dashboard",
