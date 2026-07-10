@@ -62,10 +62,10 @@ export const loginOrRegister = action(async (formData: FormData) => {
     await session.update((d) => {
       d.userId = user.id;
     });
+    return redirect(user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
   } catch (err) {
     return err as Error;
   }
-  return redirect("/dashboard");
 });
 
 export const logout = action(async () => {

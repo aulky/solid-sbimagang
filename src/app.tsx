@@ -140,6 +140,25 @@ export default function App() {
         const isLoginPage = () =>
           location.pathname === "/login" ||
           location.pathname === "/unauthorized";
+
+        const validPaths = [
+          "/",
+          "/dashboard",
+          "/riwayat",
+          "/izin",
+          "/profil",
+          "/login",
+          "/unauthorized",
+          "/admin/dashboard",
+          "/admin/users",
+          "/admin/divisi",
+          "/admin/absensi",
+          "/admin/izin",
+          "/admin/laporan",
+          "/admin/settings"
+        ];
+        const is404Page = () => !validPaths.includes(location.pathname);
+
         const user = createAsync(
           () => (isLoginPage() ? Promise.resolve(null) : getUser()),
           { deferStream: true },
@@ -152,16 +171,21 @@ export default function App() {
           // Close logout modal on any route transition or user state change
           setShowLogoutConfirm(false);
 
-          if (isLoginPage()) return;
+          if (isLoginPage() || is404Page()) return;
 
           if (u === undefined) return; // Wait for load
 
           if (!u) {
             navigate("/login");
           } else {
+            const userPaths = ["/dashboard", "/riwayat", "/izin"];
+            const isUserPath = userPaths.includes(path);
+
             if (path === "/") {
               navigate(u.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
             } else if (path.startsWith("/admin") && u.role !== "ADMIN") {
+              navigate("/unauthorized");
+            } else if (isUserPath && u.role === "ADMIN") {
               navigate("/unauthorized");
             }
           }
@@ -175,11 +199,15 @@ export default function App() {
               </div>
             </Show>
 
-            <div class="app-layout" classList={{ "has-sidebar": !!user() }}>
+            <div
+              class="app-layout"
+              classList={{ "has-sidebar": !!user() && !is404Page() }}
+            >
               <Show when={user()}>
                 {(u) => (
                   <>
-                    <header class="mobile-header no-print">
+                    <Show when={!is404Page()}>
+                      <header class="mobile-header no-print">
                       <div style="display: flex; align-items: center; gap: 8px;">
                         <img
                           src={
@@ -657,9 +685,10 @@ export default function App() {
                       </button>
                     </div>
                   </aside>
-                </>
-              )}
-            </Show>
+                </Show>
+              </>
+            )}
+          </Show>
 
               {/* Logout Confirmation Modal */}
               <Show when={showLogoutConfirm()}>

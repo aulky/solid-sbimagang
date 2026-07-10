@@ -1,4 +1,5 @@
 import { useSession } from "@solidjs/start/http";
+import { redirect } from "@solidjs/router";
 import crypto from "crypto";
 import { db } from "./db";
 
@@ -86,7 +87,7 @@ export async function requireUser() {
   const session = await getSession();
   const userId = session.data.userId;
   if (!userId) {
-    throw new Error("Unauthorized");
+    throw redirect("/login");
   }
   const user = await db.user.findUnique({
     where: { id: userId },
@@ -94,7 +95,7 @@ export async function requireUser() {
   });
   if (!user || (user as any).status === "NONAKTIF") {
     await logout();
-    throw new Error("Unauthorized");
+    throw redirect("/login");
   }
   return user;
 }
@@ -102,7 +103,7 @@ export async function requireUser() {
 export async function requireAdmin() {
   const user = await requireUser();
   if (user.role !== "ADMIN") {
-    throw new Error("Forbidden");
+    throw redirect("/unauthorized");
   }
   return user;
 }
