@@ -6,7 +6,19 @@ export default createHandler(() => (
   <StartServer
     document={({ assets, children, scripts }) => {
       const event = getRequestEvent();
-      const path = event ? new URL(event.request.url).pathname : "/";
+      const requestUrl = event ? new URL(event.request.url) : null;
+      const path = requestUrl ? requestUrl.pathname : "/";
+      const host = event
+        ? event.request.headers.get("host") || "absensi.tup.web.id"
+        : "absensi.tup.web.id";
+      const protocol =
+        event &&
+        (event.request.headers.get("x-forwarded-proto") === "https" ||
+          requestUrl?.protocol === "https:")
+          ? "https"
+          : "http";
+      const origin = `${protocol}://${host}`;
+      const logoUrl = `${origin}/favicon.png`;
 
       const titleMap: Record<string, string> = {
         "/dashboard": "Dashboard",
@@ -50,7 +62,10 @@ export default createHandler(() => (
               property="og:description"
               content="Aplikasi pemantauan absensi harian dan perizinan anak magang PT SBI Cilacap."
             />
-            <meta property="og:image" content="/favicon.png" />
+            <meta property="og:image" content={logoUrl} />
+            <meta property="og:image:width" content="512" />
+            <meta property="og:image:height" content="512" />
+            <meta property="og:image:type" content="image/png" />
 
             {/* Twitter */}
             <meta name="twitter:card" content="summary" />
@@ -59,7 +74,7 @@ export default createHandler(() => (
               name="twitter:description"
               content="Aplikasi pemantauan absensi harian dan perizinan anak magang PT SBI Cilacap."
             />
-            <meta name="twitter:image" content="/favicon.png" />
+            <meta name="twitter:image" content={logoUrl} />
 
             <script>{`
               (function() {
