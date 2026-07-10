@@ -59,10 +59,25 @@ export default function Dashboard() {
   };
 
   return (
-    <div>
-      <h1 class="page-title">Selamat datang, {user()?.fullName}!</h1>
-      <p>Divisi: {user()?.divisi}</p>
-      <p>{now()}</p>
+    <div style="text-align: left;">
+      <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap;">
+        <img
+          src="/favicon.png"
+          alt="Logo PT SBI"
+          style="height: 48px; width: auto; object-fit: contain; flex-shrink: 0;"
+        />
+        <div>
+          <h1 class="page-title" style="margin-bottom: 4px; font-size: 1.8rem; line-height: 1.2;">
+            Selamat datang, {user()?.fullName}!
+          </h1>
+          <p style="color: var(--color-text-secondary); margin: 0; font-size: 14px;">
+            Divisi: {user()?.divisi ?? "-"}
+          </p>
+        </div>
+      </div>
+      <p style="font-size: 14px; color: var(--color-text-secondary); margin: 0 0 var(--space-3) 0;">
+        {now()}
+      </p>
 
       <div class="stat-card" style={{ "margin-top": "1.5rem" }}>
         <h2>Absensi Hari Ini</h2>

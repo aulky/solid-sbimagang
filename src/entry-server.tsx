@@ -18,7 +18,7 @@ export default createHandler(() => (
           ? "https"
           : "http";
       const origin = `${protocol}://${host}`;
-      const logoUrl = `${origin}/favicon.png`;
+      const logoUrl = `${origin}/logo-sbi.png`;
 
       const titleMap: Record<string, string> = {
         "/dashboard": "Dashboard",
@@ -46,6 +46,7 @@ export default createHandler(() => (
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <title>{fullTitle}</title>
             <link rel="icon" type="image/png" href="/favicon.png" />
+            <link rel="canonical" href={`${origin}${path}`} />
 
             {/* SEO Meta Tags */}
             <meta
@@ -54,6 +55,8 @@ export default createHandler(() => (
             />
             <meta name="robots" content="index, follow" />
             <meta name="author" content="PT Solusi Bangun Indonesia Cilacap" />
+            <meta name="theme-color" content="#E11D48" />
+            <meta name="google" content="notranslate" />
 
             {/* Open Graph / Facebook */}
             <meta property="og:type" content="website" />
@@ -63,18 +66,32 @@ export default createHandler(() => (
               content="Aplikasi pemantauan absensi harian dan perizinan anak magang PT SBI Cilacap."
             />
             <meta property="og:image" content={logoUrl} />
-            <meta property="og:image:width" content="512" />
-            <meta property="og:image:height" content="512" />
             <meta property="og:image:type" content="image/png" />
+            <meta property="og:url" content={`${origin}${path}`} />
+            <meta property="og:site_name" content="Absensi Magang PT SBI" />
 
             {/* Twitter */}
-            <meta name="twitter:card" content="summary" />
+            <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" content={fullTitle} />
             <meta
               name="twitter:description"
               content="Aplikasi pemantauan absensi harian dan perizinan anak magang PT SBI Cilacap."
             />
             <meta name="twitter:image" content={logoUrl} />
+
+            {/* Google / Bing Structured Data (JSON-LD) */}
+            <script type="application/ld+json">{`
+              {
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                "name": "${fullTitle}",
+                "url": "${origin}${path}",
+                "logo": "${logoUrl}",
+                "description": "Sistem absensi harian dan perizinan anak magang PT Solusi Bangun Indonesia Cilacap.",
+                "applicationCategory": "BusinessApplication",
+                "operatingSystem": "All"
+              }
+            `}</script>
 
             <script>{`
               (function() {
