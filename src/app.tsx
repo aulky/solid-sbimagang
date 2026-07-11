@@ -216,32 +216,21 @@ export default function App() {
                 {(u) => (
                   <>
                     <Show when={!is404Page()}>
-                      <header class="mobile-header no-print">
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <img
-                          src={
-                            theme() === "dark"
-                              ? "/logo-sbi-putih.png"
-                              : "/logo-sbi.png"
+                      <header class="mobile-header no-print" style="justify-content: flex-start; gap: 8px;">
+                        <button
+                          type="button"
+                          class="hamburger-btn"
+                          onClick={() =>
+                            setMobileSidebarOpen(!mobileSidebarOpen())
                           }
-                          alt="PT SBI Logo"
-                          style="height: 28px; width: auto; object-fit: contain;"
-                        />
+                          title="Menu"
+                        >
+                          ☰
+                        </button>
                         <span style="font-family: var(--font-headline); font-weight: 700; font-size: 14px; color: var(--color-text);">
                           Absensi Magang
                         </span>
-                      </div>
-                      <button
-                        type="button"
-                        class="hamburger-btn"
-                        onClick={() =>
-                          setMobileSidebarOpen(!mobileSidebarOpen())
-                        }
-                        title="Menu"
-                      >
-                        ☰
-                      </button>
-                    </header>
+                      </header>
 
                     <Show when={mobileSidebarOpen()}>
                       <div
