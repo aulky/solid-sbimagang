@@ -184,7 +184,7 @@ export async function logActivity(action: string, details?: string, overrideUser
       const session = await getSession();
       if (session.data.userId) {
         userId = session.data.userId;
-        const user = await db.user.findUnique({ where: { id: userId } });
+        const user = await db.user.findUnique({ where: { id: userId || undefined } });
         if (user) {
           username = user.username;
         }
