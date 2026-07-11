@@ -13,6 +13,7 @@ import {
   requireUser,
   requireAdmin,
   hashPassword,
+  logActivity,
 } from "./server";
 
 // ========== AUTH ==========
@@ -62,6 +63,11 @@ export const loginOrRegister = action(async (formData: FormData) => {
     await session.update((d) => {
       d.userId = user.id;
     });
+    await logActivity(
+      loginType !== "login" ? "REGISTER" : "LOGIN",
+      `Pengguna @${user.username} berhasil ${loginType !== "login" ? "mendaftar" : "masuk"} ke sistem`,
+      user.id
+    );
     return redirect(user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
   } catch (err) {
     return err as Error;
@@ -70,6 +76,7 @@ export const loginOrRegister = action(async (formData: FormData) => {
 
 export const logout = action(async () => {
   "use server";
+  await logActivity("LOGOUT", "Pengguna keluar dari sistem");
   await logoutSession();
   return redirect("/login");
 });
@@ -123,6 +130,10 @@ export const updateSystemSettings = action(async (formData: FormData) => {
   const settings = { jamMasuk, toleransiMenit, lokasiKantor };
   const filePath = path.join(process.cwd(), "settings.json");
   await fs.writeFile(filePath, JSON.stringify(settings, null, 2), "utf-8");
+  await logActivity(
+    "UPDATE_PENGATURAN",
+    `Mengubah konfigurasi: Jam Masuk=${jamMasuk}, Toleransi Keterlambatan=${toleransiMenit} menit, Lokasi=${lokasiKantor}`
+  );
   return redirect("/admin/dashboard");
 });
 
@@ -163,6 +174,7 @@ export const checkIn = action(async () => {
       location,
     },
   });
+  await logActivity("CHECK_IN", `Melakukan Check-In (${status})`);
   return redirect("/dashboard");
 });
 
@@ -191,6 +203,7 @@ export const checkOut = action(async () => {
     where: { id: existing.id },
     data: { checkOut: now },
   });
+  await logActivity("CHECK_OUT", "Melakukan Check-Out");
   return redirect("/dashboard");
 });
 
@@ -270,6 +283,12 @@ export const submitIzin = action(async (formData: FormData) => {
       status: "PENDING",
     },
   });
+  const startStr = startDate.toLocaleDateString("id-ID");
+  const endStr = endDate.toLocaleDateString("id-ID");
+  await logActivity(
+    "PENGAJUAN_IZIN",
+    `Mengajukan izin ${type} (${startStr} - ${endStr}): ${reason.substring(0, 60)}${reason.length > 60 ? "..." : ""}`
+  );
   return redirect("/izin");
 });
 
@@ -481,6 +500,10 @@ export const createUser = action(async (formData: FormData) => {
       status: "AKTIF",
     },
   });
+  await logActivity(
+    "BUAT_PENGGUNA",
+    `Membuat pengguna baru @${username} (${fullName}, Role: ${role})`
+  );
   return redirect("/admin/users");
 });
 
@@ -497,10 +520,14 @@ export const updateUser = action(async (formData: FormData) => {
     : null;
   const status = String(formData.get("status") || "AKTIF");
 
-  await db.user.update({
+  const updatedUser = await db.user.update({
     where: { id },
     data: { fullName, email, phone: phone || null, role, divisiId, status },
   });
+  await logActivity(
+    "UPDATE_PENGGUNA",
+    `Mengubah data pengguna @${updatedUser.username} (Nama: ${fullName}, Role: ${role}, Status: ${status})`
+  );
   return redirect("/admin/users");
 });
 
@@ -508,7 +535,10 @@ export const deleteUser = action(async (formData: FormData) => {
   "use server";
   await requireAdmin();
   const id = String(formData.get("id"));
+  const targetUser = await db.user.findUnique({ where: { id } });
+  const targetUsername = targetUser ? `@${targetUser.username}` : "Pengguna";
   await db.user.delete({ where: { id } });
+  await logActivity("HAPUS_PENGGUNA", `Menghapus pengguna ${targetUsername}`);
   return redirect("/admin/users");
 });
 
@@ -536,6 +566,7 @@ export const createDivisi = action(async (formData: FormData) => {
   if (!name || name.length < 2)
     return new Error("Nama divisi minimal 2 karakter.");
   await db.divisi.create({ data: { name, description: description || null } });
+  await logActivity("BUAT_DIVISI", `Membuat divisi baru: ${name}`);
   return redirect("/admin/divisi");
 });
 
@@ -549,6 +580,7 @@ export const updateDivisi = action(async (formData: FormData) => {
     where: { id },
     data: { name, description: description || null },
   });
+  await logActivity("UPDATE_DIVISI", `Mengubah divisi: ${name}`);
   return redirect("/admin/divisi");
 });
 
@@ -556,7 +588,10 @@ export const deleteDivisi = action(async (formData: FormData) => {
   "use server";
   await requireAdmin();
   const id = String(formData.get("id"));
+  const targetDivisi = await db.divisi.findUnique({ where: { id } });
+  const divisiName = targetDivisi ? targetDivisi.name : "Divisi";
   await db.divisi.delete({ where: { id } });
+  await logActivity("HAPUS_DIVISI", `Menghapus divisi: ${divisiName}`);
   return redirect("/admin/divisi");
 });
 
@@ -626,6 +661,16 @@ export const approveIzin = action(async (formData: FormData) => {
     }
   }
 
+  const targetUser = await db.user.findUnique({ where: { id: izin.userId } });
+  const targetUsername = targetUser ? `@${targetUser.username}` : "Pengguna";
+  const typeStr = izin.type;
+  const startStr = new Date(izin.startDate).toLocaleDateString("id-ID");
+  const endStr = new Date(izin.endDate).toLocaleDateString("id-ID");
+  await logActivity(
+    statusAction === "APPROVED" ? "SETUJUI_IZIN" : "TOLAK_IZIN",
+    `${statusAction === "APPROVED" ? "Menyetujui" : "Menolak"} izin ${typeStr} untuk ${targetUsername} (${startStr} - ${endStr})`
+  );
+
   return redirect("/admin/izin");
 });
 
@@ -675,3 +720,41 @@ export const exportCSV = query(async () => {
 
   return header + rows;
 }, "exportCSV");
+
+// ========== ADMIN: AUDIT LOGS ==========
+
+export const getAdminAuditLogs = query(async () => {
+  "use server";
+  await requireAdmin();
+  return (db as any).auditLog.findMany({
+    include: { user: { select: { fullName: true, username: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+}, "adminAuditLogs");
+
+export async function logPageAccess(pathname: string) {
+  "use server";
+  try {
+    const session = await getSession();
+    const userId = session.data.userId;
+    if (!userId) return;
+    const titleMap: Record<string, string> = {
+      "/dashboard": "Dashboard",
+      "/riwayat": "Riwayat Absensi",
+      "/izin": "Pengajuan Izin",
+      "/profil": "Profil Saya",
+      "/admin/dashboard": "Dashboard Admin",
+      "/admin/users": "Kelola Pengguna",
+      "/admin/divisi": "Kelola Divisi",
+      "/admin/absensi": "Log Absensi",
+      "/admin/izin": "Kelola Izin",
+      "/admin/laporan": "Laporan",
+      "/admin/settings": "Pengaturan Sistem",
+      "/admin/audit-log": "Audit Log",
+    };
+    const pageTitle = titleMap[pathname] || pathname;
+    await logActivity("AKSES_HALAMAN", `Membuka halaman ${pageTitle}`, userId);
+  } catch (e) {
+    // Ignore
+  }
+}

@@ -34,6 +34,7 @@ export default createHandler(() => (
         "/admin/izin": "Kelola Pengajuan Izin",
         "/admin/laporan": "Laporan Absensi",
         "/admin/settings": "Pengaturan Sistem",
+        "/admin/audit-log": "Audit Log Aktivitas",
       };
 
       const pageTitle = titleMap[path] || "Absensi Magang";

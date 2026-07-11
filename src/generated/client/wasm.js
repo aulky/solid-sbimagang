@@ -173,6 +173,18 @@ exports.Prisma.IzinScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.AuditLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  username: 'username',
+  action: 'action',
+  details: 'details',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  location: 'location',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -210,7 +222,8 @@ exports.Prisma.ModelName = {
   User: 'User',
   Divisi: 'Divisi',
   Absensi: 'Absensi',
-  Izin: 'Izin'
+  Izin: 'Izin',
+  AuditLog: 'AuditLog'
 };
 
 /**

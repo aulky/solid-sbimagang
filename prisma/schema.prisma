@@ -51,6 +51,7 @@ model User {
 
   absensi   Absensi[]
   izin      Izin[]
+  auditLogs AuditLog[]
 }
 
 model Divisi {
@@ -93,4 +94,17 @@ model Izin {
   approvedAt  DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  username  String?
+  action    String
+  details   String?  @db.Text
+  ip        String?
+  userAgent String?  @db.Text
+  location  String?
+  createdAt DateTime @default(now())
 }

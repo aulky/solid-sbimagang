@@ -1,5 +1,6 @@
 import { useSession } from "@solidjs/start/http";
 import { redirect } from "@solidjs/router";
+import { getRequestEvent } from "solid-js/web";
 import crypto from "crypto";
 import { db } from "./db";
 
@@ -107,3 +108,117 @@ export async function requireAdmin() {
   }
   return user;
 }
+
+function parseUserAgent(ua: string): string {
+  if (!ua || ua === "Unknown") return "Tidak diketahui";
+
+  let os = "OS Tidak Diketahui";
+  if (ua.includes("Windows")) os = "Windows";
+  else if (ua.includes("Macintosh") || ua.includes("Mac OS X")) os = "macOS";
+  else if (ua.includes("Linux") && !ua.includes("Android")) os = "Linux";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("iPhone") || ua.includes("iPad") || ua.includes("iPod")) os = "iOS";
+
+  let browser = "Browser Tidak Diketahui";
+  if (ua.includes("Firefox/")) {
+    const match = ua.match(/Firefox\/(\d+)/);
+    browser = `Firefox ${match ? match[1] : ""}`;
+  } else if (ua.includes("Chrome/") && !ua.includes("Edg/")) {
+    const match = ua.match(/Chrome\/(\d+)/);
+    browser = `Chrome ${match ? match[1] : ""}`;
+  } else if (ua.includes("Safari/") && !ua.includes("Chrome/")) {
+    const match = ua.match(/Version\/(\d+)/);
+    browser = `Safari ${match ? match[1] : ""}`;
+  } else if (ua.includes("Edg/")) {
+    const match = ua.match(/Edg\/(\d+)/);
+    browser = `Edge ${match ? match[1] : ""}`;
+  } else if (ua.includes("PostmanRuntime/")) {
+    browser = "Postman";
+  }
+
+  return `${browser} (${os})`;
+}
+
+async function getIpLocation(ip: string): Promise<string> {
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 1500);
+    const res = await fetch(`http://ip-api.com/json/${ip}`, { signal: controller.signal });
+    clearTimeout(id);
+    if (!res.ok) return "Tidak diketahui";
+    const data = (await res.json()) as any;
+    if (data && data.status === "success") {
+      const city = data.city || "";
+      const region = data.regionName || "";
+      const country = data.country || "";
+      return [city, region, country].filter(Boolean).join(", ");
+    }
+  } catch (e) {
+    // Ignore and fallback
+  }
+  return "Tidak diketahui";
+}
+
+export async function logActivity(action: string, details?: string, overrideUserId?: string) {
+  try {
+    const event = getRequestEvent();
+
+    // 1. Get Client IP
+    const ip = event?.clientAddress || event?.request?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
+
+    // 2. Get User Agent
+    const rawUA = event?.request?.headers?.get("user-agent") || "Unknown";
+    const userAgent = parseUserAgent(rawUA);
+
+    // 3. Get User ID
+    let userId: string | null = null;
+    let username: string | null = null;
+
+    if (overrideUserId) {
+      userId = overrideUserId;
+      const user = await db.user.findUnique({ where: { id: overrideUserId } });
+      if (user) {
+        username = user.username;
+      }
+    } else {
+      const session = await getSession();
+      if (session.data.userId) {
+        userId = session.data.userId;
+        const user = await db.user.findUnique({ where: { id: userId } });
+        if (user) {
+          username = user.username;
+        }
+      }
+    }
+
+    // 4. Create Audit Log entry (initially with location null or loading)
+    const logEntry = await (db as any).auditLog.create({
+      data: {
+        userId: userId || undefined,
+        username: username || undefined,
+        action,
+        details,
+        ip,
+        userAgent,
+        location: ip === "127.0.0.1" || ip === "::1" || ip.startsWith("::ffff:127.0.0.1") ? "Localhost" : "Memuat...",
+      },
+    });
+
+    // 5. Fetch location asynchronously (fire-and-forget background promise)
+    if (ip && ip !== "127.0.0.1" && ip !== "::1" && !ip.startsWith("::ffff:127.0.0.1")) {
+      getIpLocation(ip).then(async (loc) => {
+        if (loc) {
+          await (db as any).auditLog.update({
+            where: { id: logEntry.id },
+            data: { location: loc },
+          });
+        }
+      }).catch((e) => {
+        console.error("Geocoding background error:", e);
+      });
+    }
+  } catch (err) {
+    console.error("Audit log error:", err);
+  }
+}
+
