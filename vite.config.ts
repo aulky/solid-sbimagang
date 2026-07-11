@@ -9,6 +9,6 @@ export default defineConfig({
   ],
   ssr: { external: ["@prisma/client"] },
   server: {
-    allowedHosts: ["absensi.tup.web.id"]
+    allowedHosts: ["absensi.tup.web.id", "intern-sbi.tup.web.id"]
   }
 });
