@@ -139,23 +139,69 @@ function parseUserAgent(ua: string): string {
   return `${browser} (${os})`;
 }
 
+function isPrivateIp(ip: string): boolean {
+  if (!ip) return true;
+  return (
+    ip === "127.0.0.1" ||
+    ip === "::1" ||
+    ip.startsWith("::ffff:127.0.0.1") ||
+    ip.startsWith("192.168.") ||
+    ip.startsWith("10.") ||
+    ip.startsWith("172.16.") ||
+    ip.startsWith("172.17.") ||
+    ip.startsWith("172.18.") ||
+    ip.startsWith("172.19.") ||
+    ip.startsWith("172.2") ||
+    ip.startsWith("172.30.") ||
+    ip.startsWith("172.31.") ||
+    ip.startsWith("fe80:")
+  );
+}
+
 async function getIpLocation(ip: string): Promise<string> {
+  if (!ip || isPrivateIp(ip)) {
+    return "Localhost";
+  }
+
+  // Try ipapi.co (HTTPS) first
   try {
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 1500);
-    const res = await fetch(`http://ip-api.com/json/${ip}`, { signal: controller.signal });
+    const id = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(`https://ipapi.co/${ip}/json/`, { signal: controller.signal });
     clearTimeout(id);
-    if (!res.ok) return "Tidak diketahui";
-    const data = (await res.json()) as any;
-    if (data && data.status === "success") {
-      const city = data.city || "";
-      const region = data.regionName || "";
-      const country = data.country || "";
-      return [city, region, country].filter(Boolean).join(", ");
+    if (res.ok) {
+      const data = (await res.json()) as any;
+      if (data && !data.error) {
+        const city = data.city || "";
+        const region = data.region || "";
+        const country = data.country_name || "";
+        const loc = [city, region, country].filter(Boolean).join(", ");
+        if (loc) return loc;
+      }
     }
   } catch (e) {
     // Ignore and fallback
   }
+
+  // Fallback to ip-api.com (HTTP)
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(`http://ip-api.com/json/${ip}`, { signal: controller.signal });
+    clearTimeout(id);
+    if (res.ok) {
+      const data = (await res.json()) as any;
+      if (data && data.status === "success") {
+        const city = data.city || "";
+        const region = data.regionName || "";
+        const country = data.country || "";
+        return [city, region, country].filter(Boolean).join(", ");
+      }
+    }
+  } catch (e) {
+    // Ignore
+  }
+
   return "Tidak diketahui";
 }
 
@@ -163,8 +209,13 @@ export async function logActivity(action: string, details?: string, overrideUser
   try {
     const event = getRequestEvent();
 
-    // 1. Get Client IP
-    const ip = event?.clientAddress || event?.request?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
+    // 1. Get Client IP (Check proxy headers first to bypass reverse proxies / Cloudflare)
+    const headers = event?.request?.headers;
+    const ip = headers?.get("cf-connecting-ip")
+      || headers?.get("x-real-ip")
+      || headers?.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || event?.clientAddress
+      || "127.0.0.1";
 
     // 2. Get User Agent
     const rawUA = event?.request?.headers?.get("user-agent") || "Unknown";
@@ -200,12 +251,12 @@ export async function logActivity(action: string, details?: string, overrideUser
         details,
         ip,
         userAgent,
-        location: ip === "127.0.0.1" || ip === "::1" || ip.startsWith("::ffff:127.0.0.1") ? "Localhost" : "Memuat...",
+        location: isPrivateIp(ip) ? "Localhost" : "Memuat...",
       },
     });
 
     // 5. Fetch location asynchronously (fire-and-forget background promise)
-    if (ip && ip !== "127.0.0.1" && ip !== "::1" && !ip.startsWith("::ffff:127.0.0.1")) {
+    if (ip && !isPrivateIp(ip)) {
       getIpLocation(ip).then(async (loc) => {
         if (loc) {
           await (db as any).auditLog.update({
