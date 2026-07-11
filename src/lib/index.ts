@@ -740,21 +740,21 @@ export async function logPageAccess(pathname: string) {
     const userId = session.data.userId;
     if (!userId) return;
     const titleMap: Record<string, string> = {
-      "/dashboard": "Dashboard",
-      "/riwayat": "Riwayat Absensi",
-      "/izin": "Pengajuan Izin",
-      "/profil": "Profil Saya",
-      "/admin/dashboard": "Dashboard Admin",
-      "/admin/users": "Kelola Pengguna",
-      "/admin/divisi": "Kelola Divisi",
-      "/admin/absensi": "Log Absensi",
-      "/admin/izin": "Kelola Izin",
-      "/admin/laporan": "Laporan",
-      "/admin/settings": "Pengaturan Sistem",
-      "/admin/audit-log": "Audit Log",
+      "/dashboard": "dashboard",
+      "/riwayat": "riwayat",
+      "/izin": "izin",
+      "/profil": "profil",
+      "/admin/dashboard": "admin.dashboard",
+      "/admin/users": "admin.users",
+      "/admin/divisi": "admin.divisi",
+      "/admin/absensi": "admin.absensi",
+      "/admin/izin": "admin.izin",
+      "/admin/laporan": "admin.laporan",
+      "/admin/settings": "admin.settings",
+      "/admin/audit-log": "admin.audit-log",
     };
-    const pageTitle = titleMap[pathname] || pathname;
-    await logActivity("AKSES_HALAMAN", `Membuka halaman ${pageTitle}`, userId);
+    const pageTitle = titleMap[pathname] || pathname.replace(/^\//, "").replace(/\//g, ".");
+    await logActivity("AKSES_HALAMAN", pageTitle, userId);
   } catch (e) {
     // Ignore
   }
