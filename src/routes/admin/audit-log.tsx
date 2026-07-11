@@ -23,6 +23,46 @@ export default function AdminAuditLog() {
     return Math.max(1, Math.ceil(list.length / itemsPerPage));
   };
 
+  const getPageNumbers = () => {
+    const total = totalPages();
+    const current = currentPage();
+    const pages: (number | string)[] = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (current > 4) {
+        pages.push("...");
+      }
+
+      const start = Math.max(2, current - 2);
+      const end = Math.min(total - 1, current + 2);
+
+      let adjustStart = start;
+      let adjustEnd = end;
+      if (current <= 4) {
+        adjustEnd = 5;
+      } else if (current >= total - 3) {
+        adjustStart = total - 4;
+      }
+
+      for (let i = adjustStart; i <= adjustEnd; i++) {
+        pages.push(i);
+      }
+
+      if (current < total - 3) {
+        pages.push("...");
+      }
+
+      pages.push(total);
+    }
+    return pages;
+  };
+
   const filteredLogs = () => {
     const list = logs();
     if (!list) return [];
@@ -247,15 +287,24 @@ export default function AdminAuditLog() {
             >
               Sebelumnya
             </button>
-            <For each={Array.from({ length: totalPages() }, (_, i) => i + 1)}>
+            <For each={getPageNumbers()}>
               {(page) => (
-                <button
-                  class="btn-pagination"
-                  classList={{ active: currentPage() === page }}
-                  onClick={() => setCurrentPage(page)}
+                <Show
+                  when={page !== "..."}
+                  fallback={
+                    <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
+                      ...
+                    </span>
+                  }
                 >
-                  {page}
-                </button>
+                  <button
+                    class="btn-pagination"
+                    classList={{ active: currentPage() === page }}
+                    onClick={() => setCurrentPage(page as number)}
+                  >
+                    {page}
+                  </button>
+                </Show>
               )}
             </For>
             <button
