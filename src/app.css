@@ -1281,31 +1281,47 @@ a {
 
   /* Modals on Mobile */
   .modal-overlay {
-    padding: 0;
-    align-items: flex-end;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 1000 !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    display: block !important;
   }
 
   .modal {
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    margin-bottom: 0;
-    padding: var(--space-4);
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90% !important;
+    max-width: 500px !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    border-radius: var(--radius-lg) !important;
+    padding: var(--space-5) !important;
+    box-sizing: border-box !important;
+    background-color: var(--surface-base) !important;
+    border: 1px solid var(--color-border) !important;
+    box-shadow: var(--shadow-lg) !important;
+    z-index: 1001 !important;
   }
 
   .modal-animate {
-    animation: modalSlideUp 0.3s cubic-bezier(0.32, 0.94, 0.6, 1) forwards;
+    animation: modalMobileScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
   }
 
-  @keyframes modalSlideUp {
+  @keyframes modalMobileScaleUp {
     from {
-      transform: translateY(100%);
-      opacity: 0.5;
+      transform: translate(-50%, -50%) scale(0.95);
+      opacity: 0;
     }
     to {
-      transform: translateY(0);
+      transform: translate(-50%, -50%) scale(1);
       opacity: 1;
     }
   }
