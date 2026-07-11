@@ -3,6 +3,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import crypto from "crypto";
 import { db } from "./db";
+export * from "./utils";
 import {
   getSession,
   login,

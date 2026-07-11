@@ -10,6 +10,7 @@ import {
   createDivisi,
   updateDivisi,
   deleteDivisi,
+  getPageNumbers,
 } from "~/lib";
 
 export const route = {
@@ -364,15 +365,24 @@ export default function AdminDivisi() {
             >
               Sebelumnya
             </button>
-            <For each={Array.from({ length: totalPages() }, (_, i) => i + 1)}>
+            <For each={getPageNumbers(currentPage(), totalPages())}>
               {(page) => (
-                <button
-                  class="btn-pagination"
-                  classList={{ active: currentPage() === page }}
-                  onClick={() => setCurrentPage(page)}
+                <Show
+                  when={page !== "..."}
+                  fallback={
+                    <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
+                      ...
+                    </span>
+                  }
                 >
-                  {page}
-                </button>
+                  <button
+                    class="btn-pagination"
+                    classList={{ active: currentPage() === page }}
+                    onClick={() => setCurrentPage(page as number)}
+                  >
+                    {page}
+                  </button>
+                </Show>
               )}
             </For>
             <button

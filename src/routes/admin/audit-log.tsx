@@ -1,6 +1,6 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
 import { For, Show, createSignal } from "solid-js";
-import { getAdminAuditLogs } from "~/lib";
+import { getAdminAuditLogs, getPageNumbers } from "~/lib";
 
 export const route = {
   preload() {
@@ -21,46 +21,6 @@ export default function AdminAuditLog() {
   const totalPages = () => {
     const list = filteredLogs();
     return Math.max(1, Math.ceil(list.length / itemsPerPage));
-  };
-
-  const getPageNumbers = () => {
-    const total = totalPages();
-    const current = currentPage();
-    const pages: (number | string)[] = [];
-
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-
-      if (current > 4) {
-        pages.push("...");
-      }
-
-      const start = Math.max(2, current - 2);
-      const end = Math.min(total - 1, current + 2);
-
-      let adjustStart = start;
-      let adjustEnd = end;
-      if (current <= 4) {
-        adjustEnd = 5;
-      } else if (current >= total - 3) {
-        adjustStart = total - 4;
-      }
-
-      for (let i = adjustStart; i <= adjustEnd; i++) {
-        pages.push(i);
-      }
-
-      if (current < total - 3) {
-        pages.push("...");
-      }
-
-      pages.push(total);
-    }
-    return pages;
   };
 
   const filteredLogs = () => {
@@ -287,7 +247,7 @@ export default function AdminAuditLog() {
             >
               Sebelumnya
             </button>
-            <For each={getPageNumbers()}>
+            <For each={getPageNumbers(currentPage(), totalPages())}>
               {(page) => (
                 <Show
                   when={page !== "..."}
