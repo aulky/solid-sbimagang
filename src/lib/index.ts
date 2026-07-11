@@ -66,7 +66,7 @@ export const loginOrRegister = action(async (formData: FormData) => {
     });
     await logActivity(
       loginType !== "login" ? "REGISTER" : "LOGIN",
-      `Pengguna @${user.username} berhasil ${loginType !== "login" ? "mendaftar" : "masuk"} ke sistem`,
+      loginType !== "login" ? "register success" : "login success",
       user.id
     );
     return redirect(user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
@@ -77,7 +77,7 @@ export const loginOrRegister = action(async (formData: FormData) => {
 
 export const logout = action(async () => {
   "use server";
-  await logActivity("LOGOUT", "Pengguna keluar dari sistem");
+  await logActivity("LOGOUT", "logout success");
   await logoutSession();
   return redirect("/login");
 });
@@ -131,10 +131,7 @@ export const updateSystemSettings = action(async (formData: FormData) => {
   const settings = { jamMasuk, toleransiMenit, lokasiKantor };
   const filePath = path.join(process.cwd(), "settings.json");
   await fs.writeFile(filePath, JSON.stringify(settings, null, 2), "utf-8");
-  await logActivity(
-    "UPDATE_PENGATURAN",
-    `Mengubah konfigurasi: Jam Masuk=${jamMasuk}, Toleransi Keterlambatan=${toleransiMenit} menit, Lokasi=${lokasiKantor}`
-  );
+  await logActivity("UPDATE_PENGATURAN", "update settings success");
   return redirect("/admin/dashboard");
 });
 
@@ -175,7 +172,7 @@ export const checkIn = action(async () => {
       location,
     },
   });
-  await logActivity("CHECK_IN", `Melakukan Check-In (${status})`);
+  await logActivity("CHECK_IN", `checkin success (${status.toLowerCase()})`);
   return redirect("/dashboard");
 });
 
@@ -204,7 +201,7 @@ export const checkOut = action(async () => {
     where: { id: existing.id },
     data: { checkOut: now },
   });
-  await logActivity("CHECK_OUT", "Melakukan Check-Out");
+  await logActivity("CHECK_OUT", "checkout success");
   return redirect("/dashboard");
 });
 
@@ -284,12 +281,7 @@ export const submitIzin = action(async (formData: FormData) => {
       status: "PENDING",
     },
   });
-  const startStr = startDate.toLocaleDateString("id-ID");
-  const endStr = endDate.toLocaleDateString("id-ID");
-  await logActivity(
-    "PENGAJUAN_IZIN",
-    `Mengajukan izin ${type} (${startStr} - ${endStr}): ${reason.substring(0, 60)}${reason.length > 60 ? "..." : ""}`
-  );
+  await logActivity("PENGAJUAN_IZIN", `submit leave success (${type.toLowerCase()})`);
   return redirect("/izin");
 });
 
@@ -501,10 +493,7 @@ export const createUser = action(async (formData: FormData) => {
       status: "AKTIF",
     },
   });
-  await logActivity(
-    "BUAT_PENGGUNA",
-    `Membuat pengguna baru @${username} (${fullName}, Role: ${role})`
-  );
+  await logActivity("BUAT_PENGGUNA", `create user success (@${username})`);
   return redirect("/admin/users");
 });
 
@@ -525,10 +514,7 @@ export const updateUser = action(async (formData: FormData) => {
     where: { id },
     data: { fullName, email, phone: phone || null, role, divisiId, status },
   });
-  await logActivity(
-    "UPDATE_PENGGUNA",
-    `Mengubah data pengguna @${updatedUser.username} (Nama: ${fullName}, Role: ${role}, Status: ${status})`
-  );
+  await logActivity("UPDATE_PENGGUNA", `update user success (@${updatedUser.username})`);
   return redirect("/admin/users");
 });
 
@@ -539,7 +525,7 @@ export const deleteUser = action(async (formData: FormData) => {
   const targetUser = await db.user.findUnique({ where: { id } });
   const targetUsername = targetUser ? `@${targetUser.username}` : "Pengguna";
   await db.user.delete({ where: { id } });
-  await logActivity("HAPUS_PENGGUNA", `Menghapus pengguna ${targetUsername}`);
+  await logActivity("HAPUS_PENGGUNA", `delete user success (${targetUsername})`);
   return redirect("/admin/users");
 });
 
@@ -567,7 +553,7 @@ export const createDivisi = action(async (formData: FormData) => {
   if (!name || name.length < 2)
     return new Error("Nama divisi minimal 2 karakter.");
   await db.divisi.create({ data: { name, description: description || null } });
-  await logActivity("BUAT_DIVISI", `Membuat divisi baru: ${name}`);
+  await logActivity("BUAT_DIVISI", `create division success (${name})`);
   return redirect("/admin/divisi");
 });
 
@@ -581,7 +567,7 @@ export const updateDivisi = action(async (formData: FormData) => {
     where: { id },
     data: { name, description: description || null },
   });
-  await logActivity("UPDATE_DIVISI", `Mengubah divisi: ${name}`);
+  await logActivity("UPDATE_DIVISI", `update division success (${name})`);
   return redirect("/admin/divisi");
 });
 
@@ -592,7 +578,7 @@ export const deleteDivisi = action(async (formData: FormData) => {
   const targetDivisi = await db.divisi.findUnique({ where: { id } });
   const divisiName = targetDivisi ? targetDivisi.name : "Divisi";
   await db.divisi.delete({ where: { id } });
-  await logActivity("HAPUS_DIVISI", `Menghapus divisi: ${divisiName}`);
+  await logActivity("HAPUS_DIVISI", `delete division success (${divisiName})`);
   return redirect("/admin/divisi");
 });
 
@@ -665,11 +651,9 @@ export const approveIzin = action(async (formData: FormData) => {
   const targetUser = await db.user.findUnique({ where: { id: izin.userId } });
   const targetUsername = targetUser ? `@${targetUser.username}` : "Pengguna";
   const typeStr = izin.type;
-  const startStr = new Date(izin.startDate).toLocaleDateString("id-ID");
-  const endStr = new Date(izin.endDate).toLocaleDateString("id-ID");
   await logActivity(
     statusAction === "APPROVED" ? "SETUJUI_IZIN" : "TOLAK_IZIN",
-    `${statusAction === "APPROVED" ? "Menyetujui" : "Menolak"} izin ${typeStr} untuk ${targetUsername} (${startStr} - ${endStr})`
+    `${statusAction === "APPROVED" ? "approve" : "reject"} leave success (${typeStr.toLowerCase()} - ${targetUsername})`
   );
 
   return redirect("/admin/izin");
