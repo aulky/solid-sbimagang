@@ -26,7 +26,7 @@ export default function AdminAuditLog() {
   const filteredLogs = () => {
     const list = logs();
     if (!list) return [];
-    return list.filter((log) => {
+    return list.filter((log: any) => {
       // Action type filter
       if (filterAction() && log.action !== filterAction()) return false;
 
