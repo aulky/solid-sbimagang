@@ -282,7 +282,7 @@ export const submitIzin = action(async (formData: FormData) => {
 
     await fs.mkdir(uploadsDir, { recursive: true });
     await fs.writeFile(path.join(uploadsDir, filename), buffer);
-    attachmentPath = `/api/uploads/${filename}`;
+    attachmentPath = `/api/uploads?file=${filename}`;
   }
 
   await db.izin.create({

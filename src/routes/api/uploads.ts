@@ -9,9 +9,11 @@ const MIME_TYPES: Record<string, string> = {
   ".pdf": "application/pdf",
 };
 
-export async function GET({ params }: APIEvent) {
-  const filename = params.filename;
-  if (!filename || filename.includes("..")) {
+export async function GET({ request }: APIEvent) {
+  const url = new URL(request.url);
+  const filename = url.searchParams.get("file");
+
+  if (!filename || filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
     return new Response("Not found", { status: 404 });
   }
 

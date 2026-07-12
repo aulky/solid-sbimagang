@@ -15,7 +15,7 @@ export const route = {
 } satisfies RouteDefinition;
 
 const normalizeAttachmentUrl = (url: string) =>
-  url.startsWith("/uploads/") ? url.replace("/uploads/", "/api/uploads/") : url;
+  url.startsWith("/uploads/") ? `/api/uploads?file=${url.replace("/uploads/", "")}` : url;
 
 const statusBadge = (status: string) =>
   status === "PENDING"

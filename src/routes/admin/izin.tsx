@@ -13,9 +13,9 @@ export const route = {
   },
 } satisfies RouteDefinition;
 
-// Backward compat: data lama pakai /uploads/, data baru /api/uploads/
+// Backward compat: data lama pakai /uploads/, data baru /api/uploads?file=
 const normalizeAttachmentUrl = (url: string) =>
-  url.startsWith("/uploads/") ? url.replace("/uploads/", "/api/uploads/") : url;
+  url.startsWith("/uploads/") ? `/api/uploads?file=${url.replace("/uploads/", "")}` : url;
 
 const statusText = (status: string) => {
   const map: Record<string, string> = {
