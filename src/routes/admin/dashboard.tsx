@@ -1,5 +1,5 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
-import { For, Show } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 import {
   getAdminStats,
   getUser,
@@ -22,13 +22,18 @@ const DailyDonutChart = (props: {
   izin: number;
   belumAbsen: number;
 }) => {
+  const [hovered, setHovered] = createSignal<number | null>(null);
+
   const total = () =>
     props.hadir + props.telat + props.izin + props.belumAbsen || 1;
   const radius = 35;
+  const hoverRadius = 38;
   const circumference = 2 * Math.PI * radius;
+  const hoverCircumference = 2 * Math.PI * hoverRadius;
 
   const segments = () => {
     let currentOffset = 0;
+    let currentHoverOffset = 0;
     return [
       { value: props.hadir, color: "var(--color-success)", label: "Hadir" },
       { value: props.telat, color: "var(--color-warning)", label: "Telat" },
@@ -38,22 +43,43 @@ const DailyDonutChart = (props: {
         color: "var(--color-text-secondary)",
         label: "Belum Absen",
       },
-    ].map((s) => {
-      const percentage = (s.value / total()) * 100;
-      const strokeDasharray = `${(s.value / total()) * circumference} ${circumference}`;
+    ].map((s, i) => {
+      const fraction = s.value / total();
+      const strokeDasharray = `${fraction * circumference} ${circumference}`;
       const strokeDashoffset = currentOffset;
-      currentOffset -= (s.value / total()) * circumference;
-      return { ...s, strokeDasharray, strokeDashoffset, percentage };
+      const hoverStrokeDasharray = `${fraction * hoverCircumference} ${hoverCircumference}`;
+      const hoverStrokeDashoffset = currentHoverOffset;
+      currentOffset -= fraction * circumference;
+      currentHoverOffset -= fraction * hoverCircumference;
+      const percentage = fraction * 100;
+      return { ...s, strokeDasharray, strokeDashoffset, hoverStrokeDasharray, hoverStrokeDashoffset, percentage, index: i };
     });
+  };
+
+  // Tooltip position from segment midpoint angle
+  const tooltipPos = () => {
+    const idx = hovered();
+    if (idx === null) return null;
+    const segs = segments();
+    let angleBefore = 0;
+    for (let i = 0; i < idx; i++) angleBefore += (segs[i].value / total()) * 360;
+    const midAngle = angleBefore + (segs[idx].value / total()) * 180;
+    const rad = ((midAngle - 90) * Math.PI) / 180;
+    return {
+      x: 50 + Math.cos(rad) * 52,
+      y: 50 + Math.sin(rad) * 52,
+      seg: segs[idx],
+    };
   };
 
   return (
     <div style="display: flex; align-items: center; justify-content: space-around; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-2) 0;">
       <svg
-        width="120"
-        height="120"
+        width="140"
+        height="140"
         viewBox="0 0 100 100"
-        style="transform: rotate(-90deg); flex-shrink: 0;"
+        style="transform: rotate(-90deg); flex-shrink: 0; overflow: visible;"
+        onMouseLeave={() => setHovered(null)}
       >
         <circle
           cx="50"
@@ -69,24 +95,77 @@ const DailyDonutChart = (props: {
               <circle
                 cx="50"
                 cy="50"
-                r={radius}
+                r={hovered() === segment.index ? hoverRadius : radius}
                 fill="transparent"
                 stroke={segment.color}
-                stroke-width="10"
-                stroke-dasharray={segment.strokeDasharray}
-                stroke-dashoffset={segment.strokeDashoffset}
-                style="transition: stroke-dashoffset 0.5s ease-in-out;"
+                stroke-width={hovered() === segment.index ? 12 : 10}
+                stroke-dasharray={hovered() === segment.index ? segment.hoverStrokeDasharray : segment.strokeDasharray}
+                stroke-dashoffset={hovered() === segment.index ? segment.hoverStrokeDashoffset : segment.strokeDashoffset}
+                style={`transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; opacity: ${hovered() !== null && hovered() !== segment.index ? '0.4' : '1'};`}
+                onMouseEnter={() => setHovered(segment.index)}
               />
             </Show>
           )}
         </For>
+        {/* Center text (rotated back) */}
+        <g style="transform: rotate(90deg); transform-origin: 50px 50px;">
+          <text
+            x="50"
+            y="47"
+            text-anchor="middle"
+            font-size="14"
+            font-weight="700"
+            fill="var(--color-text)"
+          >
+            {hovered() !== null ? segments()[hovered()!].value : total()}
+          </text>
+          <text
+            x="50"
+            y="58"
+            text-anchor="middle"
+            font-size="7"
+            fill="var(--color-text-secondary)"
+          >
+            {hovered() !== null ? segments()[hovered()!].label : "Total"}
+          </text>
+        </g>
+        {/* Tooltip bubble */}
+        <Show when={tooltipPos()}>
+          {(pos) => (
+            <g style="transform: rotate(90deg); transform-origin: 50px 50px; pointer-events: none;">
+              <rect
+                x={pos().x - 22}
+                y={pos().y - 10}
+                width="44"
+                height="18"
+                rx="4"
+                fill="var(--color-text)"
+                opacity="0.9"
+              />
+              <text
+                x={pos().x}
+                y={pos().y + 3}
+                text-anchor="middle"
+                font-size="7"
+                font-weight="600"
+                fill="var(--surface-base)"
+              >
+                {pos().seg.percentage.toFixed(1)}%
+              </text>
+            </g>
+          )}
+        </Show>
       </svg>
       <div style="display: flex; flex-direction: column; gap: var(--space-2); min-width: 140px;">
         <For each={segments()}>
           {(segment) => (
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+            <div
+              style={`display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; ${hovered() === segment.index ? 'background: var(--color-border);' : ''} ${hovered() !== null && hovered() !== segment.index ? 'opacity: 0.5;' : 'opacity: 1;'}`}
+              onMouseEnter={() => setHovered(segment.index)}
+              onMouseLeave={() => setHovered(null)}
+            >
               <span
-                style={`display: inline-block; width: 12px; height: 12px; border-radius: 3px; background-color: ${segment.color}; flex-shrink: 0;`}
+                style={`display: inline-block; width: 12px; height: 12px; border-radius: 3px; background-color: ${segment.color}; flex-shrink: 0; transition: transform 0.2s ease; ${hovered() === segment.index ? 'transform: scale(1.3);' : ''}`}
               ></span>
               <span style="color: var(--color-text); font-weight: 500;">
                 {segment.label}: <strong>{segment.value}</strong>{" "}

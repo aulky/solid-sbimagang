@@ -158,49 +158,47 @@ function isPrivateIp(ip: string): boolean {
   );
 }
 
+async function tryGeoFetch(url: string, extract: (data: any) => string | null, timeoutMs = 4000): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(id);
+    if (res.ok) {
+      const data = (await res.json()) as any;
+      return extract(data);
+    }
+  } catch (_) {
+    // fallthrough
+  }
+  return null;
+}
+
 async function getIpLocation(ip: string): Promise<string> {
   if (!ip || isPrivateIp(ip)) {
     return "Localhost";
   }
 
-  // Try ipapi.co (HTTPS) first
-  try {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 2000);
-    const res = await fetch(`https://ipapi.co/${ip}/json/`, { signal: controller.signal });
-    clearTimeout(id);
-    if (res.ok) {
-      const data = (await res.json()) as any;
-      if (data && !data.error) {
-        const city = data.city || "";
-        const region = data.region || "";
-        const country = data.country_name || "";
-        const loc = [city, region, country].filter(Boolean).join(", ");
-        if (loc) return loc;
-      }
-    }
-  } catch (e) {
-    // Ignore and fallback
-  }
+  // 1. ipwho.is — free, no key, HTTPS, no strict rate limit
+  const loc1 = await tryGeoFetch(`https://ipwho.is/${ip}`, (d) => {
+    if (!d || d.success === false) return null;
+    return [d.city, d.region, d.country].filter(Boolean).join(", ") || null;
+  });
+  if (loc1) return loc1;
 
-  // Fallback to ip-api.com (HTTP)
-  try {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 2000);
-    const res = await fetch(`http://ip-api.com/json/${ip}`, { signal: controller.signal });
-    clearTimeout(id);
-    if (res.ok) {
-      const data = (await res.json()) as any;
-      if (data && data.status === "success") {
-        const city = data.city || "";
-        const region = data.regionName || "";
-        const country = data.country || "";
-        return [city, region, country].filter(Boolean).join(", ");
-      }
-    }
-  } catch (e) {
-    // Ignore
-  }
+  // 2. ipapi.co — free 1000/day, HTTPS
+  const loc2 = await tryGeoFetch(`https://ipapi.co/${ip}/json/`, (d) => {
+    if (!d || d.error) return null;
+    return [d.city, d.region, d.country_name].filter(Boolean).join(", ") || null;
+  });
+  if (loc2) return loc2;
+
+  // 3. ip-api.com — free, HTTPS via fields endpoint (non-commercial)
+  const loc3 = await tryGeoFetch(`https://ip-api.com/json/${ip}?fields=status,city,regionName,country`, (d) => {
+    if (!d || d.status !== "success") return null;
+    return [d.city, d.regionName, d.country].filter(Boolean).join(", ") || null;
+  });
+  if (loc3) return loc3;
 
   return "Tidak diketahui";
 }

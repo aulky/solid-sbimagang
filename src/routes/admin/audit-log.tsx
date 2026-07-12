@@ -77,19 +77,21 @@ export default function AdminAuditLog() {
     }
   };
 
-  const formatDateTime = (dateStr: Date | string) => {
+  const formatDate = (dateStr: Date | string) => {
     const d = new Date(dateStr);
-    const dateFormatted = d.toLocaleDateString("id-ID", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-    const timeFormatted = d.toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-    return `${dateFormatted} ${timeFormatted}`;
+    const day = d.getDate();
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  const formatTime = (dateStr: Date | string) => {
+    const d = new Date(dateStr);
+    const h = String(d.getHours()).padStart(2, "0");
+    const m = String(d.getMinutes()).padStart(2, "0");
+    const s = String(d.getSeconds()).padStart(2, "0");
+    return `${h}.${m}.${s}`;
   };
 
   return (
@@ -189,7 +191,8 @@ export default function AdminAuditLog() {
                       {(currentPage() - 1) * itemsPerPage + idx() + 1}
                     </td>
                     <td style="font-size: 13px; white-space: nowrap;">
-                      {formatDateTime(row.createdAt)}
+                      <div>{formatDate(row.createdAt)}</div>
+                      <div style="font-size: 12px; color: var(--color-text-secondary);">{formatTime(row.createdAt)}</div>
                     </td>
                     <td>
                       <Show when={row.user} fallback={

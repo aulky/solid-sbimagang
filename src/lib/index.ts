@@ -368,7 +368,7 @@ export const getAdminStats = query(async () => {
     await Promise.all([
       db.user.count({ where: { role: "USER", status: { not: "NONAKTIF" } } }),
       db.divisi.count(),
-      db.absensi.count({ where: { date: today, status: "HADIR" } }),
+      db.absensi.count({ where: { date: today, status: { in: ["HADIR", "TELAT"] } } }),
       db.absensi.count({ where: { date: today, status: "TELAT" } }),
       db.izin.count({ where: { status: "PENDING" } }),
     ]);
