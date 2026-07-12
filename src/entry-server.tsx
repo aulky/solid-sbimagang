@@ -51,6 +51,10 @@ export default createHandler(() => (
 
             {/* SEO Meta Tags */}
             <meta
+              name="google-site-verification"
+              content="google83bfb21f7d7ec635"
+            />
+            <meta
               name="description"
               content="Sistem Absensi Magang PT Solusi Bangun Indonesia Cilacap. Mempermudah pencatatan kehadiran, pengajuan izin, dan rekap laporan."
             />
