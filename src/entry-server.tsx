@@ -6,18 +6,18 @@ export default createHandler(() => (
   <StartServer
     document={({ assets, children, scripts }) => {
       const event = getRequestEvent();
-      const requestUrl = event ? new URL(event.request.url) : null;
-      const path = requestUrl ? requestUrl.pathname : "/";
       const host = event
         ? event.request.headers.get("host") || "absensi.tup.web.id"
         : "absensi.tup.web.id";
       const protocol =
         event &&
         (event.request.headers.get("x-forwarded-proto") === "https" ||
-          requestUrl?.protocol === "https:")
+          event.request.headers.get("x-forwarded-protocol") === "https")
           ? "https"
           : "http";
       const origin = `${protocol}://${host}`;
+      const requestUrl = event ? new URL(event.request.url, origin) : null;
+      const path = requestUrl ? requestUrl.pathname : "/";
       const logoUrl = `${origin}/logo-sbi-seo.png`;
 
       const titleMap: Record<string, string> = {

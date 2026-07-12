@@ -29,7 +29,8 @@ export const getUser = query(async () => {
       where: { id: userId },
       include: { divisi: true },
     });
-    if (!user || (user as any).status === "NONAKTIF") throw new Error("User invalid");
+    if (!user || (user as any).status === "NONAKTIF")
+      throw new Error("User invalid");
     return {
       id: user.id,
       username: user.username,
@@ -67,7 +68,7 @@ export const loginOrRegister = action(async (formData: FormData) => {
     await logActivity(
       loginType !== "login" ? "REGISTER" : "LOGIN",
       loginType !== "login" ? "register success" : "login success",
-      user.id
+      user.id,
     );
     return redirect(user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
   } catch (err) {
@@ -281,7 +282,10 @@ export const submitIzin = action(async (formData: FormData) => {
       status: "PENDING",
     },
   });
-  await logActivity("PENGAJUAN_IZIN", `submit leave success (${type.toLowerCase()})`);
+  await logActivity(
+    "PENGAJUAN_IZIN",
+    `submit leave success (${type.toLowerCase()})`,
+  );
   return redirect("/izin");
 });
 
@@ -514,7 +518,10 @@ export const updateUser = action(async (formData: FormData) => {
     where: { id },
     data: { fullName, email, phone: phone || null, role, divisiId, status },
   });
-  await logActivity("UPDATE_PENGGUNA", `update user success (@${updatedUser.username})`);
+  await logActivity(
+    "UPDATE_PENGGUNA",
+    `update user success (@${updatedUser.username})`,
+  );
   return redirect("/admin/users");
 });
 
@@ -525,7 +532,10 @@ export const deleteUser = action(async (formData: FormData) => {
   const targetUser = await db.user.findUnique({ where: { id } });
   const targetUsername = targetUser ? `@${targetUser.username}` : "Pengguna";
   await db.user.delete({ where: { id } });
-  await logActivity("HAPUS_PENGGUNA", `delete user success (${targetUsername})`);
+  await logActivity(
+    "HAPUS_PENGGUNA",
+    `delete user success (${targetUsername})`,
+  );
   return redirect("/admin/users");
 });
 
@@ -653,7 +663,7 @@ export const approveIzin = action(async (formData: FormData) => {
   const typeStr = izin.type;
   await logActivity(
     statusAction === "APPROVED" ? "SETUJUI_IZIN" : "TOLAK_IZIN",
-    `${statusAction === "APPROVED" ? "approve" : "reject"} leave success (${typeStr.toLowerCase()} - ${targetUsername})`
+    `${statusAction === "APPROVED" ? "approve" : "reject"} leave success (${typeStr.toLowerCase()} - ${targetUsername})`,
   );
 
   return redirect("/admin/izin");
@@ -737,7 +747,8 @@ export async function logPageAccess(pathname: string) {
       "/admin/settings": "admin.settings",
       "/admin/audit-log": "admin.audit-log",
     };
-    const pageTitle = titleMap[pathname] || pathname.replace(/^\//, "").replace(/\//g, ".");
+    const pageTitle =
+      titleMap[pathname] || pathname.replace(/^\//, "").replace(/\//g, ".");
     await logActivity("AKSES_HALAMAN", pageTitle, userId);
   } catch (e) {
     // Ignore
