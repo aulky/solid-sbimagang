@@ -62,11 +62,13 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
 1. **Form Pengajuan Baru (Modal)**:
    * Dibuka melalui tombol "Ajukan Izin" di bar atas.
    * Menggunakan modal portal. Pengguna memilih tipe perizinan (Sakit, Izin, Cuti), memasukkan tanggal mulai, tanggal selesai, dan menuliskan alasan pengajuan secara detail (minimal 5 karakter).
+   * **Validasi Ukuran File**: Lampiran bukti dibatasi maksimal 500KB, divalidasi langsung di sisi client (alert instan) dan server-side (`submitIzin` action) demi keamanan storage.
    * Menutup otomatis setelah pengajuan berhasil dikirim (tanpa memunculkan modal konfirmasi ganda).
 2. **Riwayat Izin Magang (Tabel & Filter)**:
    * Halaman didesain full-width untuk visualisasi yang luas.
    * Menyajikan tabel riwayat pengajuan izin yang mencakup status persetujuan (`PENDING`, `APPROVED`, `REJECTED`).
    * Dilengkapi filter card kompak untuk menyaring riwayat berdasarkan **Tipe Izin** dan **Status**.
+   * **Preview Berkas Terunggah**: Mendukung preview berkas gambar/PDF secara instan melalui modal Portal. Berkas di-serve secara dinamis melalui API endpoint `/api/uploads?file=...` untuk memastikan akses real-time di lingkungan production. Hal ini juga mendukung kompatibilitas berkas lama (`/uploads/...`) via utilitas normalisasi URL otomatis.
 
 #### C. Halaman Riwayat Absensi (`/riwayat`)
 1. **Tabel Log Absensi**:
@@ -121,7 +123,10 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
 2. **Export Excel (XLSX)**:
    * Menghasilkan lembar kerja Excel berformat (.xls) dengan styling tabel profesional (tajuk merah `#E11D48`, teks tebal putih, gridlines, dan teks status kehadiran terwarna hijau/kuning/merah secara rapi).
 3. **Cetak PDF Landscape**:
-   * Optimasi stylesheet media cetak (`@media print`) yang memaksa printer mencetak dalam tata letak mendatar (landscape), menyembunyikan elemen non-cetak, dan merapikan grid tabel secara presisi.
+   * **Layout Bersih & Minimalis**: Menghapus border vertikal kaku (gaya grid Excel) dan hanya menggunakan border horizontal tipis (`#e2e8f0`) serta border header tebal (`#475569`) dengan background zebra-striping halus pada baris genap.
+   * **Kop Surat Pabrik Cilacap**: Menampilkan logo resmi PT SBI Tbk dan alamat operasional pabrik Cilacap di bagian atas halaman dengan penataan presisi (tanpa tag "Dokumen Internal").
+   * **Pencetakan Semua Data**: Saat mode cetak diaktifkan, layout mematikan pembatasan pagination, menyembunyikan navigasi halaman, dan menampilkan seluruh data log absensi ke media cetak.
+   * **Penyelarasan Layout**: Memaksa layout utama (`.app-layout`, `.app-main-content`) menyetel padding/margin ke `0 !important` dan width ke `100% !important` untuk menyembunyikan visual sidebar secara total dan mencegah terjadinya offset/kolom kosong di sisi kanan kertas.
 
 #### G. Halaman Pengaturan Sistem (`/admin/settings`)
 1. **Penyimpanan Dinamis**:
@@ -150,7 +155,11 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
 ## 4. Kebutuhan Non-Fungsional (Non-Functional Requirements)
 
 ### 4.1. Responsivitas & Tampilan Lintas Perangkat
-* **Desktop Layout**: Sidebar navigasi tetap setebal `260px` di sebelah kiri layar untuk kemudahan navigasi admin/user.
+* **Desktop Layout**:
+  * Sidebar navigasi tetap setebal `260px` di sebelah kiri layar.
+  * **Layout Info Pengguna & Tema**: Informasi user terbungkus rapi dalam card rounded dengan background subtle di bagian bawah sidebar, dengan toggle tema (dark/light) yang tersusun sejajar di sebelah kanan nama/role user.
+  * **Layout Tombol Logout**: Tombol logout berbentuk outline button berukuran penuh (full-width) dengan icon merah ter-center rapi di bagian footer sidebar di bawah card informasi user.
+  * **Pencegahan Overflow Teks**: Nama lengkap dan role di dalam sidebar dilengkapi pembatasan lebar dan ellipsis (`...`) jika melebihi ruang yang tersedia, guna mencegah kerusakan visual layout.
 * **Mobile Layout**: Sidebar secara otomatis bertransformasi menjadi header navigasi horizontal di bagian atas layar. Semua tabel data dilengkapi scrollbar horizontal (`overflow-x: auto`) agar layout tidak rusak pada layar ponsel cerdas.
 
 ### 4.2. Keamanan & Performa
