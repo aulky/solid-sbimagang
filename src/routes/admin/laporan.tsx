@@ -250,30 +250,34 @@ export default function Laporan() {
         </button>
       </div>
 
-      {/* Print header */}
+      {/* Print header — Kop Surat Resmi */}
       <div
         class="print-only"
-        style="display: none; text-align: center; margin-bottom: var(--space-5);"
+        style="display: none; margin-bottom: 30px;"
       >
-        <img
-          src="/logo-sbi.png"
-          alt="PT SBI"
-          style="height: 50px; margin-bottom: var(--space-2);"
-        />
-        <h2>LAPORAN KEHADIRAN ANAK MAGANG</h2>
-        <h3>PT. SOLUSI BANGUN INDONESIA — CILACAP</h3>
-        <p style="margin-top: var(--space-1); font-size: 13px; color: var(--color-text-secondary);">
-          Dicetak pada:{" "}
-          {new Date().toLocaleDateString("id-ID", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </p>
+        <div style="display: flex; align-items: center; border-bottom: 3px double #1e293b; padding-bottom: 15px; margin-bottom: 20px; gap: 15px; width: 100%; box-sizing: border-box;">
+          <img
+            src="/logo-sbi.png"
+            alt="PT SBI"
+            style="height: 55px;"
+          />
+          <div>
+            <h2 style="margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; color: #0f172a;">PT SOLUSI BANGUN INDONESIA Tbk</h2>
+            <p style="margin: 2px 0 0 0; font-size: 11px; color: #475569; line-height: 1.4;">
+              Pabrik Cilacap — Jl. Ir. H. Juanda, Cilacap, Jawa Tengah
+            </p>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 25px;">
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700; letter-spacing: 1px; color: #0f172a; text-transform: uppercase;">Laporan Kehadiran Mahasiswa / Siswa Magang</h3>
+          <p style="margin: 6px 0 0 0; font-size: 12px; color: #475569;">
+            Periode: {filterDateStart() ? new Date(filterDateStart()).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "—"} s/d {filterDateEnd() ? new Date(filterDateEnd()).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+          </p>
+        </div>
       </div>
 
-      <div style="overflow-x: auto;">
+      <div style="overflow-x: auto;" class="no-print">
         <table class="data-table">
           <thead>
             <tr>
@@ -360,6 +364,63 @@ export default function Laporan() {
         </table>
       </div>
 
+      {/* Print table — semua data tanpa pagination */}
+      <div class="print-only" style="display: none;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Lengkap</th>
+              <th>Divisi</th>
+              <th>Tanggal</th>
+              <th>Check-In</th>
+              <th>Check-Out</th>
+              <th>Status</th>
+              <th>Catatan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <For each={filteredRecords()}>
+              {(row, idx) => {
+                const dateFormatted = new Date(row.date).toLocaleDateString(
+                  "id-ID",
+                  { year: "numeric", month: "long", day: "numeric" },
+                );
+                const checkInTime = row.checkIn
+                  ? new Date(row.checkIn).toLocaleTimeString("id-ID", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "-";
+                const checkOutTime = row.checkOut
+                  ? new Date(row.checkOut).toLocaleTimeString("id-ID", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "-";
+                return (
+                  <tr>
+                    <td>{idx() + 1}</td>
+                    <td>
+                      <strong>{row.user.fullName}</strong>
+                    </td>
+                    <td>{row.user.divisi?.name ?? "-"}</td>
+                    <td>{dateFormatted}</td>
+                    <td>{checkInTime}</td>
+                    <td>{checkOutTime}</td>
+                    <td>{row.status}</td>
+                    <td>{row.notes ?? "-"}</td>
+                  </tr>
+                );
+              }}
+            </For>
+          </tbody>
+        </table>
+        <p style="font-size: 11px; color: #64748b; margin-top: 10px; text-align: right;">
+          Total: {filteredRecords().length} data
+        </p>
+      </div>
+
       {/* Pagination Controls */}
       <Show when={filteredRecords().length > 0}>
         <div class="pagination-container no-print">
@@ -417,39 +478,69 @@ export default function Laporan() {
           }
           .print-only {
             display: block !important;
+            width: 100% !important;
+          }
+          .app-layout,
+          .app-layout.has-sidebar,
+          .app-layout.has-sidebar .app-main-content {
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+            display: block !important;
+            width: 100% !important;
+          }
+          .app-main-content {
+            padding: 0 !important;
+            margin: 0 !important;
+            margin-left: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
           }
           body {
             background: #ffffff !important;
-            color: #000000 !important;
+            color: #0f172a !important;
             font-family: sans-serif !important;
           }
           main {
             padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
           }
           .data-table {
             background: #ffffff !important;
             box-shadow: none !important;
-            border: 1px solid #cbd5e1 !important;
+            border: none !important;
             width: 100% !important;
             border-collapse: collapse !important;
           }
           .data-table th {
-            background-color: #f1f5f9 !important;
-            color: #0f172a !important;
-            border: 1px solid #94a3b8 !important;
+            background-color: transparent !important;
+            color: #1e293b !important;
+            border-bottom: 2px solid #475569 !important;
+            border-top: none !important;
+            border-left: none !important;
+            border-right: none !important;
             font-weight: bold !important;
-            padding: 8px 10px !important;
+            padding: 10px 12px !important;
+            text-align: left !important;
           }
           .data-table td {
-            border: 1px solid #cbd5e1 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            border-top: none !important;
+            border-left: none !important;
+            border-right: none !important;
             color: #334155 !important;
-            padding: 8px 10px !important;
+            padding: 10px 12px !important;
+          }
+          .data-table tr:nth-child(even) td {
+            background-color: #f8fafc !important;
           }
           .badge {
             background: transparent !important;
-            border: 1.5px solid #475569 !important;
+            border: 1px solid #475569 !important;
             color: #475569 !important;
-            padding: 2px 8px !important;
+            padding: 2px 6px !important;
             border-radius: 4px !important;
             font-size: 11px !important;
             font-weight: bold !important;

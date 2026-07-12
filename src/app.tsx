@@ -240,7 +240,7 @@ export default function App() {
                     </Show>
 
                     <aside
-                      class="app-sidebar"
+                      class="app-sidebar no-print"
                       classList={{ open: mobileSidebarOpen() }}
                     >
                     <div
