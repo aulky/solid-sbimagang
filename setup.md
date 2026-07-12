@@ -12,7 +12,7 @@ sudo apt update && sudo apt upgrade -y
 
 Install tools pendukung yang dibutuhkan:
 ```bash
-sudo apt install -y curl git build-essential ufw
+sudo apt install -y curl git build-essential ufw openssl
 ```
 
 ---
@@ -35,10 +35,15 @@ sudo apt-get update
 sudo apt-get install nodejs -y
 ```
 
-Verifikasi instalasi Node.js dan npm:
+Install **pnpm** secara global:
+```bash
+sudo npm install -g pnpm
+```
+
+Verifikasi instalasi Node.js, pnpm, dan corepack:
 ```bash
 node -v
-npm -v
+pnpm -v
 ```
 
 ---
@@ -93,37 +98,50 @@ git clone <url-repository-anda> app
 cd app
 ```
 
-Install seluruh dependency NPM:
+Install seluruh dependency menggunakan **pnpm**:
 ```bash
-npm install
+pnpm install --frozen-lockfile
 ```
 
 Buat file `.env` di root project:
 ```bash
+umask 077
+cp -n .env.example .env
+chmod 600 .env
+```
+
+Generate `SESSION_SECRET` acak menggunakan openssl:
+```bash
+openssl rand -hex 32
+```
+
+Edit file `.env` dan masukkan variabel konfigurasi environment (ganti nilai secret dengan hasil command di atas):
+```bash
 nano .env
 ```
 
-Masukkan variabel konfigurasi environment berikut:
+Isi berkas `.env`:
 ```env
 DATABASE_URL="mysql://sbi_user:password_sangat_kuat@localhost:3306/sbimagang"
-PORT=3000
-HOST=127.0.0.1
-NODE_ENV=production
+SESSION_SECRET="HASIL_OPENSSL_RAND_HEX_32"
+COOKIE_SECURE=false
 ```
+*Catatan: Ubah `COOKIE_SECURE` menjadi `true` jika aplikasi sudah diakses melalui HTTPS.*
 
 Jalankan migrasi database Prisma untuk menyusun skema tabel di MySQL:
 ```bash
-npx prisma db push
+pnpm run db:push
 ```
 
-*(Opsional)* Jika ada seed data bawaan yang ingin dimasukkan:
+Isi database dengan data seed awal (akun admin default: `admin` / `admin123456`):
 ```bash
-npm run db:seed
+node --env-file=.env prisma/seed.js
 ```
 
 Build aplikasi untuk optimasi production:
 ```bash
-npm run build
+rm -rf .output .vinxi .vite
+pnpm run build
 ```
 
 ---
@@ -136,9 +154,35 @@ Install PM2 secara global:
 sudo npm install pm2 -g
 ```
 
-Jalankan server build SolidStart (.output/server/index.mjs):
+Buat file konfigurasi PM2 `ecosystem.config.cjs` di root project `/var/www/app`:
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: "sbi-app",
+      cwd: "/var/www/app",
+      script: ".output/server/index.mjs",
+      interpreter: "node",
+      node_args: "--env-file=/var/www/app/.env",
+      env: {
+        NODE_ENV: "production",
+        HOST: "127.0.0.1",
+        PORT: "3000"
+      },
+      exec_mode: "fork",
+      instances: 1,
+      autorestart: true,
+      restart_delay: 3000,
+      max_memory_restart: "500M",
+      time: true
+    }
+  ]
+};
+```
+
+Jalankan aplikasi menggunakan konfigurasi PM2:
 ```bash
-pm2 start .output/server/index.mjs --name "sbi-app" --env PORT=3000
+pm2 start ecosystem.config.cjs
 ```
 
 Konfigurasi startup PM2 agar otomatis jalan saat server reboot:
@@ -152,7 +196,7 @@ Simpan konfigurasi proses PM2 yang sedang berjalan saat ini:
 pm2 save
 ```
 
-Periksa status aplikasi:
+Periksa status aplikasi dan log runtime:
 ```bash
 pm2 list
 pm2 logs sbi-app
