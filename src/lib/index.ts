@@ -244,6 +244,13 @@ export const submitIzin = action(async (formData: FormData) => {
 
   let attachmentPath: string | null = null;
   if (file && file.size > 0 && file.name) {
+    const MAX_FILE_SIZE = 500 * 1024; // 500KB
+    if (file.size > MAX_FILE_SIZE) {
+      return new Error(
+        "Ukuran berkas lampiran maksimal 500KB.",
+      );
+    }
+
     const extension = path.extname(file.name).toLowerCase();
     const allowedExtensions = [".png", ".jpg", ".jpeg", ".pdf"];
     const allowedMimeTypes = [
@@ -275,7 +282,7 @@ export const submitIzin = action(async (formData: FormData) => {
 
     await fs.mkdir(uploadsDir, { recursive: true });
     await fs.writeFile(path.join(uploadsDir, filename), buffer);
-    attachmentPath = `/uploads/${filename}`;
+    attachmentPath = `/api/uploads/${filename}`;
   }
 
   await db.izin.create({

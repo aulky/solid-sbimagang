@@ -679,31 +679,47 @@ export default function App() {
 
                     <div
                       class="sidebar-user"
-                      style="border-top: 1px solid var(--color-border); border-bottom: none; margin-bottom: 0; margin-top: var(--space-3); padding: var(--space-3) 0 0 0;"
+                      style="margin-top: auto;"
                     >
-                      <div class="user-avatar">
-                        {u().fullName
-                          ? u().fullName.charAt(0).toUpperCase()
-                          : "U"}
-                      </div>
-                      <div class="user-info">
-                        <div class="user-name">{u().fullName}</div>
-                        <div class="user-role">
-                          {u().role === "ADMIN"
-                            ? "Administrator"
-                            : u().divisi || "Anak Magang"}
+                      <div style="display: flex; align-items: center; gap: var(--space-3); min-width: 0; overflow: hidden;">
+                        <div class="user-avatar">
+                          {u().fullName
+                            ? u().fullName.charAt(0).toUpperCase()
+                            : "U"}
+                        </div>
+                        <div class="user-info">
+                          <div class="user-name">{u().fullName}</div>
+                          <div class="user-role">
+                            {u().role === "ADMIN"
+                              ? "Administrator"
+                              : u().divisi || "Anak Magang"}
+                          </div>
                         </div>
                       </div>
+                      <ThemeToggle theme={theme} setTheme={setTheme} />
                     </div>
 
                     <div class="sidebar-footer">
-                      <ThemeToggle theme={theme} setTheme={setTheme} />
                       <button
                         class="btn-logout-sidebar"
                         type="button"
                         onClick={() => setShowLogoutConfirm(true)}
                       >
-                        Keluar
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                          <polyline points="16 17 21 12 16 7" />
+                          <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        Logout
                       </button>
                     </div>
                   </aside>

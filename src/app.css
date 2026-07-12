@@ -243,10 +243,16 @@ body {
 .sidebar-user {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border);
+  justify-content: space-between;
+  padding: var(--space-3);
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: var(--radius-lg);
   margin-bottom: var(--space-3);
+  margin-top: auto;
+}
+
+[data-theme="dark"] .sidebar-user {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .user-avatar {
@@ -268,6 +274,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 0;
 }
 
 .user-name {
@@ -292,7 +299,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  flex-grow: 1;
   overflow-y: auto;
 }
 
@@ -409,10 +415,8 @@ body {
 .sidebar-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--color-border);
-  gap: var(--space-3);
+  justify-content: center;
+  padding: 0;
 }
 
 .theme-toggle {
@@ -439,19 +443,23 @@ body {
   border: 1.5px solid var(--color-error);
   font-family: var(--font-headline);
   font-weight: 700;
-  font-size: 13px;
-  padding: var(--space-2) var(--space-3);
+  font-size: 14px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 150ms ease;
-  flex-grow: 1;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .btn-logout-sidebar:hover {
   background-color: var(--color-error);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
 }
 
 .app-main-content {
@@ -1087,6 +1095,9 @@ a {
 .btn-pagination:hover:not(:disabled) {
   border-color: var(--color-primary);
   color: var(--color-primary);
+  background-color: var(--surface-glass);
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-pagination:disabled {
@@ -1238,11 +1249,11 @@ a {
   }
 
   .sidebar-user {
-    padding: var(--space-3) 0 !important;
-    border-top: 1px solid var(--color-border) !important;
+    padding: var(--space-3) !important;
+    border-top: none !important;
     border-bottom: none !important;
-    margin-bottom: 0 !important;
-    margin-top: var(--space-3) !important;
+    margin-bottom: var(--space-3) !important;
+    margin-top: auto !important;
   }
 
   .sidebar-nav {
@@ -1266,8 +1277,8 @@ a {
   }
 
   .sidebar-footer {
-    border-top: 1px solid var(--color-border) !important;
-    padding-top: var(--space-3) !important;
+    border-top: none !important;
+    padding-top: 0 !important;
   }
 
   .app-layout.has-sidebar .app-main-content {

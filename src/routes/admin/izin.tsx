@@ -13,6 +13,10 @@ export const route = {
   },
 } satisfies RouteDefinition;
 
+// Backward compat: data lama pakai /uploads/, data baru /api/uploads/
+const normalizeAttachmentUrl = (url: string) =>
+  url.startsWith("/uploads/") ? url.replace("/uploads/", "/api/uploads/") : url;
+
 const statusText = (status: string) => {
   const map: Record<string, string> = {
     PENDING: "Menunggu",
@@ -217,7 +221,7 @@ export default function AdminIzin() {
                             type="button"
                             class="btn-secondary"
                             style="width: auto; height: 32px; padding: 0 12px; font-size: 12px; display: inline-flex;"
-                            onClick={() => setViewingAttachment(row.attachment)}
+                            onClick={() => setViewingAttachment(normalizeAttachmentUrl(row.attachment!))}
                           >
                             Lihat Surat
                           </button>

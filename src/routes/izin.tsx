@@ -14,6 +14,9 @@ export const route = {
   },
 } satisfies RouteDefinition;
 
+const normalizeAttachmentUrl = (url: string) =>
+  url.startsWith("/uploads/") ? url.replace("/uploads/", "/api/uploads/") : url;
+
 const statusBadge = (status: string) =>
   status === "PENDING"
     ? "badge-pending"
@@ -151,12 +154,19 @@ export default function Izin() {
                 </div>
 
                 <div class="form-group">
-                  <label for="attachment">Lampiran Bukti / Surat Sakit (Gambar / PDF)</label>
+                  <label for="attachment">Lampiran Bukti / Surat Sakit (Gambar / PDF, maks. 500KB)</label>
                   <input
                     type="file"
                     id="attachment"
                     name="attachment"
                     accept="image/png, image/jpeg, image/jpg, application/pdf"
+                    onChange={(e) => {
+                      const file = e.currentTarget.files?.[0];
+                      if (file && file.size > 500 * 1024) {
+                        alert("Ukuran berkas maksimal 500KB.");
+                        e.currentTarget.value = "";
+                      }
+                    }}
                   />
                 </div>
 
@@ -309,7 +319,7 @@ export default function Izin() {
                                 type="button"
                                 class="btn-secondary"
                                 style="width: auto; height: 32px; padding: 0 12px; font-size: 12px; display: inline-flex;"
-                                onClick={() => setViewingAttachment(r.attachment)}
+                                onClick={() => setViewingAttachment(normalizeAttachmentUrl(r.attachment!))}
                               >
                                 Lihat Surat
                               </button>
