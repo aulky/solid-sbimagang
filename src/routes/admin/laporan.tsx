@@ -253,9 +253,9 @@ export default function Laporan() {
       {/* Print header — Kop Surat Resmi */}
       <div
         class="print-only"
-        style="display: none; margin-bottom: 30px;"
+        style="display: none; margin-bottom: 20px;"
       >
-        <div style="display: flex; align-items: center; border-bottom: 3px double #1e293b; padding-bottom: 15px; margin-bottom: 20px; gap: 15px; width: 100%; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; border-bottom: 3px double #1e293b; padding-bottom: 15px; margin-bottom: 10px; gap: 15px; width: 100%; box-sizing: border-box;">
           <img
             src="/logo-sbi.png"
             alt="PT SBI"
@@ -269,7 +269,7 @@ export default function Laporan() {
           </div>
         </div>
 
-        <div style="text-align: center; margin-bottom: 25px;">
+        <div style="text-align: center; margin-bottom: 15px;">
           <h3 style="margin: 0; font-size: 15px; font-weight: 700; letter-spacing: 1px; color: #0f172a; text-transform: uppercase;">Laporan Kehadiran Mahasiswa / Siswa Magang</h3>
           <p style="margin: 6px 0 0 0; font-size: 12px; color: #475569;">
             Periode: {filterDateStart() ? new Date(filterDateStart()).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "—"} s/d {filterDateEnd() ? new Date(filterDateEnd()).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
