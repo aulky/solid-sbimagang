@@ -7,8 +7,8 @@ export default createHandler(() => (
     document={({ assets, children, scripts }) => {
       const event = getRequestEvent();
       const host = event
-        ? event.request.headers.get("host") || "absensi.tup.web.id"
-        : "absensi.tup.web.id";
+        ? event.request.headers.get("host") || "intern-sbi.tup.web.id"
+        : "intern-sbi.tup.web.id";
       const protocol =
         event &&
         (event.request.headers.get("x-forwarded-proto") === "https" ||
