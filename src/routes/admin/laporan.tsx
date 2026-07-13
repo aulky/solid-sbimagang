@@ -1,19 +1,19 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
 import { For, Show, createSignal } from "solid-js";
-import { getAdminAbsensi, getAllDivisi, getPageNumbers } from "~/lib";
+import { getLaporan, getAllDivisi, getPageNumbers } from "~/lib";
 
 export const route = {
   preload() {
-    getAdminAbsensi();
+    getLaporan();
     getAllDivisi();
   },
 } satisfies RouteDefinition;
 
 export default function Laporan() {
-  const records = createAsync(() => getAdminAbsensi());
-  const divisiList = createAsync(() => getAllDivisi());
   const [filterDateStart, setFilterDateStart] = createSignal("");
   const [filterDateEnd, setFilterDateEnd] = createSignal("");
+  const records = createAsync(() => getLaporan(filterDateStart(), filterDateEnd()));
+  const divisiList = createAsync(() => getAllDivisi());
   const [filterDivisi, setFilterDivisi] = createSignal("");
   const [searchQuery, setSearchQuery] = createSignal("");
 
@@ -80,7 +80,7 @@ export default function Laporan() {
     </thead>
     <tbody>`;
 
-    list.forEach((r, idx) => {
+    list.forEach((r: any, idx: number) => {
       const date = new Date(r.date).toLocaleDateString("id-ID");
       const ci = r.checkIn
         ? new Date(r.checkIn).toLocaleTimeString("id-ID")
@@ -133,7 +133,7 @@ export default function Laporan() {
   const filteredRecords = () => {
     const list = records();
     if (!list) return [];
-    return list.filter((r) => {
+    return list.filter((r: any) => {
       const rDate = new Date(r.date).toISOString().slice(0, 10);
       if (filterDateStart() && rDate < filterDateStart()) return false;
       if (filterDateEnd() && rDate > filterDateEnd()) return false;

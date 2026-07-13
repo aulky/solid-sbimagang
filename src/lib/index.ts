@@ -502,13 +502,50 @@ export const getInternTrendData = query(async () => {
 
 // ========== ADMIN: USERS CRUD ==========
 
-export const getAdminUsers = query(async () => {
+export const getAdminUsers = query(async (options?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  status?: string;
+  divisiId?: string;
+}) => {
   "use server";
   await requireAdmin();
-  return db.user.findMany({
-    include: { divisi: true },
-    orderBy: { createdAt: "desc" },
-  });
+
+  const page = options?.page ?? 1;
+  const limit = options?.limit ?? 10;
+  const search = options?.search?.trim() ?? "";
+  const role = options?.role ?? "";
+  const status = options?.status ?? "";
+  const divisiId = options?.divisiId ?? "";
+
+  const skip = (page - 1) * limit;
+
+  const where: any = {};
+  if (role) where.role = role;
+  if (status) where.status = status;
+  if (divisiId) where.divisiId = divisiId;
+
+  if (search) {
+    where.OR = [
+      { fullName: { contains: search } },
+      { username: { contains: search } },
+    ];
+  }
+
+  const [items, total] = await Promise.all([
+    db.user.findMany({
+      where,
+      include: { divisi: true },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    db.user.count({ where }),
+  ]);
+
+  return { items, total };
 }, "adminUsers");
 
 export const createUser = action(async (formData: FormData) => {
@@ -639,25 +676,112 @@ export const deleteDivisi = action(async (formData: FormData) => {
 
 // ========== ADMIN: ABSENSI ==========
 
-export const getAdminAbsensi = query(async () => {
+export const getAdminAbsensi = query(async (options?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  date?: string;
+  status?: string;
+  divisiId?: string;
+}) => {
   "use server";
   await requireAdmin();
-  return db.absensi.findMany({
-    include: { user: { include: { divisi: true } } },
-    orderBy: { date: "desc" },
-    take: 100,
-  });
+
+  const page = options?.page ?? 1;
+  const limit = options?.limit ?? 10;
+  const search = options?.search?.trim() ?? "";
+  const dateStr = options?.date ?? "";
+  const status = options?.status ?? "";
+  const divisiId = options?.divisiId ?? "";
+
+  const skip = (page - 1) * limit;
+
+  const where: any = {};
+  if (status) where.status = status;
+
+  if (dateStr) {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const filterUtc = new Date(Date.UTC(year, month - 1, day));
+    where.date = filterUtc;
+  }
+
+  if (divisiId) {
+    where.user = { divisiId };
+  }
+
+  if (search) {
+    const searchCond = {
+      OR: [
+        { fullName: { contains: search } },
+        { username: { contains: search } },
+      ],
+    };
+    if (where.user) {
+      where.user = { ...where.user, ...searchCond };
+    } else {
+      where.user = searchCond;
+    }
+  }
+
+  const [items, total] = await Promise.all([
+    db.absensi.findMany({
+      where,
+      include: { user: { include: { divisi: true } } },
+      orderBy: { date: "desc" },
+      skip,
+      take: limit,
+    }),
+    db.absensi.count({ where }),
+  ]);
+
+  return { items, total };
 }, "adminAbsensi");
 
 // ========== ADMIN: IZIN ==========
 
-export const getAdminIzin = query(async () => {
+export const getAdminIzin = query(async (options?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  type?: string;
+  status?: string;
+}) => {
   "use server";
   await requireAdmin();
-  return db.izin.findMany({
-    include: { user: true },
-    orderBy: { createdAt: "desc" },
-  });
+
+  const page = options?.page ?? 1;
+  const limit = options?.limit ?? 10;
+  const search = options?.search?.trim() ?? "";
+  const type = options?.type ?? "";
+  const status = options?.status ?? "";
+
+  const skip = (page - 1) * limit;
+
+  const where: any = {};
+  if (type) where.type = type;
+  if (status) where.status = status;
+
+  if (search) {
+    where.user = {
+      OR: [
+        { fullName: { contains: search } },
+        { username: { contains: search } },
+      ],
+    };
+  }
+
+  const [items, total] = await Promise.all([
+    db.izin.findMany({
+      where,
+      include: { user: true },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    db.izin.count({ where }),
+  ]);
+
+  return { items, total };
 }, "adminIzin");
 
 export const approveIzin = action(async (formData: FormData) => {

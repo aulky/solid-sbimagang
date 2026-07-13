@@ -3,7 +3,7 @@ import {
   useSubmission,
   type RouteDefinition,
 } from "@solidjs/router";
-import { Show, For, createSignal, createEffect } from "solid-js";
+import { Show, For, Suspense, createSignal, createEffect } from "solid-js";
 import { Portal } from "solid-js/web";
 import {
   getAdminUsers,
@@ -16,13 +16,12 @@ import {
 
 export const route = {
   preload() {
-    getAdminUsers();
+    getAdminUsers({ page: 1, limit: 10, search: "", role: "", status: "", divisiId: "" });
     getAllDivisi();
   },
 } satisfies RouteDefinition;
 
 export default function AdminUsers() {
-  const users = createAsync(() => getAdminUsers(), { deferStream: true });
   const divisiList = createAsync(() => getAllDivisi(), { deferStream: true });
 
   const [showCreate, setShowCreate] = createSignal(false);
@@ -36,6 +35,7 @@ export default function AdminUsers() {
 
   // Filter signals
   const [searchQuery, setSearchQuery] = createSignal("");
+  const [debouncedSearch, setDebouncedSearch] = createSignal("");
   const [filterRole, setFilterRole] = createSignal("");
   const [filterStatus, setFilterStatus] = createSignal("");
   const [filterDivisi, setFilterDivisi] = createSignal("");
@@ -44,34 +44,34 @@ export default function AdminUsers() {
   const [currentPage, setCurrentPage] = createSignal(1);
   const itemsPerPage = 10;
 
-  // Filter logic
-  const filteredUsers = () => {
-    const list = users();
-    if (!list) return [];
-    return list.filter((u) => {
-      if (filterRole() && u.role !== filterRole()) return false;
-      if (filterStatus() && String((u as any).status) !== filterStatus()) return false;
-      if (filterDivisi() && u.divisiId !== filterDivisi()) return false;
-
-      const q = searchQuery().toLowerCase().trim();
-      if (q) {
-        const nameMatch = u.fullName.toLowerCase().includes(q);
-        const usernameMatch = u.username.toLowerCase().includes(q);
-        if (!nameMatch && !usernameMatch) return false;
-      }
-      return true;
-    });
+  let debounceTimer: any;
+  const handleSearchInput = (val: string) => {
+    setSearchQuery(val);
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      setDebouncedSearch(val);
+      setCurrentPage(1);
+    }, 400);
   };
 
+  const usersData = createAsync(() =>
+    getAdminUsers({
+      page: currentPage(),
+      limit: itemsPerPage,
+      search: debouncedSearch(),
+      role: filterRole(),
+      status: filterStatus(),
+      divisiId: filterDivisi(),
+    })
+  );
+
   const totalPages = () => {
-    const list = filteredUsers();
-    return Math.max(1, Math.ceil(list.length / itemsPerPage));
+    const total = usersData()?.total ?? 0;
+    return Math.max(1, Math.ceil(total / itemsPerPage));
   };
 
   const paginatedUsers = () => {
-    const list = filteredUsers();
-    const start = (currentPage() - 1) * itemsPerPage;
-    return list.slice(start, start + itemsPerPage);
+    return usersData()?.items ?? [];
   };
 
   const creating = useSubmission(createUser);
@@ -257,10 +257,7 @@ export default function AdminUsers() {
             type="text"
             placeholder="Cari nama/username..."
             value={searchQuery()}
-            onInput={(e) => {
-              setSearchQuery(e.currentTarget.value);
-              setCurrentPage(1);
-            }}
+            onInput={(e) => handleSearchInput(e.currentTarget.value)}
           />
         </div>
         <div class="form-group">
@@ -310,6 +307,7 @@ export default function AdminUsers() {
         <button
           onClick={() => {
             setSearchQuery("");
+            setDebouncedSearch("");
             setFilterRole("");
             setFilterStatus("");
             setFilterDivisi("");
@@ -487,139 +485,145 @@ export default function AdminUsers() {
         )}
       </Show>
 
-      <div style="overflow-x: auto;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Username</th>
-              <th>Nama</th>
-              <th>Email</th>
-              <th>Divisi</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <Show
-              when={users() && users()!.length > 0}
-              fallback={
-                <tr>
-                  <td
-                    colspan="8"
-                    style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
-                  >
-                    Belum ada data pengguna.
-                  </td>
-                </tr>
-              }
-            >
-              <For each={paginatedUsers()}>
-                {(u, i) => (
+      <Suspense fallback={
+        <div style="text-align: center; padding: var(--space-6); color: var(--color-text-secondary);">
+          Memuat data pengguna...
+        </div>
+      }>
+        <div style="overflow-x: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Username</th>
+                <th>Nama</th>
+                <th>Email</th>
+                <th>Divisi</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <Show
+                when={paginatedUsers().length > 0}
+                fallback={
                   <tr>
-                    <td style="font-family: var(--font-mono); font-size: 13px;">
-                      {(currentPage() - 1) * itemsPerPage + i() + 1}
-                    </td>
-                    <td>{u.username}</td>
-                    <td>{u.fullName}</td>
-                    <td>{u.email}</td>
-                    <td>{u.divisi?.name ?? "-"}</td>
-                    <td>
-                      <span
-                        class={`badge ${u.role === "ADMIN" ? "badge-izin" : "badge-approved"}`}
-                      >
-                        {u.role}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        class={`badge ${
-                          (u as any).status === "AKTIF"
-                            ? "badge-approved"
-                            : (u as any).status === "DITANGGUHKAN"
-                              ? "badge-pending"
-                              : "badge-rejected"
-                        }`}
-                      >
-                        {(u as any).status === "AKTIF"
-                          ? "Aktif"
-                          : (u as any).status === "DITANGGUHKAN"
-                            ? "Ditangguhkan"
-                            : "Nonaktif"}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        class="btn-secondary"
-                        style="display: inline-flex; width: auto; height: 32px; padding: 0 12px; font-size: 13px;"
-                        onClick={() => setEditingUser(u)}
-                      >
-                        Edit
-                      </button>{" "}
-                      <button
-                        class="btn-danger"
-                        style="display: inline-flex; width: auto; height: 32px; padding: 0 12px; font-size: 13px;"
-                        onClick={() =>
-                          setDeletingUser({ id: u.id, username: u.username })
-                        }
-                      >
-                        Hapus
-                      </button>
+                    <td
+                      colspan="8"
+                      style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
+                    >
+                      Belum ada data pengguna.
                     </td>
                   </tr>
+                }
+              >
+                <For each={paginatedUsers()}>
+                  {(u, i) => (
+                    <tr>
+                      <td style="font-family: var(--font-mono); font-size: 13px;">
+                        {(currentPage() - 1) * itemsPerPage + i() + 1}
+                      </td>
+                      <td>{u.username}</td>
+                      <td>{u.fullName}</td>
+                      <td>{u.email}</td>
+                      <td>{u.divisi?.name ?? "-"}</td>
+                      <td>
+                        <span
+                          class={`badge ${u.role === "ADMIN" ? "badge-izin" : "badge-approved"}`}
+                        >
+                          {u.role}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          class={`badge ${
+                            (u as any).status === "AKTIF"
+                              ? "badge-approved"
+                              : (u as any).status === "DITANGGUHKAN"
+                                ? "badge-pending"
+                                : "badge-rejected"
+                          }`}
+                        >
+                          {(u as any).status === "AKTIF"
+                            ? "Aktif"
+                            : (u as any).status === "DITANGGUHKAN"
+                              ? "Ditangguhkan"
+                              : "Nonaktif"}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          class="btn-secondary"
+                          style="display: inline-flex; width: auto; height: 32px; padding: 0 12px; font-size: 13px;"
+                          onClick={() => setEditingUser(u)}
+                        >
+                          Edit
+                        </button>{" "}
+                        <button
+                          class="btn-danger"
+                          style="display: inline-flex; width: auto; height: 32px; padding: 0 12px; font-size: 13px;"
+                          onClick={() =>
+                            setDeletingUser({ id: u.id, username: u.username })
+                          }
+                        >
+                          Hapus
+                        </button>
+                      </td>
+                    </tr>
+                  )}
+                </For>
+              </Show>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination Controls */}
+        <Show when={(usersData()?.total ?? 0) > 0}>
+          <div class="pagination-container">
+            <div class="pagination-info">
+              Menampilkan {paginatedUsers().length} dari {usersData()?.total ?? 0}{" "}
+              pengguna
+            </div>
+            <div class="pagination-buttons">
+              <button
+                class="btn-pagination"
+                disabled={currentPage() === 1}
+                onClick={() => setCurrentPage(currentPage() - 1)}
+              >
+                Sebelumnya
+              </button>
+              <For each={getPageNumbers(currentPage(), totalPages())}>
+                {(page) => (
+                  <Show
+                    when={page !== "..."}
+                    fallback={
+                      <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
+                        ...
+                      </span>
+                    }
+                  >
+                    <button
+                      class="btn-pagination"
+                      classList={{ active: currentPage() === page }}
+                      onClick={() => setCurrentPage(page as number)}
+                    >
+                      {page}
+                    </button>
+                  </Show>
                 )}
               </For>
-            </Show>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Controls */}
-      <Show when={users() && users()!.length > 0}>
-        <div class="pagination-container">
-          <div class="pagination-info">
-            Menampilkan {paginatedUsers().length} dari {users()!.length}{" "}
-            pengguna
+              <button
+                class="btn-pagination"
+                disabled={currentPage() === totalPages()}
+                onClick={() => setCurrentPage(currentPage() + 1)}
+              >
+                Berikutnya
+              </button>
+            </div>
           </div>
-          <div class="pagination-buttons">
-            <button
-              class="btn-pagination"
-              disabled={currentPage() === 1}
-              onClick={() => setCurrentPage(currentPage() - 1)}
-            >
-              Sebelumnya
-            </button>
-            <For each={getPageNumbers(currentPage(), totalPages())}>
-              {(page) => (
-                <Show
-                  when={page !== "..."}
-                  fallback={
-                    <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
-                      ...
-                    </span>
-                  }
-                >
-                  <button
-                    class="btn-pagination"
-                    classList={{ active: currentPage() === page }}
-                    onClick={() => setCurrentPage(page as number)}
-                  >
-                    {page}
-                  </button>
-                </Show>
-              )}
-            </For>
-            <button
-              class="btn-pagination"
-              disabled={currentPage() === totalPages()}
-              onClick={() => setCurrentPage(currentPage() + 1)}
-            >
-              Berikutnya
-            </button>
-          </div>
-        </div>
-      </Show>
+        </Show>
+      </Suspense>
     </main>
   );
 }

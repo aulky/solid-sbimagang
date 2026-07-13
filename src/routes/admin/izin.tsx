@@ -3,13 +3,13 @@ import {
   useSubmission,
   type RouteDefinition,
 } from "@solidjs/router";
-import { For, Show, createSignal } from "solid-js";
+import { For, Show, Suspense, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 import { getAdminIzin, approveIzin, getPageNumbers } from "~/lib";
 
 export const route = {
   preload() {
-    getAdminIzin();
+    getAdminIzin({ page: 1, limit: 10, search: "", type: "", status: "" });
   },
 } satisfies RouteDefinition;
 
@@ -27,12 +27,12 @@ const statusText = (status: string) => {
 };
 
 export default function AdminIzin() {
-  const records = createAsync(() => getAdminIzin());
   const approving = useSubmission(approveIzin);
   const [viewingAttachment, setViewingAttachment] = createSignal<string | null>(null);
 
   // Filter signals
   const [searchQuery, setSearchQuery] = createSignal("");
+  const [debouncedSearch, setDebouncedSearch] = createSignal("");
   const [filterType, setFilterType] = createSignal("");
   const [filterStatus, setFilterStatus] = createSignal("");
 
@@ -40,33 +40,33 @@ export default function AdminIzin() {
   const [currentPage, setCurrentPage] = createSignal(1);
   const itemsPerPage = 10;
 
-  // Filter logic
-  const filteredRecords = () => {
-    const list = records();
-    if (!list) return [];
-    return list.filter((r) => {
-      if (filterStatus() && r.status !== filterStatus()) return false;
-      if (filterType() && r.type !== filterType()) return false;
-
-      const query = searchQuery().toLowerCase().trim();
-      if (query) {
-        const nameMatch = r.user.fullName.toLowerCase().includes(query);
-        const usernameMatch = r.user.username.toLowerCase().includes(query);
-        if (!nameMatch && !usernameMatch) return false;
-      }
-      return true;
-    });
+  let debounceTimer: any;
+  const handleSearchInput = (val: string) => {
+    setSearchQuery(val);
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      setDebouncedSearch(val);
+      setCurrentPage(1);
+    }, 400);
   };
 
+  const recordsData = createAsync(() =>
+    getAdminIzin({
+      page: currentPage(),
+      limit: itemsPerPage,
+      search: debouncedSearch(),
+      type: filterType(),
+      status: filterStatus(),
+    })
+  );
+
   const totalPages = () => {
-    const list = filteredRecords();
-    return Math.max(1, Math.ceil(list.length / itemsPerPage));
+    const total = recordsData()?.total ?? 0;
+    return Math.max(1, Math.ceil(total / itemsPerPage));
   };
 
   const paginatedRecords = () => {
-    const list = filteredRecords();
-    const start = (currentPage() - 1) * itemsPerPage;
-    return list.slice(start, start + itemsPerPage);
+    return recordsData()?.items ?? [];
   };
 
   return (
@@ -80,10 +80,7 @@ export default function AdminIzin() {
             type="text"
             placeholder="Cari nama atau username..."
             value={searchQuery()}
-            onInput={(e) => {
-              setSearchQuery(e.currentTarget.value);
-              setCurrentPage(1);
-            }}
+            onInput={(e) => handleSearchInput(e.currentTarget.value)}
           />
         </div>
         <div class="form-group">
@@ -119,6 +116,7 @@ export default function AdminIzin() {
         <button
           onClick={() => {
             setSearchQuery("");
+            setDebouncedSearch("");
             setFilterType("");
             setFilterStatus("");
             setCurrentPage(1);
@@ -130,7 +128,12 @@ export default function AdminIzin() {
         </button>
       </div>
 
-      <div style="overflow-x: auto;">
+      <Suspense fallback={
+        <div style="text-align: center; padding: var(--space-6); color: var(--color-text-secondary);">
+          Memuat data pengajuan izin...
+        </div>
+      }>
+        <div style="overflow-x: auto;">
         <table class="data-table">
           <thead>
             <tr>
@@ -147,7 +150,7 @@ export default function AdminIzin() {
           </thead>
           <tbody>
             <Show
-              when={records() && records()!.length > 0}
+              when={paginatedRecords().length > 0}
               fallback={
                 <tr>
                   <td
@@ -285,10 +288,10 @@ export default function AdminIzin() {
       </div>
 
       {/* Pagination Controls */}
-      <Show when={records() && records()!.length > 0}>
+      <Show when={(recordsData()?.total ?? 0) > 0}>
         <div class="pagination-container">
           <div class="pagination-info">
-            Menampilkan {paginatedRecords().length} dari {records()!.length}{" "}
+            Menampilkan {paginatedRecords().length} dari {recordsData()?.total ?? 0}{" "}
             pengajuan izin
           </div>
           <div class="pagination-buttons">
@@ -329,6 +332,7 @@ export default function AdminIzin() {
           </div>
         </div>
       </Show>
+      </Suspense>
 
       <Show when={viewingAttachment()}>
         {(url) => (

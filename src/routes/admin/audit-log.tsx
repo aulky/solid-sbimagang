@@ -1,5 +1,5 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
-import { For, Show, createSignal } from "solid-js";
+import { For, Show, Suspense, createSignal } from "solid-js";
 import { getAdminAuditLogs, getPageNumbers } from "~/lib";
 
 export const route = {
@@ -10,17 +10,28 @@ export const route = {
 
 export default function AdminAuditLog() {
   const [searchQuery, setSearchQuery] = createSignal("");
+  const [debouncedSearch, setDebouncedSearch] = createSignal("");
   const [filterAction, setFilterAction] = createSignal("");
 
   // Pagination setup
   const [currentPage, setCurrentPage] = createSignal(1);
   const itemsPerPage = 15;
 
+  let debounceTimer: any;
+  const handleSearchInput = (val: string) => {
+    setSearchQuery(val);
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      setDebouncedSearch(val);
+      setCurrentPage(1);
+    }, 400); // 400ms debounce
+  };
+
   const logs = createAsync(() =>
     getAdminAuditLogs({
       page: currentPage(),
       limit: itemsPerPage,
-      search: searchQuery(),
+      search: debouncedSearch(),
       action: filterAction(),
     })
   );
@@ -93,10 +104,7 @@ export default function AdminAuditLog() {
             type="text"
             placeholder="Cari user, IP, lokasi, atau detail..."
             value={searchQuery()}
-            onInput={(e) => {
-              setSearchQuery(e.currentTarget.value);
-              setCurrentPage(1);
-            }}
+            onInput={(e) => handleSearchInput(e.currentTarget.value)}
           />
         </div>
         <div class="form-group">
@@ -130,6 +138,7 @@ export default function AdminAuditLog() {
         <button
           onClick={() => {
             setSearchQuery("");
+            setDebouncedSearch("");
             setFilterAction("");
             setCurrentPage(1);
           }}
@@ -140,139 +149,145 @@ export default function AdminAuditLog() {
         </button>
       </div>
 
-      <div style="overflow-x: auto;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Waktu</th>
-              <th>Pengguna</th>
-              <th>Aktivitas</th>
-              <th>Detail</th>
-              <th>IP Address</th>
-              <th>Lokasi</th>
-              <th>Browser / OS</th>
-            </tr>
-          </thead>
-          <tbody>
-            <Show
-              when={paginatedLogs().length > 0}
-              fallback={
-                <tr>
-                  <td
-                    colspan="8"
-                    style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
-                  >
-                    Tidak ada log aktivitas untuk kriteria yang dipilih.
-                  </td>
-                </tr>
-              }
-            >
-              <For each={paginatedLogs()}>
-                {(row, idx) => (
+      <Suspense fallback={
+        <div style="text-align: center; padding: var(--space-6); color: var(--color-text-secondary);">
+          Memuat data log aktivitas...
+        </div>
+      }>
+        <div style="overflow-x: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Waktu</th>
+                <th>Pengguna</th>
+                <th>Aktivitas</th>
+                <th>Detail</th>
+                <th>IP Address</th>
+                <th>Lokasi</th>
+                <th>Browser / OS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <Show
+                when={paginatedLogs().length > 0}
+                fallback={
                   <tr>
-                    <td style="font-family: var(--font-mono); font-size: 13px;">
-                      {(currentPage() - 1) * itemsPerPage + idx() + 1}
-                    </td>
-                    <td style="font-size: 13px; white-space: nowrap;">
-                      <div>{formatDate(row.createdAt)}</div>
-                      <div style="font-size: 12px; color: var(--color-text-secondary);">{formatTime(row.createdAt)}</div>
-                    </td>
-                    <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title={row.user?.fullName ? `${row.user.fullName} (@${row.username})` : row.username || "Anonim"}>
-                      <Show when={row.user} fallback={
-                        <span>
-                          <strong style="color: var(--color-text-secondary); display: block; overflow: hidden; text-overflow: ellipsis;">{row.username || "Anonim"}</strong>
-                          <div style="font-size: 11px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis;">Non-aktif / Tamu</div>
-                        </span>
-                      }>
-                        <strong style="display: block; overflow: hidden; text-overflow: ellipsis;">{row.user?.fullName}</strong>
-                        <div style="font-size: 12px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis;">
-                          @{row.username}
-                        </div>
-                      </Show>
-                    </td>
-                    <td>
-                      <span class={`badge ${getActionBadgeClass(row.action)}`}>
-                        {row.action.replace(/_/g, " ")}
-                      </span>
-                    </td>
                     <td
-                      style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; font-size: 13px;"
-                      title={row.details || ""}
+                      colspan="8"
+                      style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
                     >
-                      {row.details || "-"}
-                    </td>
-                    <td
-                      style="font-family: var(--font-mono); font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                      title={row.ip || "-"}
-                    >
-                      {row.ip || "-"}
-                    </td>
-                    <td
-                      style="font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                      title={row.location || ""}
-                    >
-                      {row.location || "-"}
-                    </td>
-                    <td
-                      style="font-size: 12px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                      title={row.userAgent || ""}
-                    >
-                      {row.userAgent || "-"}
+                      Tidak ada log aktivitas untuk kriteria yang dipilih.
                     </td>
                   </tr>
+                }
+              >
+                <For each={paginatedLogs()}>
+                  {(row, idx) => (
+                    <tr>
+                      <td style="font-family: var(--font-mono); font-size: 13px;">
+                        {(currentPage() - 1) * itemsPerPage + idx() + 1}
+                      </td>
+                      <td style="font-size: 13px; white-space: nowrap;">
+                        <div>{formatDate(row.createdAt)}</div>
+                        <div style="font-size: 12px; color: var(--color-text-secondary);">{formatTime(row.createdAt)}</div>
+                      </td>
+                      <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title={row.user?.fullName ? `${row.user.fullName} (@${row.username})` : row.username || "Anonim"}>
+                        <Show when={row.user} fallback={
+                          <span>
+                            <strong style="color: var(--color-text-secondary); display: block; overflow: hidden; text-overflow: ellipsis;">{row.username || "Anonim"}</strong>
+                            <div style="font-size: 11px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis;">Non-aktif / Tamu</div>
+                          </span>
+                        }>
+                          <strong style="display: block; overflow: hidden; text-overflow: ellipsis;">{row.user?.fullName}</strong>
+                          <div style="font-size: 12px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis;">
+                            @{row.username}
+                          </div>
+                        </Show>
+                      </td>
+                      <td>
+                        <span class={`badge ${getActionBadgeClass(row.action)}`}>
+                          {row.action.replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td
+                        style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; font-size: 13px;"
+                        title={row.details || ""}
+                      >
+                        {row.details || "-"}
+                      </td>
+                      <td
+                        style="font-family: var(--font-mono); font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        title={row.ip || "-"}
+                      >
+                        {row.ip || "-"}
+                      </td>
+                      <td
+                        style="font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        title={row.location || ""}
+                      >
+                        {row.location || "-"}
+                      </td>
+                      <td
+                        style="font-size: 12px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        title={row.userAgent || ""}
+                      >
+                        {row.userAgent || "-"}
+                      </td>
+                    </tr>
+                  )}
+                </For>
+              </Show>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination Controls */}
+        <Show when={(logs()?.total ?? 0) > 0}>
+          <div class="pagination-container">
+            <div class="pagination-info">
+              Menampilkan {paginatedLogs().length} dari{" "}
+              {logs()?.total ?? 0} log aktivitas
+            </div>
+            <div class="pagination-buttons">
+              <button
+                class="btn-pagination"
+                disabled={currentPage() === 1}
+                onClick={() => setCurrentPage(currentPage() - 1)}
+              >
+                Sebelumnya
+              </button>
+              <For each={getPageNumbers(currentPage(), totalPages())}>
+                {(page) => (
+                  <Show
+                    when={page !== "..."}
+                    fallback={
+                      <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
+                        ...
+                      </span>
+                    }
+                  >
+                    <button
+                      class="btn-pagination"
+                      classList={{ active: currentPage() === page }}
+                      onClick={() => setCurrentPage(page as number)}
+                    >
+                      {page}
+                    </button>
+                  </Show>
                 )}
               </For>
-            </Show>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Controls */}
-      <Show when={(logs()?.total ?? 0) > 0}>
-        <div class="pagination-container">
-          <div class="pagination-info">
-            Menampilkan {paginatedLogs().length} dari{" "}
-            {logs()?.total ?? 0} log aktivitas
+              <button
+                class="btn-pagination"
+                disabled={currentPage() === totalPages()}
+                onClick={() => setCurrentPage(currentPage() + 1)}
+              >
+                Berikutnya
+              </button>
+            </div>
           </div>
-          <div class="pagination-buttons">
-            <button
-              class="btn-pagination"
-              disabled={currentPage() === 1}
-              onClick={() => setCurrentPage(currentPage() - 1)}
-            >
-              Sebelumnya
-            </button>
-            <For each={getPageNumbers(currentPage(), totalPages())}>
-              {(page) => (
-                <Show
-                  when={page !== "..."}
-                  fallback={
-                    <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
-                      ...
-                    </span>
-                  }
-                >
-                  <button
-                    class="btn-pagination"
-                    classList={{ active: currentPage() === page }}
-                    onClick={() => setCurrentPage(page as number)}
-                  >
-                    {page}
-                  </button>
-                </Show>
-              )}
-            </For>
-            <button
-              class="btn-pagination"
-              disabled={currentPage() === totalPages()}
-              onClick={() => setCurrentPage(currentPage() + 1)}
-            >
-              Berikutnya
-            </button>
-          </div>
-        </div>
-      </Show>
+        </Show>
+      </Suspense>
     </main>
   );
 }
