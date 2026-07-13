@@ -110,6 +110,7 @@ const getSettings = async () => {
       jamMasuk: "08:00",
       toleransiMenit: 0,
       lokasiKantor: "Kantor PT. SBI Cilacap",
+      jamMulaiCheckout: "16:00",
     };
   }
 };
@@ -120,6 +121,12 @@ export const getSystemSettings = query(async () => {
   return getSettings();
 }, "systemSettings");
 
+export const getPublicSettings = query(async () => {
+  "use server";
+  await requireUser();
+  return getSettings();
+}, "publicSettings");
+
 export const updateSystemSettings = action(async (formData: FormData) => {
   "use server";
   await requireAdmin();
@@ -128,8 +135,9 @@ export const updateSystemSettings = action(async (formData: FormData) => {
   const lokasiKantor = String(
     formData.get("lokasiKantor") || "Kantor PT. SBI Cilacap",
   );
+  const jamMulaiCheckout = String(formData.get("jamMulaiCheckout") || "16:00");
 
-  const settings = { jamMasuk, toleransiMenit, lokasiKantor };
+  const settings = { jamMasuk, toleransiMenit, lokasiKantor, jamMulaiCheckout };
   const filePath = path.join(process.cwd(), "settings.json");
   await fs.writeFile(filePath, JSON.stringify(settings, null, 2), "utf-8");
   await logActivity("UPDATE_PENGATURAN", "update settings success");
@@ -196,6 +204,19 @@ export const checkOut = action(async () => {
   }
   if (existing.checkOut) {
     return new Error("Anda sudah Check-Out hari ini.");
+  }
+
+  // ponytail: checkout time gate — enforce minimum checkout hour from settings (allows 60 mins early check-out)
+  const settings = await getSettings();
+  const jamMulaiCheckout = settings.jamMulaiCheckout || "16:00";
+  const [coHour, coMin] = jamMulaiCheckout.split(":").map(Number);
+  const targetMinutes = coHour * 60 + coMin;
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  if (nowMinutes < targetMinutes - 60) {
+    const allowedMin = (targetMinutes - 60) % 60;
+    const allowedHour = Math.floor((targetMinutes - 60) / 60);
+    const allowedTimeStr = `${String(allowedHour).padStart(2, "0")}:${String(allowedMin).padStart(2, "0")}`;
+    return new Error(`Check-Out baru bisa dilakukan mulai jam ${allowedTimeStr} (mendekati jam ${jamMulaiCheckout}).`);
   }
 
   await db.absensi.update({
@@ -368,8 +389,7 @@ export const changePassword = action(async (formData: FormData) => {
 export const getAdminStats = query(async () => {
   "use server";
   await requireAdmin();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getLocalDateAsUTC();
 
   const [totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin] =
     await Promise.all([
@@ -386,8 +406,7 @@ export const getAdminStats = query(async () => {
 export const getTodayAttendanceStatus = query(async () => {
   "use server";
   await requireAdmin();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getLocalDateAsUTC();
 
   const totalInterns = await db.user.count({
     where: { role: "USER", status: { not: "NONAKTIF" } },
@@ -732,13 +751,53 @@ export const exportCSV = query(async () => {
 
 // ========== ADMIN: AUDIT LOGS ==========
 
-export const getAdminAuditLogs = query(async () => {
+export const getAdminAuditLogs = query(async (options?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  action?: string;
+}) => {
   "use server";
   await requireAdmin();
-  return (db as any).auditLog.findMany({
-    include: { user: { select: { fullName: true, username: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+
+  const page = options?.page ?? 1;
+  const limit = options?.limit ?? 15;
+  const search = options?.search?.trim() ?? "";
+  const actionFilter = options?.action ?? "";
+
+  const skip = (page - 1) * limit;
+
+  const where: any = {};
+  if (actionFilter) {
+    where.action = actionFilter;
+  }
+
+  if (search) {
+    where.OR = [
+      { username: { contains: search } },
+      { details: { contains: search } },
+      { ip: { contains: search } },
+      { location: { contains: search } },
+      {
+        user: {
+          fullName: { contains: search },
+        },
+      },
+    ];
+  }
+
+  const [items, total] = await Promise.all([
+    (db as any).auditLog.findMany({
+      where,
+      include: { user: { select: { fullName: true, username: true } } },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    (db as any).auditLog.count({ where }),
+  ]);
+
+  return { items, total };
 }, "adminAuditLogs");
 
 export async function logPageAccess(pathname: string) {

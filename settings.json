@@ -1,5 +1,6 @@
 {
   "jamMasuk": "07:30",
   "toleransiMenit": 15,
-  "lokasiKantor": "Kantor PT. SBI Cilacap"
+  "lokasiKantor": "Kantor PT. SBI Cilacap",
+  "jamMulaiCheckout": "16:00"
 }

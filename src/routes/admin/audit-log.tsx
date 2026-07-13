@@ -4,13 +4,11 @@ import { getAdminAuditLogs, getPageNumbers } from "~/lib";
 
 export const route = {
   preload() {
-    getAdminAuditLogs();
+    getAdminAuditLogs({ page: 1, limit: 15, search: "", action: "" });
   },
 } satisfies RouteDefinition;
 
 export default function AdminAuditLog() {
-  const logs = createAsync(() => getAdminAuditLogs());
-
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filterAction, setFilterAction] = createSignal("");
 
@@ -18,36 +16,22 @@ export default function AdminAuditLog() {
   const [currentPage, setCurrentPage] = createSignal(1);
   const itemsPerPage = 15;
 
+  const logs = createAsync(() =>
+    getAdminAuditLogs({
+      page: currentPage(),
+      limit: itemsPerPage,
+      search: searchQuery(),
+      action: filterAction(),
+    })
+  );
+
   const totalPages = () => {
-    const list = filteredLogs();
-    return Math.max(1, Math.ceil(list.length / itemsPerPage));
-  };
-
-  const filteredLogs = () => {
-    const list = logs();
-    if (!list) return [];
-    return list.filter((log: any) => {
-      // Action type filter
-      if (filterAction() && log.action !== filterAction()) return false;
-
-      // Text query search
-      const q = searchQuery().toLowerCase().trim();
-      if (q) {
-        const usernameMatch = log.username?.toLowerCase().includes(q);
-        const nameMatch = log.user?.fullName?.toLowerCase().includes(q);
-        const detailMatch = log.details?.toLowerCase().includes(q);
-        const ipMatch = log.ip?.toLowerCase().includes(q);
-        const locationMatch = log.location?.toLowerCase().includes(q);
-        if (!usernameMatch && !nameMatch && !detailMatch && !ipMatch && !locationMatch) return false;
-      }
-      return true;
-    });
+    const total = logs()?.total ?? 0;
+    return Math.max(1, Math.ceil(total / itemsPerPage));
   };
 
   const paginatedLogs = () => {
-    const list = filteredLogs();
-    const start = (currentPage() - 1) * itemsPerPage;
-    return list.slice(start, start + itemsPerPage);
+    return logs()?.items ?? [];
   };
 
   const getActionBadgeClass = (action: string) => {
@@ -194,15 +178,15 @@ export default function AdminAuditLog() {
                       <div>{formatDate(row.createdAt)}</div>
                       <div style="font-size: 12px; color: var(--color-text-secondary);">{formatTime(row.createdAt)}</div>
                     </td>
-                    <td>
+                    <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title={row.user?.fullName ? `${row.user.fullName} (@${row.username})` : row.username || "Anonim"}>
                       <Show when={row.user} fallback={
                         <span>
-                          <strong style="color: var(--color-text-secondary);">{row.username || "Anonim"}</strong>
-                          <div style="font-size: 11px; color: var(--color-text-secondary);">Non-aktif / Tamu</div>
+                          <strong style="color: var(--color-text-secondary); display: block; overflow: hidden; text-overflow: ellipsis;">{row.username || "Anonim"}</strong>
+                          <div style="font-size: 11px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis;">Non-aktif / Tamu</div>
                         </span>
                       }>
-                        <strong>{row.user?.fullName}</strong>
-                        <div style="font-size: 12px; color: var(--color-text-secondary);">
+                        <strong style="display: block; overflow: hidden; text-overflow: ellipsis;">{row.user?.fullName}</strong>
+                        <div style="font-size: 12px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis;">
                           @{row.username}
                         </div>
                       </Show>
@@ -213,12 +197,21 @@ export default function AdminAuditLog() {
                       </span>
                     </td>
                     <td
-                      style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; font-size: 13px;"
+                      style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; font-size: 13px;"
                       title={row.details || ""}
                     >
                       {row.details || "-"}
                     </td>
-                    <td style="font-family: var(--font-mono); font-size: 13px;">
+                    <td
+                      style="font-family: var(--font-mono); font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;"
+                      title={`Klik untuk menyalin IP: ${row.ip || "-"}`}
+                      onClick={() => {
+                        if (row.ip) {
+                          navigator.clipboard.writeText(row.ip);
+                          alert(`IP Address (${row.ip}) disalin ke clipboard!`);
+                        }
+                      }}
+                    >
                       {row.ip || "-"}
                     </td>
                     <td style="font-size: 13px;" title={row.location || ""}>
@@ -236,11 +229,11 @@ export default function AdminAuditLog() {
       </div>
 
       {/* Pagination Controls */}
-      <Show when={filteredLogs().length > 0}>
+      <Show when={(logs()?.total ?? 0) > 0}>
         <div class="pagination-container">
           <div class="pagination-info">
             Menampilkan {paginatedLogs().length} dari{" "}
-            {filteredLogs().length} log aktivitas
+            {logs()?.total ?? 0} log aktivitas
           </div>
           <div class="pagination-buttons">
             <button

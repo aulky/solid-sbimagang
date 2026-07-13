@@ -24,7 +24,7 @@ async function main() {
     data: {
       username: "admin",
       password: adminPassword,
-      fullName: "Admin Pengelola Magang",
+      fullName: "Admin SBI",
       email: "admin@solusibangunindonesia.co.id",
       phone: "081234567890",
       role: "ADMIN",
@@ -33,13 +33,13 @@ async function main() {
   });
 
   // Create Intern User 1 (IT)
-  const user1Password = hashPassword("intern123456");
+  const user1Password = hashPassword("alif123456");
   await db.user.create({
     data: {
-      username: "budi",
+      username: "alif",
       password: user1Password,
-      fullName: "Budi Santoso",
-      email: "budi.santoso@magang.sbi.co.id",
+      fullName: "Alif Zawjati Randri",
+      email: "alif.zawjati@magang.sbi.co.id",
       phone: "089876543210",
       role: "USER",
       status: "AKTIF"
@@ -47,13 +47,13 @@ async function main() {
   });
 
   // Create Intern User 2 (HR)
-  const user2Password = hashPassword("intern123456");
+  const user2Password = hashPassword("jeki123456");
   await db.user.create({
     data: {
-      username: "siti",
+      username: "jekifauzan",
       password: user2Password,
-      fullName: "Siti Rahma",
-      email: "siti.rahma@magang.sbi.co.id",
+      fullName: "Muhammad Zaki Fauzan",
+      email: "jeki.fauzan@magang.sbi.co.id",
       phone: "085678901234",
       role: "USER",
       status: "AKTIF"

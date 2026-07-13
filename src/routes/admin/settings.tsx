@@ -47,6 +47,17 @@ export default function AdminSettings() {
               </div>
 
               <div class="form-group">
+                <label for="jam-mulai-checkout">Jam Mulai Check-Out (Format 24 Jam)</label>
+                <input
+                  id="jam-mulai-checkout"
+                  name="jamMulaiCheckout"
+                  type="time"
+                  value={data().jamMulaiCheckout || "16:00"}
+                  required
+                />
+              </div>
+
+              <div class="form-group">
                 <label for="lokasi-kantor">Lokasi Kantor (Default)</label>
                 <input
                   id="lokasi-kantor"
