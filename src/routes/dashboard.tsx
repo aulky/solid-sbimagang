@@ -154,110 +154,130 @@ export default function Dashboard() {
           }}
         </Show>
         <Show
-          when={today()}
+          when={today() && today()!.status === "IZIN"}
           fallback={
-            <div>
-              <p class="stat-label">Belum Check-In</p>
-              <form action={checkIn} method="post">
-                <button
-                  class="btn-primary"
-                  type="submit"
-                  disabled={checkingIn.pending}
-                >
-                  {checkingIn.pending ? "Memproses..." : "Check-In"}
-                </button>
-              </form>
-            </div>
+            <Show
+              when={today()}
+              fallback={
+                <div>
+                  <Show when={(checkingIn.result as any) instanceof Error}>
+                    <div class="alert-error" style="margin-bottom: 10px; font-size: 13px;">
+                      {((checkingIn.result as any) as Error).message}
+                    </div>
+                  </Show>
+                  <p class="stat-label">Belum Check-In</p>
+                  <form action={checkIn} method="post">
+                    <button
+                      class="btn-primary"
+                      type="submit"
+                      disabled={checkingIn.pending}
+                    >
+                      {checkingIn.pending ? "Memproses..." : "Check-In"}
+                    </button>
+                  </form>
+                </div>
+              }
+            >
+              {(att) => (
+                <div>
+                  <p>
+                    <span class="stat-label">Check-In:</span>{" "}
+                    {att().checkIn
+                      ? new Date(att().checkIn as Date).toLocaleTimeString("id-ID")
+                      : "-"}
+                  </p>
+                  <Show
+                    when={att().checkOut}
+                    fallback={
+                      <div>
+                        <Show when={(checkingOut.result as any) instanceof Error}>
+                          <div class="alert-error" style="margin-bottom: 10px; font-size: 13px;">
+                            {((checkingOut.result as any) as Error).message}
+                          </div>
+                        </Show>
+                        <form action={checkOut} method="post">
+                          <button
+                            class="btn-primary"
+                            type="submit"
+                            disabled={
+                              checkingOut.pending ||
+                              (() => {
+                                const s = settings();
+                                if (!s) return false;
+                                const jam = s.jamMulaiCheckout || "16:00";
+                                const [h, m] = jam.split(":").map(Number);
+                                const d = new Date();
+                                return d.getHours() * 60 + d.getMinutes() < h * 60 + m - 60;
+                              })()
+                            }
+                          >
+                            {checkingOut.pending ? "Memproses..." : "Check-Out"}
+                          </button>
+                        </form>
+                        {(() => {
+                          const s = settings();
+                          if (!s) return null;
+                          const jam = s.jamMulaiCheckout || "16:00";
+                          const [h, m] = jam.split(":").map(Number);
+                          const target = h * 60 + m;
+                          const d = new Date();
+                          const nowMin = d.getHours() * 60 + d.getMinutes();
+                          if (nowMin < target - 60) {
+                            const ah = Math.floor((target - 60) / 60);
+                            const am = (target - 60) % 60;
+                            const allowedStr = `${String(ah).padStart(2, "0")}:${String(am).padStart(2, "0")}`;
+                            return (
+                              <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 6px;">
+                                Check-Out tersedia mulai jam {allowedStr}
+                              </p>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
+                    }
+                  >
+                    {(co) => (
+                      <div>
+                        <p>
+                          <span class="stat-label">Check-Out:</span>{" "}
+                          {new Date(co() as Date).toLocaleTimeString("id-ID")}
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                          <span
+                            class={`badge ${
+                              att().status === "HADIR"
+                                ? "badge-hadir"
+                                : att().status === "TELAT"
+                                  ? "badge-telat"
+                                  : att().status === "ALPHA"
+                                    ? "badge-alpha"
+                                    : "badge-izin"
+                            }`}
+                          >
+                            {att().status}
+                          </span>
+                          <span style="font-size: 13px; color: var(--color-success); font-weight: 500;">
+                            Hari ini sudah Check-Out
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </Show>
+                </div>
+              )}
+            </Show>
           }
         >
-          {(att) => (
-            <div>
-              <p>
-                <span class="stat-label">Check-In:</span>{" "}
-                {att().checkIn
-                  ? new Date(att().checkIn as Date).toLocaleTimeString("id-ID")
-                  : "-"}
-              </p>
-              <Show
-                when={att().checkOut}
-                fallback={
-                  <div>
-                    <Show when={(checkingOut.result as any) instanceof Error}>
-                      <div class="alert-error" style="margin-bottom: 10px; font-size: 13px;">
-                        {((checkingOut.result as any) as Error).message}
-                      </div>
-                    </Show>
-                    <form action={checkOut} method="post">
-                      <button
-                        class="btn-primary"
-                        type="submit"
-                        disabled={
-                          checkingOut.pending ||
-                          (() => {
-                            const s = settings();
-                            if (!s) return false;
-                            const jam = s.jamMulaiCheckout || "16:00";
-                            const [h, m] = jam.split(":").map(Number);
-                            const d = new Date();
-                            return d.getHours() * 60 + d.getMinutes() < h * 60 + m - 60;
-                          })()
-                        }
-                      >
-                        {checkingOut.pending ? "Memproses..." : "Check-Out"}
-                      </button>
-                    </form>
-                    {(() => {
-                      const s = settings();
-                      if (!s) return null;
-                      const jam = s.jamMulaiCheckout || "16:00";
-                      const [h, m] = jam.split(":").map(Number);
-                      const target = h * 60 + m;
-                      const d = new Date();
-                      const nowMin = d.getHours() * 60 + d.getMinutes();
-                      if (nowMin < target - 60) {
-                        const ah = Math.floor((target - 60) / 60);
-                        const am = (target - 60) % 60;
-                        const allowedStr = `${String(ah).padStart(2, "0")}:${String(am).padStart(2, "0")}`;
-                        return (
-                          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 6px;">
-                            Check-Out tersedia mulai jam {allowedStr}
-                          </p>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
-                }
-              >
-                {(co) => (
-                  <div>
-                    <p>
-                      <span class="stat-label">Check-Out:</span>{" "}
-                      {new Date(co() as Date).toLocaleTimeString("id-ID")}
-                    </p>
-                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
-                      <span
-                        class={`badge ${
-                          att().status === "HADIR"
-                            ? "badge-hadir"
-                            : att().status === "TELAT"
-                              ? "badge-telat"
-                              : att().status === "ALPHA"
-                                ? "badge-alpha"
-                                : "badge-izin"
-                        }`}
-                      >
-                        {att().status}
-                      </span>
-                      <span style="font-size: 13px; color: var(--color-success); font-weight: 500;">
-                        Hari ini sudah Check-Out
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </Show>
-            </div>
-          )}
+          <div style="background: rgba(37, 99, 235, 0.1); border-left: 4px solid var(--color-info); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: var(--space-1);">
+            <p style="margin: 0; color: var(--color-info); font-weight: 600; display: flex; align-items: center; gap: 8px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              Status Kehadiran: Izin Aktif
+            </p>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--color-text-secondary); line-height: 1.4;">
+              Hari ini Anda terdaftar sedang izin/sakit ({today()?.notes || "-"}). Anda tidak perlu melakukan check-in atau check-out.
+            </p>
+          </div>
         </Show>
       </div>
     </div>

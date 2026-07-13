@@ -158,15 +158,23 @@ export const checkIn = action(async () => {
   const existing = await db.absensi.findUnique({
     where: { userId_date: { userId: user.id, date: today } },
   });
+  if (existing?.status === "IZIN") {
+    return new Error("Anda tidak perlu melakukan absensi karena sedang izin hari ini.");
+  }
   if (existing?.checkIn) {
     return new Error("Anda sudah Check-In hari ini.");
   }
 
   const settings = await getSettings();
   const [tHour, tMin] = settings.jamMasuk.split(":").map(Number);
-  const limitMinutes = tHour * 60 + tMin + Number(settings.toleransiMenit || 0);
+  const startCheckInMinutes = tHour * 60 + tMin;
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
+  if (nowMinutes < startCheckInMinutes) {
+    return new Error(`Check-In baru bisa dilakukan mulai jam ${settings.jamMasuk}.`);
+  }
+
+  const limitMinutes = startCheckInMinutes + Number(settings.toleransiMenit || 0);
   const status = nowMinutes > limitMinutes ? "TELAT" : "HADIR";
   const location = settings.lokasiKantor || "Kantor PT. SBI Cilacap";
 
@@ -202,21 +210,25 @@ export const checkOut = action(async () => {
   if (!existing?.checkIn) {
     return new Error("Anda belum Check-In hari ini.");
   }
+  if (existing.status === "IZIN") {
+    return new Error("Anda tidak perlu melakukan absensi karena sedang izin hari ini.");
+  }
   if (existing.checkOut) {
     return new Error("Anda sudah Check-Out hari ini.");
   }
 
-  // ponytail: checkout time gate — enforce minimum checkout hour from settings (allows 60 mins early check-out)
+  // ponytail: checkout time gate — enforce checkout window from settings (1 hour early until 23:59)
   const settings = await getSettings();
   const jamMulaiCheckout = settings.jamMulaiCheckout || "16:00";
   const [coHour, coMin] = jamMulaiCheckout.split(":").map(Number);
   const targetMinutes = coHour * 60 + coMin;
+  const earliestCheckout = targetMinutes - 60;
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  if (nowMinutes < targetMinutes - 60) {
-    const allowedMin = (targetMinutes - 60) % 60;
-    const allowedHour = Math.floor((targetMinutes - 60) / 60);
-    const allowedTimeStr = `${String(allowedHour).padStart(2, "0")}:${String(allowedMin).padStart(2, "0")}`;
-    return new Error(`Check-Out baru bisa dilakukan mulai jam ${allowedTimeStr} (mendekati jam ${jamMulaiCheckout}).`);
+  if (nowMinutes < earliestCheckout) {
+    const ah = Math.floor(earliestCheckout / 60);
+    const am = earliestCheckout % 60;
+    const allowedTimeStr = `${String(ah).padStart(2, "0")}:${String(am).padStart(2, "0")}`;
+    return new Error(`Check-Out hanya bisa dilakukan antara jam ${allowedTimeStr} - 23:59.`);
   }
 
   await db.absensi.update({
