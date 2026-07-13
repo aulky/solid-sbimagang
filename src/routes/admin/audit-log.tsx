@@ -203,21 +203,21 @@ export default function AdminAuditLog() {
                       {row.details || "-"}
                     </td>
                     <td
-                      style="font-family: var(--font-mono); font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;"
-                      title={`Klik untuk menyalin IP: ${row.ip || "-"}`}
-                      onClick={() => {
-                        if (row.ip) {
-                          navigator.clipboard.writeText(row.ip);
-                          alert(`IP Address (${row.ip}) disalin ke clipboard!`);
-                        }
-                      }}
+                      style="font-family: var(--font-mono); font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                      title={row.ip || "-"}
                     >
                       {row.ip || "-"}
                     </td>
-                    <td style="font-size: 13px;" title={row.location || ""}>
+                    <td
+                      style="font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                      title={row.location || ""}
+                    >
                       {row.location || "-"}
                     </td>
-                    <td style="font-size: 12px;" title={row.userAgent || ""}>
+                    <td
+                      style="font-size: 12px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                      title={row.userAgent || ""}
+                    >
                       {row.userAgent || "-"}
                     </td>
                   </tr>
