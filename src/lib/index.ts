@@ -72,6 +72,9 @@ export const loginOrRegister = action(async (formData: FormData) => {
     );
     return redirect(user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
   } catch (err) {
+    if (loginType === "login") {
+      await logActivity("LOGIN_GAGAL", `login failed: @${username}`);
+    }
     return err as Error;
   }
 });

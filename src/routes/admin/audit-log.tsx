@@ -63,6 +63,7 @@ export default function AdminAuditLog() {
       case "HAPUS_PENGGUNA":
       case "HAPUS_DIVISI":
       case "TOLAK_IZIN":
+      case "LOGIN_GAGAL":
         return "badge-rejected";
       case "AKSES_HALAMAN":
       case "PENGAJUAN_IZIN":
@@ -118,6 +119,7 @@ export default function AdminAuditLog() {
           >
             <option value="">Semua Aktivitas</option>
             <option value="LOGIN">LOGIN</option>
+            <option value="LOGIN_GAGAL">LOGIN GAGAL</option>
             <option value="REGISTER">REGISTER</option>
             <option value="LOGOUT">LOGOUT</option>
             <option value="AKSES_HALAMAN">AKSES HALAMAN</option>
