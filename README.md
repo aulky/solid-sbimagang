@@ -1,6 +1,6 @@
-# Dokumentasi Sistem Absensi Magang PT Solusi Bangun Indonesia (PT SBI) Cilacap
+# Dokumentasi SAPA - Sistem Absensi Peserta Magang
 
-Sistem Absensi Magang adalah aplikasi web modern berbasis **SolidJS (SolidStart)** yang dirancang untuk mempermudah pemantauan kehadiran, keterlambatan, pengajuan izin, dan pelaporan operasional harian anak magang di PT. Solusi Bangun Indonesia, Cilacap.
+SAPA - Sistem Absensi Peserta Magang adalah aplikasi web modern berbasis **SolidJS (SolidStart)** yang dirancang untuk mempermudah pemantauan kehadiran, keterlambatan, pengajuan izin, dan pelaporan operasional harian anak magang.
 
 ---
 
