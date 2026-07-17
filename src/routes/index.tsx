@@ -15,7 +15,7 @@ export default function Home() {
     <main class="login-container">
       <div class="login-card" style="text-align: center;">
         <img
-          src="/logo-sbi.png"
+          src="/logo-sapa.png"
           alt="PT SBI Logo"
           style="height: 60px; margin-bottom: var(--space-3);"
         />

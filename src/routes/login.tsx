@@ -23,7 +23,7 @@ export default function Login(props: RouteSectionProps) {
     <main class="login-container">
       <div class="login-card" style="text-align: center;">
         <img
-          src={theme() === "dark" ? "/logo-sbi-putih.png" : "/logo-sbi.png"}
+          src={theme() === "dark" ? "/logo-sapaa-putih.png" : "/logo-sapa.png"}
           alt="PT SBI Logo"
           style="height: 36px; width: auto; object-fit: contain; margin-bottom: var(--space-4);"
         />

@@ -254,8 +254,8 @@ export default function App() {
                         <img
                           src={
                             theme() === "dark"
-                              ? "/logo-sbi-putih.png"
-                              : "/logo-sbi.png"
+                              ? "/logo-sapaa-putih.png"
+                              : "/logo-sapa.png"
                           }
                           alt="PT SBI Logo"
                           class="sidebar-logo"
