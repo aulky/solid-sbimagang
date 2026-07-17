@@ -24,15 +24,10 @@ export default function Login(props: RouteSectionProps) {
       <div class="login-card" style="text-align: center;">
         <img
           src={theme() === "dark" ? "/logo-sapaa-putih.png" : "/logo-sapa.png"}
-          alt="PT SBI Logo"
-          style="height: 36px; width: auto; object-fit: contain; margin-bottom: var(--space-4);"
+          alt="SAPA - Sistem Absensi Peserta Magang"
+          style="height: 55px; width: auto; object-fit: contain; margin-bottom: var(--space-4);"
         />
-        <h1 style="font-size: 1.5rem; margin-bottom: var(--space-1); font-family: var(--font-headline); font-weight: 800;">
-          Sistem Absensi Magang
-        </h1>
-        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-5); font-size: 14px;">
-          PT. Solusi Bangun Indonesia Cilacap
-        </p>
+
 
         <form action={loginOrRegister} method="post">
           <input

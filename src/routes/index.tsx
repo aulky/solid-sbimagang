@@ -16,13 +16,10 @@ export default function Home() {
       <div class="login-card" style="text-align: center;">
         <img
           src="/logo-sapa.png"
-          alt="PT SBI Logo"
+          alt="Logo SAPA"
           style="height: 60px; margin-bottom: var(--space-3);"
         />
-        <h2 style="margin-bottom: var(--space-2);">Sistem Absensi Magang</h2>
-        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-4);">
-          PT. Solusi Bangun Indonesia — Cilacap
-        </p>
+        <h2 style="margin-bottom: var(--space-2);">Sistem Absensi Peserta Magang</h2>
         <Show when={user()}>
           {(u) => (
             <div>

@@ -63,7 +63,6 @@ export default function Laporan() {
 </head>
 <body>
   <h2>Laporan Kehadiran Anak Magang</h2>
-  <p>PT. Solusi Bangun Indonesia Cilacap</p>
   <table>
     <thead>
       <tr>
@@ -258,11 +257,11 @@ export default function Laporan() {
         <div style="display: flex; align-items: center; border-bottom: 3px double #1e293b; padding-bottom: 15px; margin-bottom: 10px; gap: 15px; width: 100%; box-sizing: border-box;">
           <img
             src="/logo-sapa.png"
-            alt="PT SBI"
+            alt="SAPA - Sistem Absensi Peserta Magang"
             style="height: 55px;"
           />
           <div>
-            <h2 style="margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; color: #0f172a;">PT SOLUSI BANGUN INDONESIA Tbk</h2>
+            <h2 style="margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; color: #0f172a;">SAPA - Sistem Absensi Peserta Magang</h2>
             <p style="margin: 2px 0 0 0; font-size: 11px; color: #475569; line-height: 1.4;">
               Pabrik Cilacap — Jl. Ir. H. Juanda, Cilacap, Jawa Tengah
             </p>

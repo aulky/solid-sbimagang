@@ -72,7 +72,7 @@ export default function Dashboard() {
       <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap;">
         <img
           src="/favicon.png"
-          alt="Logo PT SBI"
+          alt="Logo SAPA"
           style="height: 48px; width: auto; object-fit: contain; flex-shrink: 0;"
         />
         <div>

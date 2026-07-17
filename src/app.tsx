@@ -142,7 +142,7 @@ export default function App() {
           };
           const path = location.pathname;
           const pageTitle = titleMap[path] || "Absensi Magang";
-          document.title = `${pageTitle} | PT Solusi Bangun Indonesia`;
+          document.title = `${pageTitle} | SAPA - Sistem Absensi Peserta Magang`;
         });
 
         const isLoginPage = () =>
@@ -257,9 +257,9 @@ export default function App() {
                               ? "/logo-sapaa-putih.png"
                               : "/logo-sapa.png"
                           }
-                          alt="PT SBI Logo"
+                          alt="Logo SAPA"
                           class="sidebar-logo"
-                          style="height: 28px; width: auto; object-fit: contain; cursor: pointer;"
+                          style="height: 45px; width: auto; object-fit: contain; cursor: pointer;"
                         />
                       </a>
                     </div>

@@ -38,7 +38,7 @@ export default createHandler(() => (
       };
 
       const pageTitle = titleMap[path] || "Absensi Magang";
-      const fullTitle = `${pageTitle} | PT Solusi Bangun Indonesia`;
+      const fullTitle = `${pageTitle} | SAPA - Sistem Absensi Peserta Magang`;
 
       return (
         <html lang="id">
@@ -56,10 +56,10 @@ export default createHandler(() => (
             />
             <meta
               name="description"
-              content="Sistem Absensi Magang PT Solusi Bangun Indonesia Cilacap. Mempermudah pencatatan kehadiran, pengajuan izin, dan rekap laporan."
+              content="Sistem Absensi Peserta Magang. Mempermudah pencatatan kehadiran, pengajuan izin, dan rekap laporan."
             />
             <meta name="robots" content="index, follow" />
-            <meta name="author" content="PT Solusi Bangun Indonesia Cilacap" />
+            <meta name="author" content="SAPA" />
             <meta name="theme-color" content="#E11D48" />
             <meta name="google" content="notranslate" />
 
@@ -68,19 +68,19 @@ export default createHandler(() => (
             <meta property="og:title" content={fullTitle} />
             <meta
               property="og:description"
-              content="Aplikasi pemantauan absensi harian dan perizinan anak magang PT SBI Cilacap."
+              content="Aplikasi pemantauan absensi harian dan perizinan anak magang."
             />
             <meta property="og:image" content={logoUrl} />
             <meta property="og:image:type" content="image/png" />
             <meta property="og:url" content={`${origin}${path}`} />
-            <meta property="og:site_name" content="Absensi Magang PT SBI" />
+            <meta property="og:site_name" content="Absensi Magang" />
 
             {/* Twitter */}
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" content={fullTitle} />
             <meta
               name="twitter:description"
-              content="Aplikasi pemantauan absensi harian dan perizinan anak magang PT SBI Cilacap."
+              content="Aplikasi pemantauan absensi harian dan perizinan anak magang."
             />
             <meta name="twitter:image" content={logoUrl} />
 
@@ -92,7 +92,7 @@ export default createHandler(() => (
                 "name": "${fullTitle}",
                 "url": "${origin}${path}",
                 "logo": "${logoUrl}",
-                "description": "Sistem absensi harian dan perizinan anak magang PT Solusi Bangun Indonesia Cilacap.",
+                "description": "Sistem absensi harian dan perizinan anak magang.",
                 "applicationCategory": "BusinessApplication",
                 "operatingSystem": "All"
               }
