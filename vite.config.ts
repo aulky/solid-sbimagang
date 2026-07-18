@@ -9,6 +9,6 @@ export default defineConfig({
   ],
   ssr: { external: ["@prisma/client"] },
   server: {
-    allowedHosts: ["intern-sbi.tup.web.id"]
+    allowedHosts: ["sapa.aulky.app"]
   }
 });
