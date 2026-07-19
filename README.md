@@ -1,6 +1,6 @@
-# Dokumentasi SAPA - Sistem Absensi Peserta Magang
+# Dokumentasi SIGMA - Sistem Absensi Peserta Magang
 
-SAPA - Sistem Absensi Peserta Magang adalah aplikasi web modern berbasis **SolidJS (SolidStart)** yang dirancang untuk mempermudah pemantauan kehadiran, keterlambatan, pengajuan izin, dan pelaporan operasional harian anak magang.
+SIGMA - Sistem Absensi Peserta Magang adalah aplikasi web modern berbasis **SolidJS (SolidStart)** yang dirancang untuk mempermudah pemantauan kehadiran, keterlambatan, pengajuan izin, dan pelaporan operasional harian anak magang.
 
 ---
 

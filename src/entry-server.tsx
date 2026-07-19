@@ -7,8 +7,8 @@ export default createHandler(() => (
     document={({ assets, children, scripts }) => {
       const event = getRequestEvent();
       const host = event
-        ? event.request.headers.get("host") || "sapa.aulky.app"
-        : "sapa.aulky.app";
+        ? event.request.headers.get("host") || "SIGMA.aulky.app"
+        : "SIGMA.aulky.app";
       const protocol =
         event &&
         (event.request.headers.get("x-forwarded-proto") === "https" ||
@@ -38,7 +38,7 @@ export default createHandler(() => (
       };
 
       const pageTitle = titleMap[path] || "Absensi Magang";
-      const fullTitle = `${pageTitle} | SAPA - Sistem Absensi Peserta Magang`;
+      const fullTitle = `${pageTitle} | SIGMA - Sistem Absensi Peserta Magang`;
 
       return (
         <html lang="id">
@@ -59,7 +59,7 @@ export default createHandler(() => (
               content="Sistem Absensi Peserta Magang. Mempermudah pencatatan kehadiran, pengajuan izin, dan rekap laporan."
             />
             <meta name="robots" content="index, follow" />
-            <meta name="author" content="SAPA" />
+            <meta name="author" content="SIGMA" />
             <meta name="theme-color" content="#E11D48" />
             <meta name="google" content="notranslate" />
 

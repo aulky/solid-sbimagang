@@ -16,7 +16,7 @@ export default function Home() {
       <div class="login-card" style="text-align: center;">
         <img
           src="/logo-sapa.png"
-          alt="Logo SAPA"
+          alt="Logo SIGMA"
           style="height: 60px; margin-bottom: var(--space-3);"
         />
         <h2 style="margin-bottom: var(--space-2);">Sistem Absensi Peserta Magang</h2>
