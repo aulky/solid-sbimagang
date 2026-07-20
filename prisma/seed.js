@@ -17,6 +17,17 @@ async function main() {
   await db.absensi.deleteMany();
   await db.user.deleteMany();
   await db.divisi.deleteMany();
+  await db.batchMagang.deleteMany();
+
+  // Create Batch Magang
+  const batch1 = await db.batchMagang.create({
+    data: {
+      name: "Batch 1 - 2026",
+      startDate: new Date("2026-07-01"),
+      endDate: new Date("2026-12-31"),
+      description: "Batch magang semester 2 tahun 2026",
+    },
+  });
 
   // Create Admin
   const adminPassword = hashPassword("admin123456");
@@ -42,6 +53,7 @@ async function main() {
       email: "alif.zawjati@magang.sbi.co.id",
       phone: "089876543210",
       role: "USER",
+      batchId: batch1.id,
       status: "AKTIF"
     }
   });
@@ -56,6 +68,7 @@ async function main() {
       email: "jeki.fauzan@magang.sbi.co.id",
       phone: "085678901234",
       role: "USER",
+      batchId: batch1.id,
       status: "AKTIF"
     }
   });

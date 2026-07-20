@@ -8,6 +8,7 @@ import { Portal } from "solid-js/web";
 import {
   getAdminUsers,
   getAllDivisi,
+  getAllBatches,
   createUser,
   updateUser,
   deleteUser,
@@ -18,11 +19,13 @@ export const route = {
   preload() {
     getAdminUsers({ page: 1, limit: 10, search: "", role: "", status: "", divisiId: "" });
     getAllDivisi();
+    getAllBatches();
   },
 } satisfies RouteDefinition;
 
 export default function AdminUsers() {
   const divisiList = createAsync(() => getAllDivisi(), { deferStream: true });
+  const batchList = createAsync(() => getAllBatches(), { deferStream: true });
 
   const [showCreate, setShowCreate] = createSignal(false);
   const [editingUser, setEditingUser] = createSignal<any | null>(null);
@@ -223,6 +226,15 @@ export default function AdminUsers() {
                     </For>
                   </select>
                 </div>
+                <div class="form-group">
+                  <label>Batch Magang</label>
+                  <select name="batchId">
+                    <option value="">-- Pilih Batch --</option>
+                    <For each={batchList()}>
+                      {(b) => <option value={b.id}>{b.name}</option>}
+                    </For>
+                  </select>
+                </div>
                 <div style="display: flex; gap: var(--space-2); margin-top: var(--space-4);">
                   <button
                     class="btn-primary"
@@ -387,6 +399,22 @@ export default function AdminUsers() {
                     </select>
                   </div>
                   <div class="form-group">
+                    <label>Batch Magang</label>
+                    <select name="batchId">
+                      <option value="">-- Pilih Batch --</option>
+                      <For each={batchList()}>
+                        {(b) => (
+                          <option
+                            value={b.id}
+                            selected={b.id === user().batchId}
+                          >
+                            {b.name}
+                          </option>
+                        )}
+                      </For>
+                    </select>
+                  </div>
+                  <div class="form-group">
                     <label>Status</label>
                     <select name="status">
                       <option value="AKTIF" selected={user().status === "AKTIF"}>
@@ -499,6 +527,7 @@ export default function AdminUsers() {
                 <th>Nama</th>
                 <th>Email</th>
                 <th>Divisi</th>
+                <th>Batch</th>
                 <th>Role</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -510,7 +539,7 @@ export default function AdminUsers() {
                 fallback={
                   <tr>
                     <td
-                      colspan="8"
+                      colspan="9"
                       style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
                     >
                       Belum ada data pengguna.
@@ -528,6 +557,7 @@ export default function AdminUsers() {
                       <td>{u.fullName}</td>
                       <td>{u.email}</td>
                       <td>{u.divisi?.name ?? "-"}</td>
+                      <td>{u.batch?.name ?? "-"}</td>
                       <td>
                         <span
                           class={`badge ${u.role === "ADMIN" ? "badge-izin" : "badge-approved"}`}

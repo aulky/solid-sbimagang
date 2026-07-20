@@ -92,7 +92,7 @@ export async function requireUser() {
   }
   const user = await db.user.findUnique({
     where: { id: userId },
-    include: { divisi: true },
+    include: { divisi: true, batch: true },
   });
   if (!user || (user as any).status === "NONAKTIF") {
     await logout();

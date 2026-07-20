@@ -368,6 +368,24 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Batch Stats Section */}
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); text-align: left;">
+        <div class="stat-card" style="border-left: 4px solid #10b981;">
+          <div class="stat-value">{stats()?.batchAktif ?? 0}</div>
+          <div class="stat-label">Batch Aktif</div>
+        </div>
+
+        <div class="stat-card" style="border-left: 4px solid #6b7280;">
+          <div class="stat-value">{stats()?.batchSelesai ?? 0}</div>
+          <div class="stat-label">Batch Selesai</div>
+        </div>
+
+        <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+          <div class="stat-value">{stats()?.batchMendatang ?? 0}</div>
+          <div class="stat-label">Batch Mendatang</div>
+        </div>
+      </div>
+
       {/* Charts Section */}
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); text-align: left;">
         <div class="stat-card" style="padding: var(--space-4);">

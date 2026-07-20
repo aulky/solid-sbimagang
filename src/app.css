@@ -222,7 +222,9 @@ body {
 }
 
 .sidebar-logo {
-  height: 28px;
+  height: 40px;
+  width: auto;
+  object-fit: contain;
   margin-bottom: var(--space-2);
 }
 
@@ -1244,7 +1246,7 @@ a {
   }
 
   .sidebar-logo {
-    height: 28px !important;
+    height: 40px !important;
     margin-bottom: var(--space-2) !important;
   }
 

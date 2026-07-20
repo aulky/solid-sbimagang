@@ -27,7 +27,7 @@ export const getUser = query(async () => {
     if (userId === undefined) throw new Error("No user id");
     const user = await db.user.findUnique({
       where: { id: userId },
-      include: { divisi: true },
+      include: { divisi: true, batch: true },
     });
     if (!user || (user as any).status === "NONAKTIF")
       throw new Error("User invalid");
@@ -40,6 +40,10 @@ export const getUser = query(async () => {
       role: user.role,
       divisi: user.divisi?.name ?? null,
       divisiId: user.divisiId,
+      batch: user.batch
+        ? { name: user.batch.name, startDate: user.batch.startDate, endDate: user.batch.endDate }
+        : null,
+      batchId: user.batchId,
       avatar: user.avatar,
       status: (user as any).status,
     };
@@ -406,16 +410,19 @@ export const getAdminStats = query(async () => {
   await requireAdmin();
   const today = getLocalDateAsUTC();
 
-  const [totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin] =
+  const [totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin, batchAktif, batchSelesai, batchMendatang] =
     await Promise.all([
       db.user.count({ where: { role: "USER", status: { not: "NONAKTIF" } } }),
       db.divisi.count(),
       db.absensi.count({ where: { date: today, status: { in: ["HADIR", "TELAT"] } } }),
       db.absensi.count({ where: { date: today, status: "TELAT" } }),
       db.izin.count({ where: { status: "PENDING" } }),
+      db.batchMagang.count({ where: { startDate: { lte: today }, endDate: { gte: today } } }),
+      db.batchMagang.count({ where: { endDate: { lt: today } } }),
+      db.batchMagang.count({ where: { startDate: { gt: today } } }),
     ]);
 
-  return { totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin };
+  return { totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin, batchAktif, batchSelesai, batchMendatang };
 }, "adminStats");
 
 export const getTodayAttendanceStatus = query(async () => {
@@ -540,7 +547,7 @@ export const getAdminUsers = query(async (options?: {
   const [items, total] = await Promise.all([
     db.user.findMany({
       where,
-      include: { divisi: true },
+      include: { divisi: true, batch: true },
       orderBy: { createdAt: "desc" },
       skip,
       take: limit,
@@ -563,6 +570,9 @@ export const createUser = action(async (formData: FormData) => {
   const divisiId = formData.get("divisiId")
     ? String(formData.get("divisiId"))
     : null;
+  const batchId = formData.get("batchId")
+    ? String(formData.get("batchId"))
+    : null;
 
   let error = validateUsername(username) || validatePassword(password);
   if (error) return new Error(error);
@@ -579,6 +589,7 @@ export const createUser = action(async (formData: FormData) => {
       phone: phone || null,
       role,
       divisiId,
+      batchId,
       status: "AKTIF",
     },
   });
@@ -597,11 +608,14 @@ export const updateUser = action(async (formData: FormData) => {
   const divisiId = formData.get("divisiId")
     ? String(formData.get("divisiId"))
     : null;
+  const batchId = formData.get("batchId")
+    ? String(formData.get("batchId"))
+    : null;
   const status = String(formData.get("status") || "AKTIF");
 
   const updatedUser = await db.user.update({
     where: { id },
-    data: { fullName, email, phone: phone || null, role, divisiId, status },
+    data: { fullName, email, phone: phone || null, role, divisiId, batchId, status },
   });
   await logActivity(
     "UPDATE_PENGGUNA",
@@ -953,6 +967,7 @@ export async function logPageAccess(pathname: string) {
       "/admin/dashboard": "admin.dashboard",
       "/admin/users": "admin.users",
       "/admin/divisi": "admin.divisi",
+      "/admin/batch": "admin.batch",
       "/admin/absensi": "admin.absensi",
       "/admin/izin": "admin.izin",
       "/admin/laporan": "admin.laporan",
@@ -966,3 +981,73 @@ export async function logPageAccess(pathname: string) {
     // Ignore
   }
 }
+
+// ========== ADMIN: BATCH MAGANG CRUD ==========
+
+export const getAdminBatches = query(async () => {
+  "use server";
+  await requireAdmin();
+  return db.batchMagang.findMany({
+    include: { _count: { select: { users: true } } },
+    orderBy: { startDate: "desc" },
+  });
+}, "adminBatches");
+
+export const getAllBatches = query(async () => {
+  "use server";
+  return db.batchMagang.findMany({ orderBy: { name: "asc" } });
+}, "allBatches");
+
+export const createBatch = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const name = String(formData.get("name"));
+  const startDateStr = String(formData.get("startDate"));
+  const endDateStr = String(formData.get("endDate"));
+  const description = String(formData.get("description") || "");
+
+  if (!name || name.length < 2) return new Error("Nama batch minimal 2 karakter.");
+  if (!startDateStr || !endDateStr) return new Error("Tanggal mulai dan selesai harus diisi.");
+
+  const startDate = new Date(startDateStr);
+  const endDate = new Date(endDateStr);
+  if (startDate > endDate) return new Error("Tanggal mulai tidak boleh melebihi tanggal selesai.");
+
+  await db.batchMagang.create({
+    data: { name, startDate, endDate, description: description || null },
+  });
+  await logActivity("BUAT_BATCH", `create batch success (${name})`);
+  return redirect("/admin/batch");
+});
+
+export const updateBatch = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const name = String(formData.get("name"));
+  const startDateStr = String(formData.get("startDate"));
+  const endDateStr = String(formData.get("endDate"));
+  const description = String(formData.get("description") || "");
+
+  if (!name || name.length < 2) return new Error("Nama batch minimal 2 karakter.");
+  const startDate = new Date(startDateStr);
+  const endDate = new Date(endDateStr);
+  if (startDate > endDate) return new Error("Tanggal mulai tidak boleh melebihi tanggal selesai.");
+
+  await db.batchMagang.update({
+    where: { id },
+    data: { name, startDate, endDate, description: description || null },
+  });
+  await logActivity("UPDATE_BATCH", `update batch success (${name})`);
+  return redirect("/admin/batch");
+});
+
+export const deleteBatch = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const target = await db.batchMagang.findUnique({ where: { id } });
+  await db.batchMagang.delete({ where: { id } });
+  await logActivity("HAPUS_BATCH", `delete batch success (${target?.name ?? "Batch"})`);
+  return redirect("/admin/batch");
+});

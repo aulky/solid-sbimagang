@@ -82,6 +82,16 @@ export default function Dashboard() {
           <p style="color: var(--color-text-secondary); margin: 0; font-size: 14px;">
             Divisi: {user()?.divisi ?? "-"}
           </p>
+          <Show when={user()?.batch}>
+            {(batch) => (
+              <p style="color: var(--color-text-secondary); margin: 2px 0 0 0; font-size: 13px;">
+                Batch: <strong style="color: var(--color-text);">{batch().name}</strong>{" "}
+                <span style="font-size: 12px;">
+                  ({new Date(batch().startDate).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} - {new Date(batch().endDate).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })})
+                </span>
+              </p>
+            )}
+          </Show>
         </div>
       </div>
       <p style="font-size: 14px; color: var(--color-text-secondary); margin: 0 0 var(--space-3) 0;">
