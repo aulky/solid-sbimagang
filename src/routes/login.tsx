@@ -1,11 +1,30 @@
 import { useSubmission, type RouteSectionProps } from "@solidjs/router";
-import { Show, createSignal, onMount } from "solid-js";
+import { Show, createSignal, onMount, createEffect } from "solid-js";
+import { Portal } from "solid-js/web";
 import { loginOrRegister } from "~/lib";
 
 export default function Login(props: RouteSectionProps) {
   const loggingIn = useSubmission(loginOrRegister);
   const [theme, setTheme] = createSignal("light");
   const [showPassword, setShowPassword] = createSignal(false);
+  const [errorMessage, setErrorMessage] = createSignal<string | null>(null);
+
+  let toastTimer: any;
+
+  createEffect(() => {
+    const res = loggingIn.result;
+    if (res) {
+      const msg = res instanceof Error
+        ? res.message
+        : (res as any)?.message || String(res);
+      setErrorMessage(msg);
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        setErrorMessage(null);
+      }, 10000);
+    }
+  });
 
   onMount(() => {
     const saved = localStorage.getItem("theme");
@@ -21,6 +40,42 @@ export default function Login(props: RouteSectionProps) {
 
   return (
     <main class="login-container">
+      {/* Toast Notification Top-Right */}
+      <Show when={errorMessage()}>
+        {(msg) => (
+          <Portal>
+            <div
+              style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 380px; width: calc(100% - 40px); animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
+            >
+              <div
+                class="alert-error"
+                role="alert"
+                style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; margin: 0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2); border: 2px solid var(--color-error); border-radius: var(--radius-md); background-color: var(--surface-base);"
+              >
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: var(--color-error);">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <span style="font-size: 14px; font-weight: 500; text-align: left; line-height: 1.4;">
+                    {msg()}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage(null)}
+                  style="background: transparent; border: none; font-size: 20px; line-height: 1; cursor: pointer; color: var(--color-text-secondary); padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: color 0.2s ease;"
+                  title="Tutup notifikasi"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </Portal>
+        )}
+      </Show>
+
       <div class="login-card" style="text-align: center;">
         <img
           src={theme() === "dark" ? "/logo-sapaa-putih.png" : "/logo-sapa.png"}
@@ -85,14 +140,10 @@ export default function Login(props: RouteSectionProps) {
             {loggingIn.pending ? "Memproses..." : "Masuk"}
           </button>
 
-          <Show when={loggingIn.result}>
-            <div class="alert-error" role="alert" id="error-message">
-              {loggingIn.result instanceof Error
-                ? loggingIn.result.message
-                : (loggingIn.result as any)?.message ||
-                  String(loggingIn.result)}
-            </div>
-          </Show>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: var(--space-4); color: var(--color-text-secondary); font-size: 16px;">
+            <span>Created by :</span>
+            <img src="/logo-telu.png" alt="Telkom University" style="height: 80px; width: auto; object-fit: contain;" />
+          </div>
         </form>
       </div>
     </main>
