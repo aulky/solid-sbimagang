@@ -154,9 +154,9 @@ export const updateSystemSettings = action(async (formData: FormData) => {
 export const checkIn = action(async () => {
   "use server";
   const user = await requireUser();
-  if ((user as any).status === "DITANGGUHKAN") {
+  if ((user as any).status === "ALUMNI") {
     return new Error(
-      "Akun Anda sedang ditangguhkan. Anda tidak dapat melakukan absensi.",
+      "Akun Anda sudah menjadi Alumni. Anda tidak dapat melakukan absensi.",
     );
   }
   const now = new Date();
@@ -203,9 +203,9 @@ export const checkIn = action(async () => {
 export const checkOut = action(async () => {
   "use server";
   const user = await requireUser();
-  if ((user as any).status === "DITANGGUHKAN") {
+  if ((user as any).status === "ALUMNI") {
     return new Error(
-      "Akun Anda sedang ditangguhkan. Anda tidak dapat melakukan absensi.",
+      "Akun Anda sudah menjadi Alumni. Anda tidak dapat melakukan absensi.",
     );
   }
   const now = new Date();
@@ -266,9 +266,9 @@ const parseLocalDateAsUTC = (dateStr: string) => {
 export const submitIzin = action(async (formData: FormData) => {
   "use server";
   const user = await requireUser();
-  if ((user as any).status === "DITANGGUHKAN") {
+  if ((user as any).status === "ALUMNI") {
     return new Error(
-      "Akun Anda sedang ditangguhkan. Anda tidak dapat mengajukan izin.",
+      "Akun Anda sudah menjadi Alumni. Anda tidak dapat mengajukan izin.",
     );
   }
   const startDate = parseLocalDateAsUTC(String(formData.get("startDate")));
@@ -412,7 +412,7 @@ export const getAdminStats = query(async () => {
 
   const [totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin, batchAktif, batchSelesai, batchMendatang] =
     await Promise.all([
-      db.user.count({ where: { role: "USER", status: { not: "NONAKTIF" } } }),
+      db.user.count({ where: { role: "USER", status: "AKTIF" } }),
       db.divisi.count(),
       db.absensi.count({ where: { date: today, status: { in: ["HADIR", "TELAT"] } } }),
       db.absensi.count({ where: { date: today, status: "TELAT" } }),
@@ -431,7 +431,7 @@ export const getTodayAttendanceStatus = query(async () => {
   const today = getLocalDateAsUTC();
 
   const totalInterns = await db.user.count({
-    where: { role: "USER", status: { not: "NONAKTIF" } },
+    where: { role: "USER", status: "AKTIF" },
   });
 
   const attendanceToday = await db.absensi.groupBy({

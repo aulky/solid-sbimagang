@@ -942,6 +942,8 @@ button[type="submit"]:disabled {
   padding: var(--space-5);
   width: 90%;
   max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: var(--shadow-lg);
   box-sizing: border-box;
 }

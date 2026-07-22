@@ -98,6 +98,22 @@ export async function requireUser() {
     await logout();
     throw redirect("/login");
   }
+
+  // Auto-alumni: jika batch sudah berakhir, update status ke ALUMNI
+  if ((user as any).status === "AKTIF" && user.batch) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endDate = new Date(user.batch.endDate);
+    endDate.setHours(0, 0, 0, 0);
+    if (today > endDate) {
+      await db.user.update({
+        where: { id: user.id },
+        data: { status: "ALUMNI" },
+      });
+      (user as any).status = "ALUMNI";
+    }
+  }
+
   return user;
 }
 

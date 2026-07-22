@@ -205,11 +205,10 @@ export default function AdminIzin() {
                       </td>
                       <td>{startDate}</td>
                       <td>{endDate}</td>
-                      <td
-                        style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                        title={row.reason}
-                      >
-                        {row.reason}
+                      <td title={row.reason}>
+                        <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                          {row.reason}
+                        </div>
                       </td>
                       <td>
                         <Show

@@ -297,7 +297,7 @@ export default function AdminUsers() {
           >
             <option value="">Semua Status</option>
             <option value="AKTIF">Aktif</option>
-            <option value="DITANGGUHKAN">Ditangguhkan</option>
+            <option value="ALUMNI">Alumni</option>
             <option value="NONAKTIF">Nonaktif</option>
           </select>
         </div>
@@ -420,8 +420,8 @@ export default function AdminUsers() {
                       <option value="AKTIF" selected={user().status === "AKTIF"}>
                         Aktif
                       </option>
-                      <option value="DITANGGUHKAN" selected={user().status === "DITANGGUHKAN"}>
-                        Ditangguhkan
+                      <option value="ALUMNI" selected={user().status === "ALUMNI"}>
+                        Alumni
                       </option>
                       <option value="NONAKTIF" selected={user().status === "NONAKTIF"}>
                         Nonaktif
@@ -570,15 +570,15 @@ export default function AdminUsers() {
                           class={`badge ${
                             (u as any).status === "AKTIF"
                               ? "badge-approved"
-                              : (u as any).status === "DITANGGUHKAN"
-                                ? "badge-pending"
+                              : (u as any).status === "ALUMNI"
+                                ? "badge-izin"
                                 : "badge-rejected"
                           }`}
                         >
                           {(u as any).status === "AKTIF"
                             ? "Aktif"
-                            : (u as any).status === "DITANGGUHKAN"
-                              ? "Ditangguhkan"
+                            : (u as any).status === "ALUMNI"
+                              ? "Alumni"
                               : "Nonaktif"}
                         </span>
                       </td>
