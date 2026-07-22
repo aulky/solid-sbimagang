@@ -22,8 +22,9 @@ export async function GET({ request }: APIEvent) {
     return new Response("Not found", { status: 404 });
   }
 
-  // Coba production path dulu, fallback ke public/uploads
+  // Prioritas: uploads/ (persisten) → .output/public/uploads → public/uploads (backward compat)
   const candidates = [
+    path.join(process.cwd(), "uploads", filename),
     path.join(process.cwd(), ".output", "public", "uploads", filename),
     path.join(process.cwd(), "public", "uploads", filename),
   ];

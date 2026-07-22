@@ -311,14 +311,7 @@ export const submitIzin = action(async (formData: FormData) => {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const filename = `${crypto.randomBytes(16).toString("hex")}${extension}`;
-    let uploadsDir = path.join(process.cwd(), "public", "uploads");
-
-    // Jika berjalan di production (.output/public ada), simpan ke folder build statis
-    const prodPublicDir = path.join(process.cwd(), ".output", "public");
-    try {
-      await fs.access(prodPublicDir);
-      uploadsDir = path.join(prodPublicDir, "uploads");
-    } catch {}
+    const uploadsDir = path.join(process.cwd(), "uploads");
 
     await fs.mkdir(uploadsDir, { recursive: true });
     await fs.writeFile(path.join(uploadsDir, filename), buffer);
