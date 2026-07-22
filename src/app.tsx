@@ -9,6 +9,7 @@ import { Suspense, Show, createSignal, onMount, createEffect } from "solid-js";
 import { Portal } from "solid-js/web";
 import { createAsync } from "@solidjs/router";
 import { getUser, logout, logPageAccess } from "~/lib";
+import { toastMessage, setToastMessage } from "~/lib/toast";
 import "./app.css";
 
 interface ThemeToggleProps {
@@ -817,6 +818,43 @@ export default function App() {
                 <div class="fade-in">{props.children}</div>
               </main>
             </div>
+
+            {/* Global Toast Notification */}
+            <Show when={toastMessage()}>
+              {(msg) => (
+                <Portal>
+                  <div
+                    style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 380px; width: calc(100% - 40px); animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
+                  >
+                    <div
+                      class="alert-error"
+                      role="alert"
+                      style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; margin: 0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2); border: 2px solid var(--color-error); border-radius: var(--radius-md); background-color: var(--surface-base);"
+                    >
+                      <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: var(--color-error);">
+                          <circle cx="12" cy="12" r="10" />
+                          <line x1="12" y1="8" x2="12" y2="12" />
+                          <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <span style="font-size: 14px; font-weight: 500; text-align: left; line-height: 1.4;">
+                          {msg()}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setToastMessage(null)}
+                        style="background: transparent; border: none; font-size: 20px; line-height: 1; cursor: pointer; color: var(--color-text-secondary); padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: color 0.2s ease;"
+                        title="Tutup notifikasi"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                </Portal>
+              )}
+            </Show>
+
           </Suspense>
         );
       }}

@@ -7,6 +7,7 @@ import {
 import { For, Show, createSignal, createEffect } from "solid-js";
 import { Portal } from "solid-js/web";
 import { getUserIzinList, submitIzin, getPageNumbers } from "~/lib";
+import { showToast } from "~/lib/toast";
 
 export const route = {
   preload: () => {
@@ -81,6 +82,9 @@ export default function Izin() {
     }
     prevSubmittingPending = pending;
   });
+
+  // Toast error notification
+  createEffect(() => { if (submitting.result instanceof Error) showToast(submitting.result.message); });
 
   return (
     <main class="p-4" style="text-align: left;">
@@ -186,12 +190,6 @@ export default function Izin() {
                     Batal
                   </button>
                 </div>
-
-                <Show when={submitting.result instanceof Error}>
-                  <div class="alert-error">
-                    {(submitting.result as Error).message}
-                  </div>
-                </Show>
               </form>
             </div>
           </div>

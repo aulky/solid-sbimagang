@@ -12,6 +12,7 @@ import {
   deleteBatch,
   getPageNumbers,
 } from "~/lib";
+import { showToast } from "~/lib/toast";
 
 export const route = {
   preload() {
@@ -112,6 +113,11 @@ export default function AdminBatch() {
     prevDeletingPending = pending;
   });
 
+  // Toast error notifications
+  createEffect(() => { if (creating.result instanceof Error) showToast(creating.result.message); });
+  createEffect(() => { if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message); });
+  createEffect(() => { if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message); });
+
   return (
     <main class="p-4">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); text-align: left;">
@@ -190,11 +196,6 @@ export default function AdminBatch() {
                     Batal
                   </button>
                 </div>
-                <Show when={creating.result instanceof Error}>
-                  <div class="alert-error">
-                    {(creating.result as Error).message}
-                  </div>
-                </Show>
               </form>
             </div>
           </div>
@@ -274,11 +275,6 @@ export default function AdminBatch() {
                       Batal
                     </button>
                   </div>
-                  <Show when={(updating.result as any) instanceof Error}>
-                    <div class="alert-error">
-                      {((updating.result as any) as Error).message}
-                    </div>
-                  </Show>
                 </form>
               </div>
             </div>
@@ -331,11 +327,6 @@ export default function AdminBatch() {
                       Batal
                     </button>
                   </div>
-                  <Show when={(deleting.result as any) instanceof Error}>
-                    <div class="alert-error">
-                      {(deleting.result as any as Error).message}
-                    </div>
-                  </Show>
                 </form>
               </div>
             </div>

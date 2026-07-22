@@ -3,7 +3,7 @@ import {
   useSubmission,
   type RouteDefinition,
 } from "@solidjs/router";
-import { Show } from "solid-js";
+import { Show, createEffect } from "solid-js";
 import {
   getUser,
   getTodayAttendance,
@@ -12,6 +12,7 @@ import {
   getAttendanceHistory,
   getPublicSettings,
 } from "~/lib";
+import { showToast } from "~/lib/toast";
 
 export const route = {
   preload: () => {
@@ -29,6 +30,10 @@ export default function Dashboard() {
   const settings = createAsync(() => getPublicSettings());
   const checkingIn = useSubmission(checkIn);
   const checkingOut = useSubmission(checkOut);
+
+  // Toast error notifications
+  createEffect(() => { if ((checkingIn.result as any) instanceof Error) showToast(((checkingIn.result as any) as Error).message); });
+  createEffect(() => { if ((checkingOut.result as any) instanceof Error) showToast(((checkingOut.result as any) as Error).message); });
 
   const now = () => {
     const d = new Date();
@@ -170,11 +175,6 @@ export default function Dashboard() {
               when={today()}
               fallback={
                 <div>
-                  <Show when={(checkingIn.result as any) instanceof Error}>
-                    <div class="alert-error" style="margin-bottom: 10px; font-size: 13px;">
-                      {((checkingIn.result as any) as Error).message}
-                    </div>
-                  </Show>
                   <p class="stat-label">Belum Check-In</p>
                   <form action={checkIn} method="post">
                     <button
@@ -200,11 +200,6 @@ export default function Dashboard() {
                     when={att().checkOut}
                     fallback={
                       <div>
-                        <Show when={(checkingOut.result as any) instanceof Error}>
-                          <div class="alert-error" style="margin-bottom: 10px; font-size: 13px;">
-                            {((checkingOut.result as any) as Error).message}
-                          </div>
-                        </Show>
                         <form action={checkOut} method="post">
                           <button
                             class="btn-primary"

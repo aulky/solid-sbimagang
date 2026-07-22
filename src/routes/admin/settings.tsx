@@ -1,6 +1,7 @@
 import { createAsync, useSubmission, type RouteDefinition } from "@solidjs/router";
-import { Show } from "solid-js";
+import { Show, createEffect } from "solid-js";
 import { getSystemSettings, updateSystemSettings } from "~/lib";
+import { showToast } from "~/lib/toast";
 
 export const route = {
   preload() {
@@ -11,6 +12,8 @@ export const route = {
 export default function AdminSettings() {
   const settings = createAsync(() => getSystemSettings());
   const updating = useSubmission(updateSystemSettings);
+
+  createEffect(() => { if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message); });
 
   return (
     <main style="max-width: 600px; margin: 0 auto; text-align: left;">
@@ -77,10 +80,6 @@ export default function AdminSettings() {
               >
                 {updating.pending ? "Menyimpan..." : "Simpan Pengaturan"}
               </button>
-
-              <Show when={(updating.result as any) instanceof Error}>
-                <div class="alert-error">{((updating.result as any) as Error).message}</div>
-              </Show>
             </form>
           </div>
         )}

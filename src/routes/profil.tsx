@@ -6,6 +6,7 @@ import {
 } from "@solidjs/router";
 import { Show, createSignal, createEffect } from "solid-js";
 import { getUser, updateProfile, changePassword } from "~/lib";
+import { showToast } from "~/lib/toast";
 
 export const route = {
   preload: () => {
@@ -35,6 +36,10 @@ export default function Profil() {
       return () => clearTimeout(timer);
     }
   });
+
+  // Toast error notifications
+  createEffect(() => { if (updating.result instanceof Error) showToast(updating.result.message); });
+  createEffect(() => { if (changing.result instanceof Error) showToast(changing.result.message); });
 
   return (
     <main style="max-width: 600px; margin: 0 auto; text-align: left;">
@@ -92,11 +97,6 @@ export default function Profil() {
                 >
                   {updating.pending ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>
-                <Show when={updating.result instanceof Error}>
-                  <div class="alert-error" style="margin-top: var(--space-3);">
-                    {(updating.result as Error).message}
-                  </div>
-                </Show>
               </form>
             </Show>
 
@@ -218,12 +218,6 @@ export default function Profil() {
                     style="margin-top: var(--space-3); color: var(--color-success); font-weight: bold; font-size: 14px;"
                   >
                     {successMessage()}
-                  </div>
-                </Show>
-
-                <Show when={changing.result instanceof Error}>
-                  <div class="alert-error" style="margin-top: var(--space-3);">
-                    {(changing.result as Error).message}
                   </div>
                 </Show>
               </form>
