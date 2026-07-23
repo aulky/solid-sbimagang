@@ -219,6 +219,51 @@ async function getIpLocation(ip: string): Promise<string> {
   return "Tidak diketahui";
 }
 
+export function signLogEntry(data: {
+  userId?: string | null;
+  username?: string | null;
+  action: string;
+  details?: string | null;
+  ip?: string | null;
+  userAgent?: string | null;
+  createdAt: Date;
+}): string {
+  const secret =
+    process.env.LOG_SIGNING_SECRET ??
+    process.env.SESSION_SECRET ??
+    "default_sbi_secure_audit_log_signing_key_2026";
+  const hmac = crypto.createHmac("sha256", secret);
+  const payload = [
+    data.userId || "",
+    data.username || "",
+    data.action,
+    data.details || "",
+    data.ip || "",
+    data.userAgent || "",
+    data.createdAt.getTime().toString(),
+  ].join("|");
+  return hmac.update(payload).digest("hex");
+}
+
+export function verifyLogEntry(log: {
+  userId?: string | null;
+  username?: string | null;
+  action: string;
+  details?: string | null;
+  ip?: string | null;
+  userAgent?: string | null;
+  createdAt: Date;
+  signature?: string | null;
+}): boolean {
+  if (!log.signature) return false;
+  const expected = signLogEntry(log);
+  if (log.signature.length !== expected.length) return false;
+  return crypto.timingSafeEqual(
+    Buffer.from(log.signature, "hex"),
+    Buffer.from(expected, "hex"),
+  );
+}
+
 export async function logActivity(action: string, details?: string, overrideUserId?: string) {
   try {
     const event = getRequestEvent();
@@ -256,6 +301,17 @@ export async function logActivity(action: string, details?: string, overrideUser
       }
     }
 
+    const createdAt = new Date();
+    const signature = signLogEntry({
+      userId,
+      username,
+      action,
+      details,
+      ip,
+      userAgent,
+      createdAt,
+    });
+
     // 4. Create Audit Log entry (initially with location null or loading)
     const logEntry = await (db as any).auditLog.create({
       data: {
@@ -265,6 +321,8 @@ export async function logActivity(action: string, details?: string, overrideUser
         details,
         ip,
         userAgent,
+        signature,
+        createdAt,
         location: isPrivateIp(ip) ? "Localhost" : "Memuat...",
       },
     });

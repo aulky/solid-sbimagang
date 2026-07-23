@@ -108,6 +108,7 @@ model AuditLog {
   ip        String?
   userAgent String?  @db.Text
   location  String?
+  signature String?  @db.VarChar(255)
   createdAt DateTime @default(now())
 }
 
