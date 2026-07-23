@@ -75,10 +75,8 @@ const DailyDonutChart = (props: {
   return (
     <div style="display: flex; align-items: center; justify-content: space-around; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-2) 0;">
       <svg
-        width="140"
-        height="140"
         viewBox="0 0 100 100"
-        style="transform: rotate(-90deg); flex-shrink: 0; overflow: visible;"
+        style="width: 100%; max-width: 140px; height: auto; aspect-ratio: 1 / 1; transform: rotate(-90deg); flex-shrink: 0; overflow: visible;"
         onMouseLeave={() => setHovered(null)}
       >
         <circle
@@ -238,7 +236,7 @@ const TrendLineChart = (props: {
         <select
           value={period()}
           onChange={(e) => { setPeriod(e.currentTarget.value as any); setHovered(null); }}
-          style="padding: 4px 12px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--surface-base); color: var(--color-text); font-size: 13px; cursor: pointer; outline: none;"
+          style="width: auto !important; height: 32px !important; padding: 4px 24px 4px 12px !important; border-radius: 6px; border: 1px solid var(--color-border); background: var(--surface-base); color: var(--color-text); font-size: 13px; cursor: pointer; outline: none;"
         >
           <option value="weekly">Mingguan</option>
           <option value="monthly">Bulanan</option>
@@ -248,9 +246,7 @@ const TrendLineChart = (props: {
 
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        width="100%"
-        height="220"
-        style="background: transparent; overflow: visible;"
+        style="width: 100%; height: auto; aspect-ratio: 500 / 250; background: transparent; overflow: visible;"
         onMouseLeave={() => setHovered(null)}
       >
         <defs>

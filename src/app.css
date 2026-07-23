@@ -70,14 +70,6 @@ body {
   background-color: var(--surface-base);
   color: var(--color-text);
   min-height: 100vh;
-  background-image:
-    radial-gradient(var(--color-primary) 0.5px, transparent 0.5px),
-    radial-gradient(var(--color-secondary) 0.5px, var(--surface-base) 0.5px);
-  background-size: 40px 40px;
-  background-position:
-    0 0,
-    20px 20px;
-  background-attachment: fixed;
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
@@ -105,12 +97,6 @@ body {
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(156, 163, 175, 0.25) transparent;
-}
-
-[data-theme="dark"] body {
-  background-image:
-    radial-gradient(rgba(225, 29, 72, 0.15) 0.5px, transparent 0.5px),
-    radial-gradient(rgba(37, 99, 235, 0.15) 0.5px, var(--surface-base) 0.5px);
 }
 
 /* Layout */
