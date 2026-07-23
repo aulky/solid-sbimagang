@@ -51,9 +51,9 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
 4. **Pencegahan Flash Lightmode (FOYT Bug)**:
    * Menggunakan script pemblokir render di `<head>` dokumen (SSR layer) untuk menyematkan tema `dark` dari `localStorage` secara instan sebelum browser mem-parsing elemen DOM.
 5. **Manajemen Status Pengguna**:
-   * Pengguna memiliki status: `AKTIF`, `DITANGGUHKAN`, `NONAKTIF`.
+   * Pengguna memiliki status: `AKTIF`, `ALUMNI`, `NONAKTIF`.
    * Status `NONAKTIF` mencegah login sama sekali.
-   * Status `DITANGGUHKAN` mencegah check-in, check-out, dan pengajuan izin.
+   * Status `ALUMNI` mencegah check-in, check-out, dan pengajuan izin. Status ini secara otomatis diperbarui oleh sistem saat `requireUser()` mendeteksi tanggal hari ini telah melewati tanggal akhir batch (`endDate`) yang bersangkutan.
 6. **Logout Konfirmasi**:
    * Tombol Logout di sidebar memicu modal konfirmasi (Portal) sebelum benar-benar logout.
 
@@ -81,7 +81,7 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
    * Menggunakan modal portal dengan animasi scale-up.
    * Memilih tipe perizinan (Sakit, Izin, Cuti), tanggal mulai, tanggal selesai, dan alasan detail (min. 5 karakter).
    * **Validasi Ukuran File**: Lampiran bukti maksimal 500KB, tipe file gambar (JPG/PNG) atau PDF, divalidasi client-side (alert) dan server-side.
-   * Upload file disimpan dengan nama random (crypto) di folder `public/uploads/` atau `.output/public/uploads/` untuk production.
+   * Upload file disimpan dengan nama random (crypto) di folder `uploads/` pada root project (persisten, tidak terhapus saat rebuild).
    * Path lampiran disimpan sebagai `/api/uploads?file=...`.
    * Modal menutup otomatis setelah pengajuan berhasil dikirim.
 2. **Riwayat Izin Magang (Tabel + Filter + Pagination)**:
@@ -105,7 +105,7 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
 
 #### A. Halaman Dashboard Utama (`/admin/dashboard`)
 1. **Statistik Numerik (5 kartu)**:
-   * Total Anak Magang (user aktif, role USER, status bukan NONAKTIF).
+   * Total Anak Magang (user aktif, role USER, status `AKTIF` saja — tidak termasuk `ALUMNI` dan `NONAKTIF`).
    * Total Divisi.
    * Hadir Hari Ini.
    * Terlambat Hari Ini.
@@ -125,7 +125,7 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
    * Edit pengguna via modal pre-filled (nama, email, telepon, role, divisi, **status**).
    * Hapus pengguna via modal konfirmasi custom.
 2. **Penyaringan (Filter)**:
-   * Filter dengan 4 kriteria: **Cari Nama/Username** (debounce 400ms), **Role**, **Status** (Aktif/Ditangguhkan/Nonaktif), **Divisi**.
+   * Filter dengan 4 kriteria: **Cari Nama/Username** (debounce 400ms), **Role**, **Status** (Aktif/Alumni/Nonaktif), **Divisi**.
    * Tombol Reset Filter.
 3. **Paginasi Server-side**: 10 item per halaman dengan total dari server.
 4. Modal otomatis menutup setelah sukses create/update/delete.
@@ -150,6 +150,7 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
 #### E. Halaman Kelola Pengajuan Izin (`/admin/izin`)
 1. **Tabel Pengajuan Izin**:
    * Menampilkan daftar izin dari semua anak magang (Nama + username + telepon, Tipe, Tanggal Mulai, Tanggal Selesai, Alasan, Lampiran, Status, Aksi).
+   * **Ellipsis Alasan**: Kolom alasan dibatasi dengan `max-width: 200px` dan efek ellipsis (`...`) agar tampilan tabel rapi dan konsisten (seperti pada log aktivitas). Detail alasan tetap dapat dibaca via tooltip hover (`title`).
 2. **Penyaringan Data (Filter)**:
    * Filter: **Cari Nama/Username** (debounce 400ms), **Tipe Izin**, **Status**.
    * Tombol Reset Filter.
@@ -196,10 +197,11 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
 ### 3.4. Modul Upload Berkas
 1. **API Upload Serving** (`/api/uploads?file=...`):
    * Endpoint GET yang menyajikan file gambar/PDF dari folder uploads.
-   * Mendukung dual path: production (`.output/public/uploads/`) dan development (`public/uploads/`).
+   * Mendukung 3-candidate fallback path: `uploads/` (root project, persisten) → `.output/public/uploads/` → `public/uploads/` (backward compat data lama).
    * Proteksi path traversal (filter `..` dan `/`).
    * Cache header `public, max-age=31536000, immutable`.
 2. **Normalisasi URL**: Data lama dengan path `/uploads/` otomatis dinormalisasi ke `/api/uploads?file=...` di kedua halaman (user & admin izin).
+3. **Penyimpanan Persisten**: File upload disimpan di folder `uploads/` pada root project (bukan di dalam `public/` atau `.output/`) agar tidak terhapus saat proses build ulang.
 
 ### 3.5. Modul Pengaturan Akun (Shared - ADMIN & USER)
 1. **Sidebar Dropdown**:
@@ -222,11 +224,14 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
   * Info user di card rounded bawah sidebar dengan avatar lingkaran (inisial), nama (ellipsis), role, toggle tema.
   * Tombol logout outline merah full-width di footer sidebar.
   * Nama dan role dibatasi dengan text-overflow ellipsis.
-* **Mobile Layout**:
-  * Sidebar bertransformasi menjadi hamburger drawer yang slide dari kiri dengan backdrop blur.
-  * Header fixed 50px di atas dengan tombol hamburger dan judul.
-  * Semua tabel dengan `overflow-x: auto`.
+* **Modal Responsif**:
+  * Modal pop-up memiliki `max-height: 90vh` dan `overflow-y: auto` untuk memastikan konten tetap terlihat pada layar dengan zoom tinggi (misal 150%) atau resolusi kecil.
   * Modal diposisikan fixed center dengan animasi mobile.
+* **Notifikasi Toast Error Global**:
+  * Semua notifikasi error di seluruh halaman (admin & user) menggunakan satu komponen Toast mengambang (floating) di kanan atas layar, dirender secara global di `app.tsx` via `<Portal>`.
+  * Desain: background transparan merah (`rgba(220, 38, 38, 0.12)`) dengan `backdrop-filter: blur(16px)`, beradaptasi otomatis dengan tema dark/light mode.
+  * Auto-dismiss setelah 10 detik, dengan tombol tutup manual (×).
+  * Animasi `slideIn` dari atas.
 * **Animasi**:
   * Loading bar global di atas saat route transition.
   * Fade-in pada konten utama.

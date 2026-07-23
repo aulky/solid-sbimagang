@@ -12,6 +12,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  bulkCreateUsers,
   getPageNumbers,
 } from "~/lib";
 import { showToast } from "~/lib/toast";
@@ -36,6 +37,14 @@ export default function AdminUsers() {
   } | null>(null);
   const [showCreatePassword, setShowCreatePassword] = createSignal(false);
   let createFormRef: HTMLFormElement | undefined;
+
+  // Bulk import signals
+  const [showBulk, setShowBulk] = createSignal(false);
+  const [bulkResult, setBulkResult] = createSignal<{
+    total: number; successCount: number;
+    errors: Array<{ row: number; username: string; error: string }>;
+  } | null>(null);
+  const [bulkLoading, setBulkLoading] = createSignal(false);
 
   // Filter signals
   const [searchQuery, setSearchQuery] = createSignal("");
@@ -124,13 +133,22 @@ export default function AdminUsers() {
         <h1 class="page-title" style="margin-bottom: 0;">
           Kelola Pengguna
         </h1>
-        <button
-          class="btn-primary"
-          style="width: auto; padding: 0 var(--space-4); height: 40px;"
-          onClick={() => setShowCreate(true)}
-        >
-          Tambah Pengguna
-        </button>
+        <div style="display: flex; gap: var(--space-2);">
+          <button
+            class="btn-ghost"
+            style="width: auto; padding: 0 var(--space-4); height: 40px;"
+            onClick={() => { setBulkResult(null); setShowBulk(true); }}
+          >
+            Impor Massal
+          </button>
+          <button
+            class="btn-primary"
+            style="width: auto; padding: 0 var(--space-4); height: 40px;"
+            onClick={() => setShowCreate(true)}
+          >
+            Tambah Pengguna
+          </button>
+        </div>
       </div>
 
       <Show when={showCreate()}>
@@ -258,6 +276,104 @@ export default function AdminUsers() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </Portal>
+      </Show>
+
+      <Show when={showBulk()}>
+        <Portal>
+          <div class="modal-overlay" onClick={() => setShowBulk(false)}>
+            <div
+              class="modal modal-animate"
+              onClick={(e) => e.stopPropagation()}
+              style="max-width: 600px;"
+            >
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
+                <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">
+                  Impor Pengguna Massal
+                </h3>
+                <button
+                  class="theme-toggle"
+                  style="font-size: 24px; padding: 0; cursor: pointer;"
+                  onClick={() => setShowBulk(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div style="margin-bottom: var(--space-4);">
+                <p style="margin: 0 0 var(--space-2); font-size: 14px; color: var(--color-text-secondary);">
+                  1. Unduh template Excel, isi data pengguna, lalu upload kembali.
+                </p>
+                <a
+                  href="/api/users/template"
+                  download=""
+                  class="btn-ghost"
+                  style="display: inline-block; text-decoration: none; text-align: center; width: auto; padding: 0 var(--space-4); height: 36px; line-height: 36px;"
+                >
+                  Unduh Template
+                </a>
+              </div>
+
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                setBulkLoading(true);
+                setBulkResult(null);
+                try {
+                  const result = await bulkCreateUsers(fd);
+                  if (result instanceof Error) {
+                    setBulkResult({ total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: result.message }] });
+                  } else {
+                    setBulkResult(result as any);
+                  }
+                } catch (err: any) {
+                  setBulkResult({ total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: err.message }] });
+                }
+                setBulkLoading(false);
+              }}>
+                <div class="form-group">
+                  <label>2. Upload file Excel (.xlsx)</label>
+                  <input name="file" type="file" accept=".xlsx" required />
+                </div>
+                <button
+                  class="btn-primary"
+                  type="submit"
+                  disabled={bulkLoading()}
+                  style="width: auto; padding: 0 var(--space-4);"
+                >
+                  {bulkLoading() ? "Mengimpor..." : "Impor"}
+                </button>
+              </form>
+
+              <Show when={bulkResult()}>
+                {(res) => (
+                  <div style="margin-top: var(--space-4); border-top: 1px solid var(--color-border); padding-top: var(--space-4);">
+                    <p style="margin: 0 0 var(--space-2); font-size: 14px;">
+                      <strong>Hasil:</strong> {res().successCount}/{res().total} berhasil ditambahkan.
+                    </p>
+                    <Show when={res().errors.length > 0}>
+                      <div style="max-height: 200px; overflow-y: auto;">
+                        <table class="data-table" style="font-size: 12px;">
+                          <thead><tr><th>Baris</th><th>Username</th><th>Error</th></tr></thead>
+                          <tbody>
+                            <For each={res().errors}>
+                              {(err) => (
+                                <tr>
+                                  <td>{err.row}</td>
+                                  <td>{err.username}</td>
+                                  <td style="color: var(--color-danger);">{err.error}</td>
+                                </tr>
+                              )}
+                            </For>
+                          </tbody>
+                        </table>
+                      </div>
+                    </Show>
+                  </div>
+                )}
+              </Show>
             </div>
           </div>
         </Portal>

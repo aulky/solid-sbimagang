@@ -181,139 +181,199 @@ const DailyDonutChart = (props: {
   );
 };
 
-const TrendLineChart = (props: { data: { date: string; count: number }[] }) => {
-  const chartData = () => props.data.slice(-10);
+const TrendLineChart = (props: {
+  data: {
+    weekly: { label: string; count: number }[];
+    monthly: { label: string; count: number }[];
+    yearly: { label: string; count: number }[];
+  };
+}) => {
+  const [period, setPeriod] = createSignal<"weekly" | "monthly" | "yearly">("monthly");
+  const [hovered, setHovered] = createSignal<number | null>(null);
+
+  const activeData = () => props.data[period()];
+
+  const width = 500;
+  const height = 250;
+  const padL = 40, padR = 10, padT = 15, padB = 30;
 
   const maxCount = () => {
-    const vals = chartData().map((d) => d.count);
-    return vals.length > 0 ? Math.max(...vals) + 1 : 5;
+    const vals = activeData().map((d) => d.count);
+    const rawMax = vals.length > 0 ? Math.max(...vals) : 4;
+    return Math.max(Math.ceil(rawMax / 4) * 4, 4);
   };
 
-  const minCount = () => {
-    const vals = chartData().map((d) => d.count);
-    return vals.length > 0 ? Math.max(0, Math.min(...vals) - 1) : 0;
+  const getX = (i: number) => {
+    const len = activeData().length;
+    if (len <= 1) return padL + (width - padL - padR) / 2;
+    return padL + (i / (len - 1)) * (width - padL - padR);
   };
 
-  const width = 400;
-  const height = 150;
-  const paddingX = 35;
-  const paddingY = 20;
-
-  const points = () => {
-    const data = chartData();
-    if (data.length < 2) return "";
-    const rangeY = maxCount() - minCount() || 1;
-    return data
-      .map((d, index) => {
-        const x =
-          paddingX + (index / (data.length - 1)) * (width - paddingX * 2);
-        const y =
-          height -
-          paddingY -
-          ((d.count - minCount()) / rangeY) * (height - paddingY * 2);
-        return `${x},${y}`;
-      })
-      .join(" ");
+  const getY = (count: number) => {
+    const ratio = count / maxCount();
+    return height - padB - ratio * (height - padT - padB);
   };
 
-  const formatShortDate = (dateStr: string) => {
-    try {
-      const parts = dateStr.split("-");
-      if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}`;
-      }
-      return dateStr;
-    } catch {
-      return dateStr;
-    }
+  const linePath = () => {
+    const data = activeData();
+    if (data.length === 0) return "";
+    return data.map((d, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.count)}`).join(" ");
   };
+
+  const areaPath = () => {
+    const data = activeData();
+    if (data.length === 0) return "";
+    const yBottom = height - padB;
+    return `${linePath()} L ${getX(data.length - 1)} ${yBottom} L ${getX(0)} ${yBottom} Z`;
+  };
+
+  const formatValue = (val: number) => (val >= 1000 ? (val / 1000).toFixed(0) + "RB" : `${val}`);
 
   return (
-    <div style="width: 100%; display: flex; flex-direction: column; gap: var(--space-2);">
+    <div style="width: 100%; position: relative;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+        <h3 style="font-family: var(--font-headline); font-weight: 700; font-size: 1.1rem; margin: 0; color: var(--color-text);">
+          Grafik Anak Magang
+        </h3>
+        <select
+          value={period()}
+          onChange={(e) => { setPeriod(e.currentTarget.value as any); setHovered(null); }}
+          style="padding: 4px 12px; border-radius: 6px; border: 1px solid var(--color-border); background: var(--surface-base); color: var(--color-text); font-size: 13px; cursor: pointer; outline: none;"
+        >
+          <option value="weekly">Mingguan</option>
+          <option value="monthly">Bulanan</option>
+          <option value="yearly">Tahunan</option>
+        </select>
+      </div>
+
       <svg
         viewBox={`0 0 ${width} ${height}`}
         width="100%"
-        height="130"
+        height="220"
         style="background: transparent; overflow: visible;"
+        onMouseLeave={() => setHovered(null)}
       >
-        <For each={[0, 0.5, 1]}>
+        <defs>
+          <linearGradient id="chartAreaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.02" />
+          </linearGradient>
+        </defs>
+
+        {/* Y grid lines + labels */}
+        <For each={[0, 0.25, 0.5, 0.75, 1]}>
           {(ratio) => {
-            const rangeY = maxCount() - minCount() || 1;
-            const val = Math.round(minCount() + ratio * rangeY);
-            const y = height - paddingY - ratio * (height - paddingY * 2);
+            const val = Math.round(ratio * maxCount());
+            const y = getY(val);
             return (
               <g>
-                <line
-                  x1={paddingX}
-                  y1={y}
-                  x2={width - paddingX}
-                  y2={y}
-                  stroke="var(--color-border)"
-                  stroke-dasharray="4 4"
-                  stroke-width="1"
-                />
-                <text
-                  x={paddingX - 8}
-                  y={y + 4}
-                  font-size="10"
-                  fill="var(--color-text-secondary)"
-                  text-anchor="end"
-                  font-family="var(--font-mono)"
-                >
-                  {val}
-                </text>
+                <line x1={padL} y1={y} x2={width - padR} y2={y} stroke="var(--color-border)" stroke-dasharray="4 4" stroke-width="1" opacity="0.5" />
+                <text x={padL - 8} y={y + 4} font-size="10" fill="var(--color-text-secondary)" text-anchor="end" font-family="var(--font-mono)">{formatValue(val)}</text>
               </g>
             );
           }}
         </For>
 
-        <Show when={chartData().length >= 2}>
-          <polyline
-            fill="none"
-            stroke="var(--color-secondary)"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            points={points()}
-          />
+        {/* Area fill */}
+        <Show when={activeData().length >= 2}>
+          <path d={areaPath()} fill="url(#chartAreaGrad)" />
         </Show>
 
-        <For each={chartData()}>
-          {(d, index) => {
-            const rangeY = maxCount() - minCount() || 1;
-            const x =
-              paddingX +
-              (index() / (chartData().length - 1)) * (width - paddingX * 2);
-            const y =
-              height -
-              paddingY -
-              ((d.count - minCount()) / rangeY) * (height - paddingY * 2);
+        {/* Line */}
+        <Show when={activeData().length >= 2}>
+          <path d={linePath()} fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </Show>
+
+        {/* Data point dots (hidden when hovering) */}
+        <For each={activeData()}>
+          {(d, i) => (
+            <circle
+              cx={getX(i())}
+              cy={getY(d.count)}
+              r={3}
+              fill="#3b82f6"
+              stroke="var(--surface-base)"
+              stroke-width="1.5"
+              opacity={hovered() !== null ? 0 : 0.7}
+              style="transition: opacity 0.15s ease; pointer-events: none;"
+            />
+          )}
+        </For>
+
+        {/* Hover indicator */}
+        <Show when={hovered() !== null && activeData()[hovered()!]}>
+          <g style="pointer-events: none;">
+            <line x1={getX(hovered()!)} y1={padT} x2={getX(hovered()!)} y2={height - padB} stroke="#3b82f6" stroke-width="1" stroke-dasharray="3 3" opacity="0.5" />
+            <circle cx={getX(hovered()!)} cy={getY(activeData()[hovered()!].count)} r="6" fill="#3b82f6" stroke="#ffffff" stroke-width="2.5" style="filter: drop-shadow(0px 2px 4px rgba(59,130,246,0.4));" />
+          </g>
+        </Show>
+
+        {/* Hover target slices (transparent rects per data point) */}
+        <For each={activeData()}>
+          {(_, i) => {
+            const data = activeData();
+            const sliceW = data.length <= 1 ? width - padL - padR : (width - padL - padR) / (data.length - 1);
             return (
-              <g style="cursor: pointer;">
-                <circle
-                  cx={x}
-                  cy={y}
-                  r="4"
-                  fill="var(--color-secondary)"
-                  stroke="var(--surface-base)"
-                  stroke-width="2"
-                />
-                <title>{`${d.date}: ${d.count} Anak Magang`}</title>
-              </g>
+              <rect
+                x={getX(i()) - sliceW / 2}
+                y={padT}
+                width={sliceW}
+                height={height - padT - padB}
+                fill="transparent"
+                style="cursor: crosshair;"
+                onMouseEnter={() => setHovered(i())}
+              />
+            );
+          }}
+        </For>
+
+        {/* X-axis labels */}
+        <For each={activeData()}>
+          {(d, i) => {
+            const data = activeData();
+            const show = i() % 3 === 0 || i() === data.length - 1;
+            return (
+              <Show when={show}>
+                <text x={getX(i())} y={height - 4} font-size="9" fill="var(--color-text-secondary)" text-anchor="middle" font-family="var(--font-mono)">
+                  {d.label}
+                </text>
+              </Show>
             );
           }}
         </For>
       </svg>
 
-      <div style="display: flex; justify-content: space-between; padding: 0 var(--space-4); font-size: 11px; color: var(--color-text-secondary); font-family: var(--font-mono);">
-        <span>{formatShortDate(chartData()[0]?.date ?? "")}</span>
-        <span style="font-weight: 600; color: var(--color-text);">
-          Tren Pertumbuhan
-        </span>
-        <span>
-          {formatShortDate(chartData()[chartData().length - 1]?.date ?? "")}
-        </span>
-      </div>
+      {/* Tooltip overlay */}
+      <Show when={hovered() !== null}>
+        {() => {
+          const idx = hovered()!;
+          const d = activeData()[idx];
+          const x = getX(idx);
+          const y = getY(d.count);
+          const leftPct = Math.max(5, Math.min(90, (x / width) * 100));
+          const topPct = Math.max(0, (y / height) * 100 - 32);
+          return (
+            <div style={`position: absolute; left: ${leftPct}%; top: ${topPct}%; transform: translateX(-50%); pointer-events: none; z-index: 10; background: var(--surface-base); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;`}>
+              <div style="font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px;">{d.label}</div>
+              <div style="font-size: 18px; font-weight: 700; color: var(--color-text);">{d.count}</div>
+            </div>
+          );
+        }}
+      </Show>
+
+      {/* Footer summary */}
+      {(() => {
+        const data = activeData();
+        const periodLabels = { weekly: "Mingguan", monthly: "Bulanan", yearly: "Tahunan" } as const;
+        const first = data[0]?.label ?? "";
+        const last = data[data.length - 1]?.label ?? "";
+        return (
+          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: var(--space-3); font-size: 12px; color: var(--color-text-secondary);">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; flex-shrink: 0;"></span>
+            Total Anak Magang {periodLabels[period()]} dari {first} hingga {last}
+          </div>
+        );
+      })()}
     </div>
   );
 };
@@ -412,18 +472,15 @@ export default function AdminDashboard() {
         </div>
 
         <div class="stat-card" style="padding: var(--space-4);">
-          <h3 style="font-family: var(--font-headline); font-weight: 700; font-size: 1.2rem; margin-top: 0; margin-bottom: var(--space-4); color: var(--color-text);">
-            Tren Pertumbuhan Anak Magang
-          </h3>
           <Show
-            when={trendData() && trendData()!.registrationTrend.length > 0}
+            when={trendData() && trendData()!.monthly.length > 0}
             fallback={
               <p style="color: var(--color-text-secondary); font-size: 14px;">
                 Memuat data grafik...
               </p>
             }
           >
-            <TrendLineChart data={trendData()!.registrationTrend} />
+            <TrendLineChart data={trendData()!} />
           </Show>
         </div>
       </div>

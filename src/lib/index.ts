@@ -2,6 +2,7 @@ import { action, query, redirect } from "@solidjs/router";
 import { promises as fs } from "fs";
 import path from "path";
 import crypto from "crypto";
+import * as XLSX from "xlsx";
 import { db } from "./db";
 export * from "./utils";
 import {
@@ -17,7 +18,7 @@ import {
   logActivity,
 } from "./server";
 
-// ========== AUTH ==========
+//  AUTH 
 
 export const getUser = query(async () => {
   "use server";
@@ -90,7 +91,7 @@ export const logout = action(async () => {
   return redirect("/login");
 });
 
-// ========== ABSENSI (ATTENDANCE) ==========
+//  ABSENSI (ATTENDANCE) 
 
 const getLocalDateAsUTC = () => {
   const d = new Date();
@@ -256,7 +257,7 @@ export const getAttendanceHistory = query(async () => {
   });
 }, "attendanceHistory");
 
-// ========== IZIN (LEAVE REQUEST) ==========
+//  IZIN (LEAVE REQUEST) 
 
 const parseLocalDateAsUTC = (dateStr: string) => {
   const [year, month, day] = dateStr.split("-").map(Number);
@@ -346,7 +347,7 @@ export const getUserIzinList = query(async () => {
   });
 }, "userIzinList");
 
-// ========== PROFIL ==========
+//  PROFIL 
 
 export const updateProfile = action(async (formData: FormData) => {
   "use server";
@@ -396,7 +397,7 @@ export const changePassword = action(async (formData: FormData) => {
   return { success: true };
 });
 
-// ========== ADMIN: DASHBOARD ==========
+//  ADMIN: DASHBOARD 
 
 export const getAdminStats = query(async () => {
   "use server";
@@ -454,29 +455,16 @@ export const getInternTrendData = query(async () => {
   "use server";
   await requireAdmin();
 
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const MONTHS_ID = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
-  const attendanceHistory = await db.absensi.findMany({
-    where: { date: { gte: thirtyDaysAgo } },
-    select: { date: true, status: true },
-    orderBy: { date: "asc" },
-  });
-
-  const dailyData: Record<
-    string,
-    { hadir: number; telat: number; izin: number; total: number }
-  > = {};
-  for (const record of attendanceHistory) {
-    const dateStr = record.date.toISOString().split("T")[0];
-    if (!dailyData[dateStr]) {
-      dailyData[dateStr] = { hadir: 0, telat: 0, izin: 0, total: 0 };
-    }
-    if (record.status === "HADIR") dailyData[dateStr].hadir++;
-    else if (record.status === "TELAT") dailyData[dateStr].telat++;
-    else if (record.status === "IZIN") dailyData[dateStr].izin++;
-    dailyData[dateStr].total++;
-  }
+  const getMonthLabel = (d: Date) => `${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
+  const getWeekLabel = (d: Date) => {
+    const t = new Date(d.getTime());
+    const day = t.getDay();
+    t.setDate(t.getDate() - day + (day === 0 ? -6 : 1));
+    return `${t.getDate()} ${MONTHS_ID[t.getMonth()]} ${t.getFullYear()}`;
+  };
+  const getYearLabel = (d: Date) => `${d.getFullYear()}`;
 
   const users = await db.user.findMany({
     where: { role: "USER" },
@@ -484,26 +472,57 @@ export const getInternTrendData = query(async () => {
     orderBy: { createdAt: "asc" },
   });
 
-  const registrationTrend: Record<string, number> = {};
-  let runningCount = 0;
+  const now = new Date();
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+  const startDate = users.length > 0 ? new Date(Math.min(users[0].createdAt.getTime(), sixMonthsAgo.getTime())) : sixMonthsAgo;
+
+  // Build cumulative counts per period label
+  const monthlyCounts: Record<string, number> = {};
+  const weeklyCounts: Record<string, number> = {};
+  const yearlyCounts: Record<string, number> = {};
+  let running = 0;
   for (const u of users) {
-    const dateStr = u.createdAt.toISOString().split("T")[0];
-    runningCount++;
-    registrationTrend[dateStr] = runningCount;
+    running++;
+    monthlyCounts[getMonthLabel(u.createdAt)] = running;
+    weeklyCounts[getWeekLabel(u.createdAt)] = running;
+    yearlyCounts[getYearLabel(u.createdAt)] = running;
   }
 
+  // Generate continuous label sequences and fill gaps
+  const fillSeries = (labels: string[], counts: Record<string, number>) => {
+    let last = 0;
+    return labels.map((label) => {
+      if (counts[label] !== undefined) last = counts[label];
+      return { label, count: last };
+    });
+  };
+
+  // Monthly: from startDate to now
+  const monthLabels: string[] = [];
+  const mc = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  while (mc <= now) { monthLabels.push(getMonthLabel(mc)); mc.setMonth(mc.getMonth() + 1); }
+
+  // Weekly: from startDate to now (last 12 weeks max for readability)
+  const weekLabels: string[] = [];
+  const wc = new Date(startDate.getTime());
+  const wDay = wc.getDay();
+  wc.setDate(wc.getDate() - wDay + (wDay === 0 ? -6 : 1));
+  wc.setHours(0, 0, 0, 0);
+  while (wc <= now) { weekLabels.push(getWeekLabel(wc)); wc.setDate(wc.getDate() + 7); }
+  const recentWeeks = weekLabels.slice(-12);
+
+  // Yearly: from startDate to now
+  const yearLabels: string[] = [];
+  for (let y = startDate.getFullYear(); y <= now.getFullYear(); y++) yearLabels.push(`${y}`);
+
   return {
-    dailyAttendanceTrend: Object.entries(dailyData).map(([date, stats]) => ({
-      date,
-      ...stats,
-    })),
-    registrationTrend: Object.entries(registrationTrend).map(
-      ([date, count]) => ({ date, count }),
-    ),
+    weekly: fillSeries(recentWeeks, weeklyCounts),
+    monthly: fillSeries(monthLabels, monthlyCounts),
+    yearly: fillSeries(yearLabels, yearlyCounts),
   };
 }, "internTrendData");
 
-// ========== ADMIN: USERS CRUD ==========
+//  ADMIN: USERS CRUD 
 
 export const getAdminUsers = query(async (options?: {
   page?: number;
@@ -590,6 +609,105 @@ export const createUser = action(async (formData: FormData) => {
   return redirect("/admin/users");
 });
 
+export const bulkCreateUsers = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+
+  const file = formData.get("file") as File | null;
+  if (!file || file.size === 0)
+    return { total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: "File tidak valid atau kosong." }] };
+  if (file.size > 2 * 1024 * 1024)
+    return { total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: "Ukuran file maksimal 2MB." }] };
+
+  const bytes = await file.arrayBuffer();
+  const wb = XLSX.read(Buffer.from(bytes), { type: "buffer" });
+  const rows = XLSX.utils.sheet_to_json<Record<string, any>>(wb.Sheets[wb.SheetNames[0]]);
+
+  if (rows.length === 0)
+    return { total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: "Template kosong, tidak ada data." }] };
+
+  const [divisiList, batchList, existingUsers] = await Promise.all([
+    db.divisi.findMany(),
+    db.batchMagang.findMany(),
+    db.user.findMany({ select: { username: true, email: true } }),
+  ]);
+  const divisiMap = new Map(divisiList.map((d) => [d.name.toLowerCase().trim(), d.id]));
+  const batchMap = new Map(batchList.map((b) => [b.name.toLowerCase().trim(), b.id]));
+  const usedUsernames = new Set(existingUsers.map((u) => u.username.toLowerCase()));
+  const usedEmails = new Set(existingUsers.map((u) => u.email.toLowerCase()));
+
+  const errors: Array<{ row: number; username: string; error: string }> = [];
+  let successCount = 0;
+  const batchUsernames = new Set<string>();
+  const batchEmails = new Set<string>();
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const rowNum = i + 2;
+    const username = String(r.username || "").trim();
+    const password = String(r.password || "").trim();
+    const fullName = String(r.fullName || "").trim();
+    const email = String(r.email || "").trim();
+    const phone = String(r.phone || "").trim();
+    const role = String(r.role || "USER").trim().toUpperCase();
+    const divisiName = String(r.divisi || "").trim();
+    const batchName = String(r.batch || "").trim();
+
+    if (!username || !password || !fullName || !email) {
+      errors.push({ row: rowNum, username: username || "(kosong)", error: "username, password, fullName, dan email wajib diisi." });
+      continue;
+    }
+    const ue = validateUsername(username);
+    if (ue) { errors.push({ row: rowNum, username, error: ue }); continue; }
+    const pe = validatePassword(password);
+    if (pe) { errors.push({ row: rowNum, username, error: pe }); continue; }
+    if (!["USER", "ADMIN"].includes(role)) {
+      errors.push({ row: rowNum, username, error: `Role "${r.role}" tidak valid. Gunakan USER atau ADMIN.` });
+      continue;
+    }
+
+    const uLower = username.toLowerCase();
+    const eLower = email.toLowerCase();
+    if (usedUsernames.has(uLower) || batchUsernames.has(uLower)) {
+      errors.push({ row: rowNum, username, error: "Username sudah terdaftar." }); continue;
+    }
+    if (usedEmails.has(eLower) || batchEmails.has(eLower)) {
+      errors.push({ row: rowNum, username, error: "Email sudah terdaftar." }); continue;
+    }
+
+    let divisiId: string | null = null;
+    if (divisiName) {
+      divisiId = divisiMap.get(divisiName.toLowerCase()) ?? null;
+      if (!divisiId) { errors.push({ row: rowNum, username, error: `Divisi "${divisiName}" tidak ditemukan.` }); continue; }
+    }
+    let batchId: string | null = null;
+    if (batchName) {
+      batchId = batchMap.get(batchName.toLowerCase()) ?? null;
+      if (!batchId) { errors.push({ row: rowNum, username, error: `Batch "${batchName}" tidak ditemukan.` }); continue; }
+    }
+
+    try {
+      await db.user.create({
+        data: {
+          username, password: hashPassword(password), fullName, email,
+          phone: phone || null, role: role as "USER" | "ADMIN",
+          divisiId, batchId, status: "AKTIF",
+        },
+      });
+      batchUsernames.add(uLower);
+      batchEmails.add(eLower);
+      successCount++;
+    } catch (e: any) {
+      errors.push({ row: rowNum, username, error: e.message || "Gagal menyimpan." });
+    }
+  }
+
+  if (successCount > 0) {
+    await logActivity("BUAT_PENGGUNA", `bulk create ${successCount}/${rows.length} users`);
+  }
+  return { total: rows.length, successCount, errors };
+});
+
 export const updateUser = action(async (formData: FormData) => {
   "use server";
   await requireAdmin();
@@ -631,7 +749,7 @@ export const deleteUser = action(async (formData: FormData) => {
   return redirect("/admin/users");
 });
 
-// ========== ADMIN: DIVISI CRUD ==========
+//  ADMIN: DIVISI CRUD 
 
 export const getAdminDivisi = query(async () => {
   "use server";
@@ -684,7 +802,7 @@ export const deleteDivisi = action(async (formData: FormData) => {
   return redirect("/admin/divisi");
 });
 
-// ========== ADMIN: ABSENSI ==========
+//  ADMIN: ABSENSI 
 
 export const getAdminAbsensi = query(async (options?: {
   page?: number;
@@ -747,7 +865,7 @@ export const getAdminAbsensi = query(async (options?: {
   return { items, total };
 }, "adminAbsensi");
 
-// ========== ADMIN: IZIN ==========
+//  ADMIN: IZIN 
 
 export const getAdminIzin = query(async (options?: {
   page?: number;
@@ -848,7 +966,7 @@ export const approveIzin = action(async (formData: FormData) => {
   return redirect("/admin/izin");
 });
 
-// ========== ADMIN: LAPORAN ==========
+//  ADMIN: LAPORAN 
 
 export const getLaporan = query(
   async (startDate?: string, endDate?: string) => {
@@ -867,7 +985,7 @@ export const getLaporan = query(
   "laporan",
 );
 
-// ========== ADMIN: EXPORT CSV ==========
+//  ADMIN: EXPORT CSV 
 
 export const exportCSV = query(async () => {
   "use server";
@@ -895,7 +1013,7 @@ export const exportCSV = query(async () => {
   return header + rows;
 }, "exportCSV");
 
-// ========== ADMIN: AUDIT LOGS ==========
+//  ADMIN: AUDIT LOGS 
 
 export const getAdminAuditLogs = query(async (options?: {
   page?: number;
@@ -975,7 +1093,7 @@ export async function logPageAccess(pathname: string) {
   }
 }
 
-// ========== ADMIN: BATCH MAGANG CRUD ==========
+//  ADMIN: BATCH MAGANG CRUD 
 
 export const getAdminBatches = query(async () => {
   "use server";
