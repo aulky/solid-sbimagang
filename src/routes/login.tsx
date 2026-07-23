@@ -34,7 +34,7 @@ export default function Login(props: RouteSectionProps) {
     <main class="login-container">
       <div class="login-card" style="text-align: center;">
         <img
-          src={theme() === "dark" ? "/logo-sapaa-putih.png" : "/logo-sapa.png"}
+          src={theme() === "dark" ? "/logo-sigma-putih.png" : "/logo-sigma.png"}
           alt="SIGMA - Sistem Informasi dan Manajemen Magang"
           style="height: 55px; width: auto; object-fit: contain; margin-bottom: var(--space-4);"
         />

@@ -289,8 +289,8 @@ export default function App() {
                         <img
                           src={
                             theme() === "dark"
-                              ? "/logo-sapaa-putih.png"
-                              : "/logo-sapa.png"
+                              ? "/logo-sigma-putih.png"
+                              : "/logo-sigma.png"
                           }
                           alt="Logo SIGMA"
                           class="sidebar-logo"

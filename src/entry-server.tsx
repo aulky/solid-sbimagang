@@ -18,7 +18,7 @@ export default createHandler(() => (
       const origin = `${protocol}://${host}`;
       const requestUrl = event ? new URL(event.request.url, origin) : null;
       const path = requestUrl ? requestUrl.pathname : "/";
-      const logoUrl = `${origin}/logo-sapa-seo.png`;
+      const logoUrl = `${origin}/logo-sigma-seo.png`;
 
       const titleMap: Record<string, string> = {
         "/dashboard": "Dashboard",

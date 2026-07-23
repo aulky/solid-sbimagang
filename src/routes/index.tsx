@@ -15,7 +15,7 @@ export default function Home() {
     <main class="login-container">
       <div class="login-card" style="text-align: center;">
         <img
-          src="/logo-sapa.png"
+          src="/logo-sigma.png"
           alt="Logo SIGMA"
           style="height: 60px; margin-bottom: var(--space-3);"
         />

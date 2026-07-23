@@ -256,7 +256,7 @@ export default function Laporan() {
       >
         <div style="display: flex; align-items: center; border-bottom: 3px double #1e293b; padding-bottom: 15px; margin-bottom: 10px; gap: 15px; width: 100%; box-sizing: border-box;">
           <img
-            src="/logo-sapa.png"
+            src="/logo-sigma.png"
             alt="SIGMA - Sistem Informasi dan Manajemen Magang"
             style="height: 55px;"
           />
