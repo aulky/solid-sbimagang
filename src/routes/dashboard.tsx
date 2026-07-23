@@ -154,7 +154,7 @@ export default function Dashboard() {
       </div>
 
       <div class="stat-card" style={{ "margin-top": "var(--space-4)" }}>
-        <h2>Absensi Hari Ini</h2>
+        <h2 style="font-family: var(--font-headline); font-weight: 700; font-size: 1.2rem; margin-top: 0; margin-bottom: var(--space-3); color: var(--color-text);">Absensi Hari Ini</h2>
         <Show when={settings()}>
           {(s) => {
             const [tHour, tMin] = (s().jamMasuk || "08:00").split(":").map(Number);

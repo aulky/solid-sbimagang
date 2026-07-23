@@ -52,7 +52,15 @@ const DailyDonutChart = (props: {
       currentOffset -= fraction * circumference;
       currentHoverOffset -= fraction * hoverCircumference;
       const percentage = fraction * 100;
-      return { ...s, strokeDasharray, strokeDashoffset, hoverStrokeDasharray, hoverStrokeDashoffset, percentage, index: i };
+      return {
+        ...s,
+        strokeDasharray,
+        strokeDashoffset,
+        hoverStrokeDasharray,
+        hoverStrokeDashoffset,
+        percentage,
+        index: i,
+      };
     });
   };
 
@@ -62,7 +70,8 @@ const DailyDonutChart = (props: {
     if (idx === null) return null;
     const segs = segments();
     let angleBefore = 0;
-    for (let i = 0; i < idx; i++) angleBefore += (segs[i].value / total()) * 360;
+    for (let i = 0; i < idx; i++)
+      angleBefore += (segs[i].value / total()) * 360;
     const midAngle = angleBefore + (segs[idx].value / total()) * 180;
     const rad = ((midAngle - 90) * Math.PI) / 180;
     return {
@@ -73,10 +82,10 @@ const DailyDonutChart = (props: {
   };
 
   return (
-    <div style="display: flex; align-items: center; justify-content: space-around; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-2) 0;">
+    <div style="display: flex; align-items: center; justify-content: space-around; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-2) 0; flex-grow: 1;">
       <svg
         viewBox="0 0 100 100"
-        style="width: 100%; max-width: 140px; height: auto; aspect-ratio: 1 / 1; transform: rotate(-90deg); flex-shrink: 0; overflow: visible;"
+        style="width: 45%; max-width: 185px; min-width: 130px; height: auto; aspect-ratio: 1 / 1; transform: rotate(-90deg); flex-shrink: 0; overflow: visible;"
         onMouseLeave={() => setHovered(null)}
       >
         <circle
@@ -97,9 +106,17 @@ const DailyDonutChart = (props: {
                 fill="transparent"
                 stroke={segment.color}
                 stroke-width={hovered() === segment.index ? 12 : 10}
-                stroke-dasharray={hovered() === segment.index ? segment.hoverStrokeDasharray : segment.strokeDasharray}
-                stroke-dashoffset={hovered() === segment.index ? segment.hoverStrokeDashoffset : segment.strokeDashoffset}
-                style={`transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; opacity: ${hovered() !== null && hovered() !== segment.index ? '0.4' : '1'};`}
+                stroke-dasharray={
+                  hovered() === segment.index
+                    ? segment.hoverStrokeDasharray
+                    : segment.strokeDasharray
+                }
+                stroke-dashoffset={
+                  hovered() === segment.index
+                    ? segment.hoverStrokeDashoffset
+                    : segment.strokeDashoffset
+                }
+                style={`transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; opacity: ${hovered() !== null && hovered() !== segment.index ? "0.4" : "1"};`}
                 onMouseEnter={() => setHovered(segment.index)}
               />
             </Show>
@@ -154,16 +171,16 @@ const DailyDonutChart = (props: {
           )}
         </Show>
       </svg>
-      <div style="display: flex; flex-direction: column; gap: var(--space-2); min-width: 140px;">
+      <div style="display: flex; flex-direction: column; gap: var(--space-2); min-width: 150px; flex: 1 1 auto; max-width: 220px;">
         <For each={segments()}>
           {(segment) => (
             <div
-              style={`display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; ${hovered() === segment.index ? 'background: var(--color-border);' : ''} ${hovered() !== null && hovered() !== segment.index ? 'opacity: 0.5;' : 'opacity: 1;'}`}
+              style={`display: flex; align-items: center; gap: 8px; font-size: 13.5px; padding: 6px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; ${hovered() === segment.index ? "background: var(--color-border);" : ""} ${hovered() !== null && hovered() !== segment.index ? "opacity: 0.5;" : "opacity: 1;"}`}
               onMouseEnter={() => setHovered(segment.index)}
               onMouseLeave={() => setHovered(null)}
             >
               <span
-                style={`display: inline-block; width: 12px; height: 12px; border-radius: 3px; background-color: ${segment.color}; flex-shrink: 0; transition: transform 0.2s ease; ${hovered() === segment.index ? 'transform: scale(1.3);' : ''}`}
+                style={`display: inline-block; width: 12px; height: 12px; border-radius: 3px; background-color: ${segment.color}; flex-shrink: 0; transition: transform 0.2s ease; ${hovered() === segment.index ? "transform: scale(1.3);" : ""}`}
               ></span>
               <span style="color: var(--color-text); font-weight: 500;">
                 {segment.label}: <strong>{segment.value}</strong>{" "}
@@ -186,14 +203,19 @@ const TrendLineChart = (props: {
     yearly: { label: string; count: number }[];
   };
 }) => {
-  const [period, setPeriod] = createSignal<"weekly" | "monthly" | "yearly">("monthly");
+  const [period, setPeriod] = createSignal<"weekly" | "monthly" | "yearly">(
+    "monthly",
+  );
   const [hovered, setHovered] = createSignal<number | null>(null);
 
   const activeData = () => props.data[period()];
 
   const width = 500;
   const height = 250;
-  const padL = 40, padR = 10, padT = 15, padB = 30;
+  const padL = 40,
+    padR = 10,
+    padT = 15,
+    padB = 30;
 
   const maxCount = () => {
     const vals = activeData().map((d) => d.count);
@@ -215,7 +237,9 @@ const TrendLineChart = (props: {
   const linePath = () => {
     const data = activeData();
     if (data.length === 0) return "";
-    return data.map((d, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.count)}`).join(" ");
+    return data
+      .map((d, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.count)}`)
+      .join(" ");
   };
 
   const areaPath = () => {
@@ -225,17 +249,21 @@ const TrendLineChart = (props: {
     return `${linePath()} L ${getX(data.length - 1)} ${yBottom} L ${getX(0)} ${yBottom} Z`;
   };
 
-  const formatValue = (val: number) => (val >= 1000 ? (val / 1000).toFixed(0) + "RB" : `${val}`);
+  const formatValue = (val: number) =>
+    val >= 1000 ? (val / 1000).toFixed(0) + "RB" : `${val}`;
 
   return (
     <div style="width: 100%; position: relative;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); flex-wrap: wrap; gap: 8px;">
         <h3 style="font-family: var(--font-headline); font-weight: 700; font-size: 1.1rem; margin: 0; color: var(--color-text);">
           Grafik Anak Magang
         </h3>
         <select
           value={period()}
-          onChange={(e) => { setPeriod(e.currentTarget.value as any); setHovered(null); }}
+          onChange={(e) => {
+            setPeriod(e.currentTarget.value as any);
+            setHovered(null);
+          }}
           style="width: auto !important; height: 32px !important; padding: 4px 24px 4px 12px !important; border-radius: 6px; border: 1px solid var(--color-border); background: var(--surface-base); color: var(--color-text); font-size: 13px; cursor: pointer; outline: none;"
         >
           <option value="weekly">Mingguan</option>
@@ -263,8 +291,26 @@ const TrendLineChart = (props: {
             const y = getY(val);
             return (
               <g>
-                <line x1={padL} y1={y} x2={width - padR} y2={y} stroke="var(--color-border)" stroke-dasharray="4 4" stroke-width="1" opacity="0.5" />
-                <text x={padL - 8} y={y + 4} font-size="10" fill="var(--color-text-secondary)" text-anchor="end" font-family="var(--font-mono)">{formatValue(val)}</text>
+                <line
+                  x1={padL}
+                  y1={y}
+                  x2={width - padR}
+                  y2={y}
+                  stroke="var(--color-border)"
+                  stroke-dasharray="4 4"
+                  stroke-width="1"
+                  opacity="0.5"
+                />
+                <text
+                  x={padL - 8}
+                  y={y + 4}
+                  font-size="10"
+                  fill="var(--color-text-secondary)"
+                  text-anchor="end"
+                  font-family="var(--font-mono)"
+                >
+                  {formatValue(val)}
+                </text>
               </g>
             );
           }}
@@ -277,7 +323,14 @@ const TrendLineChart = (props: {
 
         {/* Line */}
         <Show when={activeData().length >= 2}>
-          <path d={linePath()} fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path
+            d={linePath()}
+            fill="none"
+            stroke="#3b82f6"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </Show>
 
         {/* Data point dots (hidden when hovering) */}
@@ -299,8 +352,25 @@ const TrendLineChart = (props: {
         {/* Hover indicator */}
         <Show when={hovered() !== null && activeData()[hovered()!]}>
           <g style="pointer-events: none;">
-            <line x1={getX(hovered()!)} y1={padT} x2={getX(hovered()!)} y2={height - padB} stroke="#3b82f6" stroke-width="1" stroke-dasharray="3 3" opacity="0.5" />
-            <circle cx={getX(hovered()!)} cy={getY(activeData()[hovered()!].count)} r="6" fill="#3b82f6" stroke="#ffffff" stroke-width="2.5" style="filter: drop-shadow(0px 2px 4px rgba(59,130,246,0.4));" />
+            <line
+              x1={getX(hovered()!)}
+              y1={padT}
+              x2={getX(hovered()!)}
+              y2={height - padB}
+              stroke="#3b82f6"
+              stroke-width="1"
+              stroke-dasharray="3 3"
+              opacity="0.5"
+            />
+            <circle
+              cx={getX(hovered()!)}
+              cy={getY(activeData()[hovered()!].count)}
+              r="6"
+              fill="#3b82f6"
+              stroke="#ffffff"
+              stroke-width="2.5"
+              style="filter: drop-shadow(0px 2px 4px rgba(59,130,246,0.4));"
+            />
           </g>
         </Show>
 
@@ -308,7 +378,10 @@ const TrendLineChart = (props: {
         <For each={activeData()}>
           {(_, i) => {
             const data = activeData();
-            const sliceW = data.length <= 1 ? width - padL - padR : (width - padL - padR) / (data.length - 1);
+            const sliceW =
+              data.length <= 1
+                ? width - padL - padR
+                : (width - padL - padR) / (data.length - 1);
             return (
               <rect
                 x={getX(i()) - sliceW / 2}
@@ -330,7 +403,14 @@ const TrendLineChart = (props: {
             const show = i() % 3 === 0 || i() === data.length - 1;
             return (
               <Show when={show}>
-                <text x={getX(i())} y={height - 4} font-size="9" fill="var(--color-text-secondary)" text-anchor="middle" font-family="var(--font-mono)">
+                <text
+                  x={getX(i())}
+                  y={height - 4}
+                  font-size="9"
+                  fill="var(--color-text-secondary)"
+                  text-anchor="middle"
+                  font-family="var(--font-mono)"
+                >
                   {d.label}
                 </text>
               </Show>
@@ -340,18 +420,24 @@ const TrendLineChart = (props: {
       </svg>
 
       {/* Tooltip overlay */}
-      <Show when={hovered() !== null}>
-        {() => {
-          const idx = hovered()!;
+      <Show when={hovered() !== null ? { idx: hovered()! } : null} keyed>
+        {(item) => {
+          const idx = item.idx;
           const d = activeData()[idx];
           const x = getX(idx);
           const y = getY(d.count);
           const leftPct = Math.max(5, Math.min(90, (x / width) * 100));
           const topPct = Math.max(0, (y / height) * 100 - 32);
           return (
-            <div style={`position: absolute; left: ${leftPct}%; top: ${topPct}%; transform: translateX(-50%); pointer-events: none; z-index: 10; background: var(--surface-base); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;`}>
-              <div style="font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px;">{d.label}</div>
-              <div style="font-size: 18px; font-weight: 700; color: var(--color-text);">{d.count}</div>
+            <div
+              style={`position: absolute; left: ${leftPct}%; top: ${topPct}%; transform: translateX(-50%); pointer-events: none; z-index: 10; background: var(--surface-base); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;`}
+            >
+              <div style="font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px;">
+                {d.label}
+              </div>
+              <div style="font-size: 18px; font-weight: 700; color: var(--color-text);">
+                {d.count}
+              </div>
             </div>
           );
         }}
@@ -360,13 +446,18 @@ const TrendLineChart = (props: {
       {/* Footer summary */}
       {(() => {
         const data = activeData();
-        const periodLabels = { weekly: "Mingguan", monthly: "Bulanan", yearly: "Tahunan" } as const;
+        const periodLabels = {
+          weekly: "Mingguan",
+          monthly: "Bulanan",
+          yearly: "Tahunan",
+        } as const;
         const first = data[0]?.label ?? "";
         const last = data[data.length - 1]?.label ?? "";
         return (
           <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: var(--space-3); font-size: 12px; color: var(--color-text-secondary);">
             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; flex-shrink: 0;"></span>
-            Total Anak Magang {periodLabels[period()]} dari {first} hingga {last}
+            Total Anak Magang {periodLabels[period()]} dari {first} hingga{" "}
+            {last}
           </div>
         );
       })()}
@@ -396,8 +487,8 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Stats Section */}
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); text-align: left;">
+      {/* Stats Section 1: Overview */}
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-4); text-align: left;">
         <div class="stat-card" style="border-left: 4px solid #3b82f6;">
           <div class="stat-value">{stats()?.totalUsers ?? 0}</div>
           <div class="stat-label">Total Anak Magang</div>
@@ -408,6 +499,19 @@ export default function AdminDashboard() {
           <div class="stat-label">Total Divisi</div>
         </div>
 
+        <div class="stat-card" style="border-left: 4px solid #10b981;">
+          <div class="stat-value">{stats()?.batchAktif ?? 0}</div>
+          <div class="stat-label">Batch Aktif</div>
+        </div>
+
+        <div class="stat-card" style="border-left: 4px solid #6b7280;">
+          <div class="stat-value">{stats()?.batchSelesai ?? 0}</div>
+          <div class="stat-label">Batch Selesai</div>
+        </div>
+      </div>
+
+      {/* Stats Section 2: Attendance & Future */}
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); text-align: left;">
         <div class="stat-card" style="border-left: 4px solid #10b981;">
           <div class="stat-value">{stats()?.todayHadir ?? 0}</div>
           <div class="stat-label">Hadir Hari Ini</div>
@@ -421,19 +525,6 @@ export default function AdminDashboard() {
         <div class="stat-card" style="border-left: 4px solid #ef4444;">
           <div class="stat-value">{stats()?.pendingIzin ?? 0}</div>
           <div class="stat-label">Izin Menunggu Persetujuan</div>
-        </div>
-      </div>
-
-      {/* Batch Stats Section */}
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); text-align: left;">
-        <div class="stat-card" style="border-left: 4px solid #10b981;">
-          <div class="stat-value">{stats()?.batchAktif ?? 0}</div>
-          <div class="stat-label">Batch Aktif</div>
-        </div>
-
-        <div class="stat-card" style="border-left: 4px solid #6b7280;">
-          <div class="stat-value">{stats()?.batchSelesai ?? 0}</div>
-          <div class="stat-label">Batch Selesai</div>
         </div>
 
         <div class="stat-card" style="border-left: 4px solid #3b82f6;">
