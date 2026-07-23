@@ -85,7 +85,8 @@ const DailyDonutChart = (props: {
     <div style="display: flex; align-items: center; justify-content: space-around; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-2) 0; flex-grow: 1;">
       <svg
         viewBox="0 0 100 100"
-        style="width: 45%; max-width: 185px; min-width: 130px; height: auto; aspect-ratio: 1 / 1; transform: rotate(-90deg); flex-shrink: 0; overflow: visible;"
+        class="donut-svg-anim"
+        style="width: 45%; max-width: 185px; min-width: 130px; height: auto; aspect-ratio: 1 / 1; flex-shrink: 0; overflow: visible; transform-origin: center;"
         onMouseLeave={() => setHovered(null)}
       >
         <circle
@@ -237,9 +238,19 @@ const TrendLineChart = (props: {
   const linePath = () => {
     const data = activeData();
     if (data.length === 0) return "";
-    return data
-      .map((d, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.count)}`)
-      .join(" ");
+    let path = `M ${getX(0)} ${getY(data[0].count)}`;
+    for (let i = 1; i < data.length; i++) {
+      const x0 = getX(i - 1);
+      const y0 = getY(data[i - 1].count);
+      const x1 = getX(i);
+      const y1 = getY(data[i].count);
+      const cpX1 = x0 + (x1 - x0) * 0.35;
+      const cpY1 = y0;
+      const cpX2 = x1 - (x1 - x0) * 0.35;
+      const cpY2 = y1;
+      path += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${x1} ${y1}`;
+    }
+    return path;
   };
 
   const areaPath = () => {
@@ -318,12 +329,13 @@ const TrendLineChart = (props: {
 
         {/* Area fill */}
         <Show when={activeData().length >= 2}>
-          <path d={areaPath()} fill="url(#chartAreaGrad)" />
+          <path class="chart-area-anim" d={areaPath()} fill="url(#chartAreaGrad)" />
         </Show>
 
         {/* Line */}
         <Show when={activeData().length >= 2}>
           <path
+            class="chart-line-anim"
             d={linePath()}
             fill="none"
             stroke="#3b82f6"
@@ -477,7 +489,7 @@ export default function AdminDashboard() {
 
   return (
     <main>
-      <div style="margin-bottom: var(--space-5); text-align: left;">
+      <div class="fade-in-up" style="margin-bottom: var(--space-5); text-align: left;">
         <h1 class="page-title" style="margin-bottom: var(--space-1);">
           Dashboard Admin
         </h1>
@@ -489,22 +501,22 @@ export default function AdminDashboard() {
 
       {/* Stats Section 1: Overview */}
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-4); text-align: left;">
-        <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+        <div class="stat-card fade-in-up stagger-1" style="border-left: 4px solid #3b82f6;">
           <div class="stat-value">{stats()?.totalUsers ?? 0}</div>
           <div class="stat-label">Total Anak Magang</div>
         </div>
 
-        <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
+        <div class="stat-card fade-in-up stagger-2" style="border-left: 4px solid #8b5cf6;">
           <div class="stat-value">{stats()?.totalDivisi ?? 0}</div>
           <div class="stat-label">Total Divisi</div>
         </div>
 
-        <div class="stat-card" style="border-left: 4px solid #10b981;">
+        <div class="stat-card fade-in-up stagger-3" style="border-left: 4px solid #10b981;">
           <div class="stat-value">{stats()?.batchAktif ?? 0}</div>
           <div class="stat-label">Batch Aktif</div>
         </div>
 
-        <div class="stat-card" style="border-left: 4px solid #6b7280;">
+        <div class="stat-card fade-in-up stagger-4" style="border-left: 4px solid #6b7280;">
           <div class="stat-value">{stats()?.batchSelesai ?? 0}</div>
           <div class="stat-label">Batch Selesai</div>
         </div>
@@ -512,22 +524,22 @@ export default function AdminDashboard() {
 
       {/* Stats Section 2: Attendance & Future */}
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); text-align: left;">
-        <div class="stat-card" style="border-left: 4px solid #10b981;">
+        <div class="stat-card fade-in-up stagger-5" style="border-left: 4px solid #10b981;">
           <div class="stat-value">{stats()?.todayHadir ?? 0}</div>
           <div class="stat-label">Hadir Hari Ini</div>
         </div>
 
-        <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+        <div class="stat-card fade-in-up stagger-6" style="border-left: 4px solid #f59e0b;">
           <div class="stat-value">{stats()?.todayTelat ?? 0}</div>
           <div class="stat-label">Terlambat Hari Ini</div>
         </div>
 
-        <div class="stat-card" style="border-left: 4px solid #ef4444;">
+        <div class="stat-card fade-in-up stagger-7" style="border-left: 4px solid #ef4444;">
           <div class="stat-value">{stats()?.pendingIzin ?? 0}</div>
           <div class="stat-label">Izin Menunggu Persetujuan</div>
         </div>
 
-        <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+        <div class="stat-card fade-in-up stagger-8" style="border-left: 4px solid #3b82f6;">
           <div class="stat-value">{stats()?.batchMendatang ?? 0}</div>
           <div class="stat-label">Batch Mendatang</div>
         </div>
@@ -535,7 +547,7 @@ export default function AdminDashboard() {
 
       {/* Charts Section */}
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); text-align: left;">
-        <div class="stat-card" style="padding: var(--space-4);">
+        <div class="stat-card fade-in-up" style="padding: var(--space-4); animation-delay: 0.45s;">
           <h3 style="font-family: var(--font-headline); font-weight: 700; font-size: 1.2rem; margin-top: 0; margin-bottom: var(--space-4); color: var(--color-text);">
             Status Kehadiran Hari Ini
           </h3>
@@ -558,7 +570,7 @@ export default function AdminDashboard() {
           </Show>
         </div>
 
-        <div class="stat-card" style="padding: var(--space-4);">
+        <div class="stat-card fade-in-up" style="padding: var(--space-4); animation-delay: 0.5s;">
           <Show
             when={trendData() && trendData()!.monthly.length > 0}
             fallback={

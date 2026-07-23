@@ -172,7 +172,7 @@ export default function App() {
           };
           const path = location.pathname;
           const pageTitle = titleMap[path] || "Absensi Magang";
-          document.title = `${pageTitle} | SIGMA - Sistem Absensi Peserta Magang`;
+          document.title = `${pageTitle} | SIGMA - Sistem Informasi dan Manajemen Magang`;
         });
 
         const isLoginPage = () =>

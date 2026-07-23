@@ -35,7 +35,7 @@ export default function Login(props: RouteSectionProps) {
       <div class="login-card" style="text-align: center;">
         <img
           src={theme() === "dark" ? "/logo-sapaa-putih.png" : "/logo-sapa.png"}
-          alt="SIGMA - Sistem Absensi Peserta Magang"
+          alt="SIGMA - Sistem Informasi dan Manajemen Magang"
           style="height: 55px; width: auto; object-fit: contain; margin-bottom: var(--space-4);"
         />
 

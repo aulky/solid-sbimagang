@@ -38,7 +38,7 @@ export default createHandler(() => (
       };
 
       const pageTitle = titleMap[path] || "Absensi Magang";
-      const fullTitle = `${pageTitle} | SIGMA - Sistem Absensi Peserta Magang`;
+      const fullTitle = `${pageTitle} | SIGMA - Sistem Informasi dan Manajemen Magang`;
 
       return (
         <html lang="id">
@@ -56,7 +56,7 @@ export default createHandler(() => (
             />
             <meta
               name="description"
-              content="Sistem Absensi Peserta Magang. Mempermudah pencatatan kehadiran, pengajuan izin, dan rekap laporan."
+              content="Sistem Informasi dan Manajemen Magang. Mempermudah pencatatan kehadiran, pengajuan izin, dan rekap laporan."
             />
             <meta name="robots" content="index, follow" />
             <meta name="author" content="SIGMA" />

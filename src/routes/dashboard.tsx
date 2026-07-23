@@ -74,7 +74,7 @@ export default function Dashboard() {
 
   return (
     <div style="text-align: left;">
-      <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap;">
+      <div class="fade-in-up" style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap;">
         <img
           src="/favicon.png"
           alt="Logo SIGMA"
@@ -109,7 +109,7 @@ export default function Dashboard() {
       </h2>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3);">
         {/* Hadir */}
-        <div class="stat-card" style="border-left: 4px solid var(--color-success); flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4);">
+        <div class="stat-card fade-in-up stagger-1" style="border-left: 4px solid var(--color-success); flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4);">
           <div>
             <div class="stat-value" style="font-size: 1.8rem; line-height: 1.2;">{monthStats().hadir}</div>
             <div class="stat-label" style="font-size: 13px;">Hadir</div>
@@ -120,7 +120,7 @@ export default function Dashboard() {
         </div>
 
         {/* Telat */}
-        <div class="stat-card" style="border-left: 4px solid var(--color-warning); flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4);">
+        <div class="stat-card fade-in-up stagger-2" style="border-left: 4px solid var(--color-warning); flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4);">
           <div>
             <div class="stat-value" style="font-size: 1.8rem; line-height: 1.2;">{monthStats().telat}</div>
             <div class="stat-label" style="font-size: 13px;">Terlambat</div>
@@ -131,7 +131,7 @@ export default function Dashboard() {
         </div>
 
         {/* Izin */}
-        <div class="stat-card" style="border-left: 4px solid var(--color-info); flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4);">
+        <div class="stat-card fade-in-up stagger-3" style="border-left: 4px solid var(--color-info); flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4);">
           <div>
             <div class="stat-value" style="font-size: 1.8rem; line-height: 1.2;">{monthStats().izin}</div>
             <div class="stat-label" style="font-size: 13px;">Izin / Sakit</div>
@@ -142,7 +142,7 @@ export default function Dashboard() {
         </div>
 
         {/* Tingkat Tepat Waktu */}
-        <div class="stat-card" style="border-left: 4px solid #8b5cf6; flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4);">
+        <div class="stat-card fade-in-up stagger-4" style="border-left: 4px solid #8b5cf6; flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-4);">
           <div>
             <div class="stat-value" style="font-size: 1.8rem; line-height: 1.2;">{monthStats().onTimeRate}<span style="font-size: 1rem;">%</span></div>
             <div class="stat-label" style="font-size: 13px;">Tepat Waktu</div>
@@ -153,7 +153,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div class="stat-card" style={{ "margin-top": "var(--space-4)" }}>
+      <div class="stat-card fade-in-up stagger-5" style={{ "margin-top": "var(--space-4)" }}>
         <h2 style="font-family: var(--font-headline); font-weight: 700; font-size: 1.2rem; margin-top: 0; margin-bottom: var(--space-3); color: var(--color-text);">Absensi Hari Ini</h2>
         <Show when={settings()}>
           {(s) => {

@@ -19,7 +19,7 @@ export default function Home() {
           alt="Logo SIGMA"
           style="height: 60px; margin-bottom: var(--space-3);"
         />
-        <h2 style="margin-bottom: var(--space-2);">Sistem Absensi Peserta Magang</h2>
+        <h2 style="margin-bottom: var(--space-2);">Sistem Informasi dan Manajemen Magang</h2>
         <Show when={user()}>
           {(u) => (
             <div>

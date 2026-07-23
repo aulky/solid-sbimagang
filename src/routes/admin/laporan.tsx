@@ -257,11 +257,11 @@ export default function Laporan() {
         <div style="display: flex; align-items: center; border-bottom: 3px double #1e293b; padding-bottom: 15px; margin-bottom: 10px; gap: 15px; width: 100%; box-sizing: border-box;">
           <img
             src="/logo-sapa.png"
-            alt="SIGMA - Sistem Absensi Peserta Magang"
+            alt="SIGMA - Sistem Informasi dan Manajemen Magang"
             style="height: 55px;"
           />
           <div>
-            <h2 style="margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; color: #0f172a;">SIGMA - Sistem Absensi Peserta Magang</h2>
+            <h2 style="margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; color: #0f172a;">SIGMA - Sistem Informasi dan Manajemen Magang</h2>
             <p style="margin: 2px 0 0 0; font-size: 11px; color: #475569; line-height: 1.4;">
               Pabrik Cilacap — Jl. Ir. H. Juanda, Cilacap, Jawa Tengah
             </p>
