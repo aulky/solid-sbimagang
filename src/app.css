@@ -1122,26 +1122,19 @@ a {
   z-index: 9999;
   background-color: transparent;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.loading-bar-container.visible {
+  opacity: 1;
 }
 
 .loading-bar {
   height: 100%;
-  width: 100%;
   background-color: var(--color-primary);
-  animation: loadingBarAnimation 1.5s infinite linear;
-  transform-origin: 0% 50%;
-}
-
-@keyframes loadingBarAnimation {
-  0% {
-    transform: translateX(-100%) scaleX(1);
-  }
-  50% {
-    transform: translateX(0%) scaleX(0.5);
-  }
-  100% {
-    transform: translateX(100%) scaleX(1);
-  }
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
 }
 
 /* Responsive Styling */

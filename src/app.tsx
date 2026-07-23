@@ -5,7 +5,7 @@ import {
   useIsRouting,
 } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { Suspense, Show, createSignal, onMount, createEffect } from "solid-js";
+import { Suspense, Show, createSignal, onMount, createEffect, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 import { createAsync } from "@solidjs/router";
 import { getUser, logout, logPageAccess } from "~/lib";
@@ -87,6 +87,34 @@ export default function App() {
           location.pathname === "/profil",
         );
         const [mobileSidebarOpen, setMobileSidebarOpen] = createSignal(false);
+        const [progress, setProgress] = createSignal(0);
+        const [visible, setVisible] = createSignal(false);
+
+        createEffect(() => {
+          if (isRouting()) {
+            setVisible(true);
+            setProgress(10);
+            const interval = setInterval(() => {
+              setProgress((prev) => {
+                if (prev >= 90) {
+                  clearInterval(interval);
+                  return prev;
+                }
+                return prev + (90 - prev) * 0.15;
+              });
+            }, 200);
+
+            onCleanup(() => {
+              clearInterval(interval);
+              setProgress(100);
+              const timeout = setTimeout(() => {
+                setVisible(false);
+                setProgress(0);
+              }, 300);
+              onCleanup(() => clearTimeout(timeout));
+            });
+          }
+        });
 
         onMount(() => {
           const saved = localStorage.getItem("theme");
@@ -205,11 +233,15 @@ export default function App() {
 
         return (
           <Suspense fallback={<div class="loading-screen">Memuat...</div>}>
-            <Show when={isRouting()}>
-              <div class="loading-bar-container">
-                <div class="loading-bar"></div>
-              </div>
-            </Show>
+            <div
+              class="loading-bar-container"
+              classList={{ visible: visible() }}
+            >
+              <div
+                class="loading-bar"
+                style={{ width: `${progress()}%` }}
+              ></div>
+            </div>
 
             <div
               class="app-layout"
