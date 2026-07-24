@@ -918,7 +918,7 @@ button[type="submit"]:disabled {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  animation: fadeInOverlay 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeInOverlay 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .modal {
@@ -935,7 +935,7 @@ button[type="submit"]:disabled {
 }
 
 .modal-animate {
-  animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: modalScaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes fadeInOverlay {
@@ -953,11 +953,11 @@ button[type="submit"]:disabled {
 
 @keyframes modalScaleUp {
   from {
-    transform: scale(0.95);
+    transform: scale(0.96) translateY(10px);
     opacity: 0;
   }
   to {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 }
@@ -1317,16 +1317,16 @@ a {
   }
 
   .modal-animate {
-    animation: modalMobileScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+    animation: modalMobileScaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
   }
 
   @keyframes modalMobileScaleUp {
     from {
-      transform: translate(-50%, -50%) scale(0.95);
+      transform: translate(-50%, -50%) scale(0.96) translateY(10px);
       opacity: 0;
     }
     to {
-      transform: translate(-50%, -50%) scale(1);
+      transform: translate(-50%, -50%) scale(1) translateY(0);
       opacity: 1;
     }
   }
