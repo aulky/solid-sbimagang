@@ -1,13 +1,18 @@
 import { createSignal } from "solid-js";
 
-export const [toastMessage, setToastMessage] = createSignal<string | null>(null);
+export interface ToastData {
+  message: string;
+  type: "success" | "error";
+}
+
+export const [toastMessage, setToastMessage] = createSignal<ToastData | null>(null);
 
 let toastTimer: any;
 
-export function showToast(message: string) {
-  setToastMessage(message);
+export function showToast(message: string, type: "success" | "error" = "error") {
+  setToastMessage({ message, type });
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
     setToastMessage(null);
-  }, 10000); // 10 detik agar user sempat membaca
+  }, type === "success" ? 4000 : 10000);
 }

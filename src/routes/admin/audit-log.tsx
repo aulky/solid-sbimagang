@@ -152,8 +152,37 @@ export default function AdminAuditLog() {
       </div>
 
       <Suspense fallback={
-        <div style="text-align: center; padding: var(--space-6); color: var(--color-text-secondary);">
-          Memuat data log aktivitas...
+        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Waktu</th>
+                <th>Pengguna</th>
+                <th>Aktivitas</th>
+                <th>Detail</th>
+                <th>IP Address</th>
+                <th>Lokasi</th>
+                <th>Browser / OS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={[1, 2, 3, 4, 5]}>
+                {() => (
+                  <tr>
+                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 100px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 80px; height: 20px; border-radius: 4px;"></div></td>
+                    <td><div class="skeleton" style="width: 150px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 90px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 90px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 120px; height: 16px;"></div></td>
+                  </tr>
+                )}
+              </For>
+            </tbody>
+          </table>
         </div>
       }>
         <div style="overflow-x: auto;">

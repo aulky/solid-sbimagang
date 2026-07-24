@@ -14,6 +14,7 @@ import {
   deleteUser,
   bulkCreateUsers,
   getPageNumbers,
+  adminResetPassword,
 } from "~/lib";
 import { showToast } from "~/lib/toast";
 
@@ -52,6 +53,11 @@ export default function AdminUsers() {
   const [filterRole, setFilterRole] = createSignal("");
   const [filterStatus, setFilterStatus] = createSignal("");
   const [filterDivisi, setFilterDivisi] = createSignal("");
+  const [filterBatch, setFilterBatch] = createSignal("");
+
+  // Reset password signals
+  const [resettingUser, setResettingUser] = createSignal<any | null>(null);
+  const [showResetPassword, setShowResetPassword] = createSignal(false);
 
   // Pagination setup
   const [currentPage, setCurrentPage] = createSignal(1);
@@ -75,6 +81,7 @@ export default function AdminUsers() {
       role: filterRole(),
       status: filterStatus(),
       divisiId: filterDivisi(),
+      batchId: filterBatch(),
     })
   );
 
@@ -90,6 +97,7 @@ export default function AdminUsers() {
   const creating = useSubmission(createUser);
   const updating = useSubmission(updateUser);
   const deleting = useSubmission(deleteUser);
+  const resetting = useSubmission(adminResetPassword);
 
   // Close modal on successful user creation and reset form
   let prevCreatingPending = false;
@@ -122,10 +130,41 @@ export default function AdminUsers() {
     prevDeletingPending = pending;
   });
 
-  // Toast error notifications
-  createEffect(() => { if (creating.result instanceof Error) showToast(creating.result.message); });
-  createEffect(() => { if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message); });
-  createEffect(() => { if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message); });
+  // Close modal on successful reset password
+  let prevResettingPending = false;
+  createEffect(() => {
+    const pending = !!resetting.pending;
+    if (prevResettingPending && !pending && !resetting.error) {
+      setResettingUser(null);
+    }
+    prevResettingPending = pending;
+  });
+
+  // Toast notifications (success & error)
+  createEffect(() => {
+    if (creating.result) {
+      if (creating.result instanceof Error) showToast(creating.result.message, "error");
+      else showToast("Pengguna berhasil dibuat!", "success");
+    }
+  });
+  createEffect(() => {
+    if (updating.result) {
+      if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message, "error");
+      else showToast("Pengguna berhasil diperbarui!", "success");
+    }
+  });
+  createEffect(() => {
+    if (deleting.result) {
+      if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message, "error");
+      else showToast("Pengguna berhasil dihapus!", "success");
+    }
+  });
+  createEffect(() => {
+    if (resetting.result) {
+      if ((resetting.result as any) instanceof Error) showToast(((resetting.result as any) as Error).message, "error");
+      else showToast("Sandi pengguna berhasil direset!", "success");
+    }
+  });
 
   return (
     <main class="p-4">
@@ -433,6 +472,21 @@ export default function AdminUsers() {
             </For>
           </select>
         </div>
+        <div class="form-group">
+          <label>Pilih Batch</label>
+          <select
+            value={filterBatch()}
+            onChange={(e) => {
+              setFilterBatch(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Batch</option>
+            <For each={batchList()}>
+              {(b) => <option value={b.id}>{b.name}</option>}
+            </For>
+          </select>
+        </div>
         <button
           onClick={() => {
             setSearchQuery("");
@@ -440,6 +494,7 @@ export default function AdminUsers() {
             setFilterRole("");
             setFilterStatus("");
             setFilterDivisi("");
+            setFilterBatch("");
             setCurrentPage(1);
           }}
           class="btn-ghost"
@@ -620,9 +675,122 @@ export default function AdminUsers() {
         )}
       </Show>
 
+      <Show when={resettingUser()}>
+        {(user) => (
+          <Portal>
+            <div class="modal-overlay" onClick={() => setResettingUser(null)}>
+              <div
+                class="modal modal-animate"
+                onClick={(e) => e.stopPropagation()}
+                style="max-width: 400px;"
+              >
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
+                  <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">
+                    Reset Sandi Pengguna
+                  </h3>
+                  <button
+                    class="theme-toggle"
+                    style="font-size: 24px; padding: 0; cursor: pointer;"
+                    onClick={() => setResettingUser(null)}
+                  >
+                    ×
+                  </button>
+                </div>
+                <form action={adminResetPassword} method="post">
+                  <input type="hidden" name="id" value={user().id} />
+                  <p style="margin-top: 0; margin-bottom: var(--space-3); font-size: 14px; color: var(--color-text); text-align: left;">
+                    Reset sandi untuk <strong>{user().username}</strong>.
+                  </p>
+                  <div class="form-group">
+                    <label>Sandi Baru</label>
+                    <div class="password-input-container">
+                      <input
+                        name="newPassword"
+                        type={showResetPassword() ? "text" : "password"}
+                        placeholder="Masukkan sandi baru (min. 6 karakter)"
+                        required
+                        minLength={6}
+                      />
+                      <button
+                        type="button"
+                        class="password-toggle-btn"
+                        onClick={() => setShowResetPassword(!showResetPassword())}
+                        title={showResetPassword() ? "Sembunyikan sandi" : "Tampilkan sandi"}
+                      >
+                        <Show
+                          when={showResetPassword()}
+                          fallback={
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                          }
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                            <line x1="1" y1="1" x2="23" y2="23" />
+                          </svg>
+                        </Show>
+                      </button>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: var(--space-2); margin-top: var(--space-4);">
+                    <button
+                      class="btn-primary"
+                      type="submit"
+                      disabled={resetting.pending}
+                    >
+                      {resetting.pending ? "Memproses..." : "Reset Sandi"}
+                    </button>
+                    <button
+                      class="btn-ghost"
+                      type="button"
+                      onClick={() => setResettingUser(null)}
+                    >
+                      Batal
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </Portal>
+        )}
+      </Show>
+
       <Suspense fallback={
-        <div style="text-align: center; padding: var(--space-6); color: var(--color-text-secondary);">
-          Memuat data pengguna...
+        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Username</th>
+                <th>Nama</th>
+                <th>Email</th>
+                <th>Divisi</th>
+                <th>Batch</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={[1, 2, 3, 4, 5]}>
+                {() => (
+                  <tr>
+                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 90px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 110px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 140px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 50px; height: 20px; border-radius: 4px;"></div></td>
+                    <td><div class="skeleton" style="width: 50px; height: 20px; border-radius: 4px;"></div></td>
+                    <td><div class="skeleton" style="width: 100px; height: 24px;"></div></td>
+                  </tr>
+                )}
+              </For>
+            </tbody>
+          </table>
         </div>
       }>
         <div style="overflow-x: auto;">
@@ -696,6 +864,13 @@ export default function AdminUsers() {
                           onClick={() => setEditingUser(u)}
                         >
                           Edit
+                        </button>{" "}
+                        <button
+                          class="btn-ghost"
+                          style="display: inline-flex; width: auto; height: 32px; padding: 0 12px; font-size: 13px; color: var(--color-info);"
+                          onClick={() => setResettingUser({ id: u.id, username: u.username })}
+                        >
+                          Reset
                         </button>{" "}
                         <button
                           class="btn-danger"

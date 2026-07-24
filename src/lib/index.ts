@@ -1,4 +1,5 @@
 import { action, query, redirect } from "@solidjs/router";
+import { getRequestEvent } from "solid-js/web";
 import { promises as fs } from "fs";
 import path from "path";
 import crypto from "crypto";
@@ -62,6 +63,33 @@ export const loginOrRegister = action(async (formData: FormData) => {
   let error = validateUsername(username) || validatePassword(password);
   if (error) return new Error(error);
 
+  const event = getRequestEvent();
+  const headers = event?.request?.headers;
+  const ip = headers?.get("cf-connecting-ip")
+    || headers?.get("x-real-ip")
+    || headers?.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || event?.clientAddress
+    || "127.0.0.1";
+
+  if (loginType === "login") {
+    const cooldown = 2 * 60 * 1000; // 2 minutes
+    const cutoff = new Date(Date.now() - cooldown);
+    const failureCount = await db.auditLog.count({
+      where: {
+        action: "LOGIN_GAGAL",
+        OR: [
+          { details: { contains: `@${username}` } },
+          { ip: ip }
+        ],
+        createdAt: { gte: cutoff }
+      }
+    });
+
+    if (failureCount >= 5) {
+      return new Error("Terlalu banyak percobaan masuk yang salah. Silakan coba lagi dalam 2 menit.");
+    }
+  }
+
   try {
     const user = await (loginType !== "login"
       ? register(username, password)
@@ -69,6 +97,7 @@ export const loginOrRegister = action(async (formData: FormData) => {
     const session = await getSession();
     await session.update((d) => {
       d.userId = user.id;
+      d.lastActive = Date.now();
     });
     await logActivity(
       loginType !== "login" ? "REGISTER" : "LOGIN",
@@ -531,6 +560,7 @@ export const getAdminUsers = query(async (options?: {
   role?: string;
   status?: string;
   divisiId?: string;
+  batchId?: string;
 }) => {
   "use server";
   await requireAdmin();
@@ -541,6 +571,7 @@ export const getAdminUsers = query(async (options?: {
   const role = options?.role ?? "";
   const status = options?.status ?? "";
   const divisiId = options?.divisiId ?? "";
+  const batchId = options?.batchId ?? "";
 
   const skip = (page - 1) * limit;
 
@@ -548,6 +579,7 @@ export const getAdminUsers = query(async (options?: {
   if (role) where.role = role;
   if (status) where.status = status;
   if (divisiId) where.divisiId = divisiId;
+  if (batchId) where.batchId = batchId;
 
   if (search) {
     where.OR = [
@@ -749,7 +781,24 @@ export const deleteUser = action(async (formData: FormData) => {
   return redirect("/admin/users");
 });
 
-//  ADMIN: DIVISI CRUD 
+export const adminResetPassword = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const newPassword = String(formData.get("newPassword"));
+
+  const pwdError = validatePassword(newPassword);
+  if (pwdError) return new Error(pwdError);
+
+  const targetUser = await db.user.update({
+    where: { id },
+    data: { password: hashPassword(newPassword) },
+  });
+  await logActivity("RESET_PASSWORD", `reset password success (@${targetUser.username})`);
+  return { success: true };
+});
+
+//  ADMIN: DIVISI CRUD
 
 export const getAdminDivisi = query(async () => {
   "use server";
@@ -811,6 +860,7 @@ export const getAdminAbsensi = query(async (options?: {
   date?: string;
   status?: string;
   divisiId?: string;
+  batchId?: string;
 }) => {
   "use server";
   await requireAdmin();
@@ -821,6 +871,7 @@ export const getAdminAbsensi = query(async (options?: {
   const dateStr = options?.date ?? "";
   const status = options?.status ?? "";
   const divisiId = options?.divisiId ?? "";
+  const batchId = options?.batchId ?? "";
 
   const skip = (page - 1) * limit;
 
@@ -833,8 +884,10 @@ export const getAdminAbsensi = query(async (options?: {
     where.date = filterUtc;
   }
 
-  if (divisiId) {
-    where.user = { divisiId };
+  if (divisiId || batchId) {
+    where.user = {};
+    if (divisiId) where.user.divisiId = divisiId;
+    if (batchId) where.user.batchId = batchId;
   }
 
   if (search) {

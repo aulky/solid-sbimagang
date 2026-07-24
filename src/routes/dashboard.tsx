@@ -31,9 +31,25 @@ export default function Dashboard() {
   const checkingIn = useSubmission(checkIn);
   const checkingOut = useSubmission(checkOut);
 
-  // Toast error notifications
-  createEffect(() => { if ((checkingIn.result as any) instanceof Error) showToast(((checkingIn.result as any) as Error).message); });
-  createEffect(() => { if ((checkingOut.result as any) instanceof Error) showToast(((checkingOut.result as any) as Error).message); });
+  // Toast notifications (success & error)
+  createEffect(() => {
+    if (checkingIn.result) {
+      if ((checkingIn.result as any) instanceof Error) {
+        showToast(((checkingIn.result as any) as Error).message, "error");
+      } else {
+        showToast("Check-In berhasil! Selamat bekerja.", "success");
+      }
+    }
+  });
+  createEffect(() => {
+    if (checkingOut.result) {
+      if ((checkingOut.result as any) instanceof Error) {
+        showToast(((checkingOut.result as any) as Error).message, "error");
+      } else {
+        showToast("Check-Out berhasil! Sampai jumpa besok.", "success");
+      }
+    }
+  });
 
   const now = () => {
     const d = new Date();

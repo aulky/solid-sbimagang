@@ -129,6 +129,27 @@ export default function App() {
             document.documentElement.setAttribute("data-theme", "dark");
             setTheme("dark");
           }
+
+          // Client-side auto logout after 5 hours of inactivity
+          let timeoutId: any;
+          const resetTimeout = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+              const u = user();
+              if (u) {
+                logout();
+              }
+            }, 5 * 60 * 60 * 1000); // 5 hours
+          };
+
+          const events = ["mousemove", "keydown", "click", "scroll"];
+          events.forEach((name) => window.addEventListener(name, resetTimeout));
+          resetTimeout();
+
+          onCleanup(() => {
+            events.forEach((name) => window.removeEventListener(name, resetTimeout));
+            clearTimeout(timeoutId);
+          });
         });
 
         createEffect(() => {
@@ -232,7 +253,43 @@ export default function App() {
         });
 
         return (
-          <Suspense fallback={<div class="loading-screen">Memuat...</div>}>
+          <Suspense
+            fallback={
+              <div class="app-layout has-sidebar" style="opacity: 0.6; pointer-events: none;">
+                <aside class="app-sidebar no-print">
+                  <div class="sidebar-header" style="display: flex; justify-content: center; padding: 20px;">
+                    <div class="skeleton" style="width: 120px; height: 35px; border-radius: var(--radius-md);"></div>
+                  </div>
+                  <nav class="sidebar-nav" style="display: flex; flex-direction: column; gap: 15px; padding: 20px;">
+                    <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
+                    <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
+                    <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
+                    <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
+                  </nav>
+                </aside>
+                <main class="app-main-content">
+                  <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
+                    <div class="skeleton" style="width: 250px; height: 32px; border-radius: 6px;"></div>
+                    <div class="skeleton" style="width: 100%; height: 20px; border-radius: 4px;"></div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 20px;">
+                      <div class="skeleton-card" style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="skeleton" style="width: 40px; height: 30px;"></div>
+                        <div class="skeleton" style="width: 100px; height: 16px;"></div>
+                      </div>
+                      <div class="skeleton-card" style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="skeleton" style="width: 40px; height: 30px;"></div>
+                        <div class="skeleton" style="width: 100px; height: 16px;"></div>
+                      </div>
+                      <div class="skeleton-card" style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="skeleton" style="width: 40px; height: 30px;"></div>
+                        <div class="skeleton" style="width: 100px; height: 16px;"></div>
+                      </div>
+                    </div>
+                  </div>
+                </main>
+              </div>
+            }
+          >
             <div
               class="loading-bar-container"
               classList={{ visible: visible() }}
@@ -855,24 +912,33 @@ export default function App() {
 
             {/* Global Toast Notification */}
             <Show when={toastMessage()}>
-              {(msg) => (
+              {(toast) => (
                 <Portal>
                   <div
                     style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 380px; width: calc(100% - 40px); animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
                   >
                     <div
-                      class="alert-error"
                       role="alert"
-                      style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; margin: 0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2); border: 2px solid var(--color-error); border-radius: var(--radius-md); background-color: rgba(220, 38, 38, 0.12); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);"
+                      style={`display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; margin: 0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2); border: 2px solid ${toast().type === "success" ? "var(--color-success)" : "var(--color-error)"}; border-radius: var(--radius-md); background-color: ${toast().type === "success" ? "rgba(22, 163, 74, 0.12)" : "rgba(220, 38, 38, 0.12)"}; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);`}
                     >
                       <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; color: var(--color-error);">
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="12" y1="8" x2="12" y2="12" />
-                          <line x1="12" y1="16" x2="12.01" y2="16" />
-                        </svg>
+                        <Show
+                          when={toast().type === "success"}
+                          fallback={
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={`flex-shrink: 0; color: var(--color-error);`}>
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="12" y1="8" x2="12" y2="12" />
+                              <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                          }
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={`flex-shrink: 0; color: var(--color-success);`}>
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                          </svg>
+                        </Show>
                         <span style="font-size: 14px; font-weight: 500; text-align: left; line-height: 1.4;">
-                          {msg()}
+                          {toast().message}
                         </span>
                       </div>
                       <button

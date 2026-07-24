@@ -30,6 +30,16 @@ export default function AdminIzin() {
   const approving = useSubmission(approveIzin);
   const [viewingAttachment, setViewingAttachment] = createSignal<string | null>(null);
 
+  createEffect(() => {
+    if (approving.result) {
+      if ((approving.result as any) instanceof Error) {
+        showToast(((approving.result as any) as Error).message, "error");
+      } else {
+        showToast("Status pengajuan izin berhasil diperbarui!", "success");
+      }
+    }
+  });
+
   // Filter signals
   const [searchQuery, setSearchQuery] = createSignal("");
   const [debouncedSearch, setDebouncedSearch] = createSignal("");
@@ -129,8 +139,39 @@ export default function AdminIzin() {
       </div>
 
       <Suspense fallback={
-        <div style="text-align: center; padding: var(--space-6); color: var(--color-text-secondary);">
-          Memuat data pengajuan izin...
+        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Tipe</th>
+                <th>Tanggal Mulai</th>
+                <th>Tanggal Selesai</th>
+                <th>Alasan</th>
+                <th>Lampiran</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={[1, 2, 3, 4, 5]}>
+                {() => (
+                  <tr>
+                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 100px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 50px; height: 20px; border-radius: 4px;"></div></td>
+                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 150px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 70px; height: 24px; border-radius: 4px;"></div></td>
+                    <td><div class="skeleton" style="width: 60px; height: 20px; border-radius: 4px;"></div></td>
+                    <td><div class="skeleton" style="width: 100px; height: 24px;"></div></td>
+                  </tr>
+                )}
+              </For>
+            </tbody>
+          </table>
         </div>
       }>
         <div style="overflow-x: auto;">

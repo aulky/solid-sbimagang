@@ -1,16 +1,18 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
 import { For, Show, Suspense, createSignal } from "solid-js";
-import { getAdminAbsensi, getAllDivisi, getPageNumbers } from "~/lib";
+import { getAdminAbsensi, getAllDivisi, getAllBatches, getPageNumbers } from "~/lib";
 
 export const route = {
   preload() {
-    getAdminAbsensi({ page: 1, limit: 10, search: "", date: "", status: "", divisiId: "" });
+    getAdminAbsensi({ page: 1, limit: 10, search: "", date: "", status: "", divisiId: "", batchId: "" });
     getAllDivisi();
+    getAllBatches();
   },
 } satisfies RouteDefinition;
 
 export default function AdminAbsensi() {
   const divisiList = createAsync(() => getAllDivisi());
+  const batchList = createAsync(() => getAllBatches());
 
   // Get local today date as YYYY-MM-DD
   const getTodayString = () => {
@@ -25,6 +27,7 @@ export default function AdminAbsensi() {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [debouncedSearch, setDebouncedSearch] = createSignal("");
   const [filterDivisi, setFilterDivisi] = createSignal("");
+  const [filterBatch, setFilterBatch] = createSignal("");
   const [filterStatus, setFilterStatus] = createSignal("");
 
   // Pagination setup
@@ -49,6 +52,7 @@ export default function AdminAbsensi() {
       date: filterDate(),
       status: filterStatus(),
       divisiId: filterDivisi(),
+      batchId: filterBatch(),
     })
   );
 
@@ -121,6 +125,21 @@ export default function AdminAbsensi() {
             </For>
           </select>
         </div>
+        <div class="form-group">
+          <label>Pilih Batch</label>
+          <select
+            value={filterBatch()}
+            onChange={(e) => {
+              setFilterBatch(e.currentTarget.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Semua Batch</option>
+            <For each={batchList()}>
+              {(b) => <option value={b.id}>{b.name}</option>}
+            </For>
+          </select>
+        </div>
         <button
           onClick={() => {
             setSearchQuery("");
@@ -128,6 +147,7 @@ export default function AdminAbsensi() {
             setFilterDate(getTodayString());
             setFilterStatus("");
             setFilterDivisi("");
+            setFilterBatch("");
             setCurrentPage(1);
           }}
           class="btn-ghost"
@@ -138,8 +158,37 @@ export default function AdminAbsensi() {
       </div>
 
       <Suspense fallback={
-        <div style="text-align: center; padding: var(--space-6); color: var(--color-text-secondary);">
-          Memuat data absensi...
+        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Lengkap</th>
+                <th>Divisi</th>
+                <th>Tanggal</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Status</th>
+                <th>Catatan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={[1, 2, 3, 4, 5]}>
+                {() => (
+                  <tr>
+                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 120px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 100px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 60px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 60px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 70px; height: 20px; border-radius: 4px;"></div></td>
+                    <td><div class="skeleton" style="width: 150px; height: 16px;"></div></td>
+                  </tr>
+                )}
+              </For>
+            </tbody>
+          </table>
         </div>
       }>
         <div style="overflow-x: auto;">

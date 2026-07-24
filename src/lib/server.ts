@@ -90,6 +90,19 @@ export async function requireUser() {
   if (!userId) {
     throw redirect("/login");
   }
+
+  // Session timeout: auto-logout after 5 hours of inactivity
+  const lastActive = session.data.lastActive as number | undefined;
+  const now = Date.now();
+  const maxIdle = 5 * 60 * 60 * 1000; // 5 hours
+  if (lastActive && now - lastActive > maxIdle) {
+    await logout();
+    throw redirect("/login");
+  }
+  await session.update((d) => {
+    d.lastActive = now;
+  });
+
   const user = await db.user.findUnique({
     where: { id: userId },
     include: { divisi: true, batch: true },

@@ -37,15 +37,41 @@ export default function Profil() {
     }
   });
 
-  // Toast error notifications
-  createEffect(() => { if (updating.result instanceof Error) showToast(updating.result.message); });
-  createEffect(() => { if (changing.result instanceof Error) showToast(changing.result.message); });
+  // Toast error and success notifications
+  createEffect(() => {
+    if (updating.result) {
+      if (updating.result instanceof Error) showToast(updating.result.message, "error");
+      else showToast("Profil berhasil diperbarui!", "success");
+    }
+  });
+  createEffect(() => {
+    if (changing.result) {
+      if (changing.result instanceof Error) showToast(changing.result.message, "error");
+      else showToast("Password berhasil diubah!", "success");
+    }
+  });
 
   return (
     <main style="max-width: 600px; margin: 0 auto; text-align: left;">
       <h1 class="page-title">Profil Saya</h1>
 
-      <Show when={user()} fallback={<p>Memuat...</p>}>
+      <Show when={user()} fallback={
+        <div class="settings-card skeleton-card" style="opacity: 0.6; pointer-events: none;">
+          <div class="skeleton-form-field">
+            <div class="skeleton" style="width: 80px; height: 16px;"></div>
+            <div class="skeleton" style="width: 100%; height: 35px; border-radius: 6px;"></div>
+          </div>
+          <div class="skeleton-form-field">
+            <div class="skeleton" style="width: 120px; height: 16px;"></div>
+            <div class="skeleton" style="width: 100%; height: 35px; border-radius: 6px;"></div>
+          </div>
+          <div class="skeleton-form-field">
+            <div class="skeleton" style="width: 100px; height: 16px;"></div>
+            <div class="skeleton" style="width: 100%; height: 35px; border-radius: 6px;"></div>
+          </div>
+          <div class="skeleton" style="width: 130px; height: 38px; border-radius: var(--radius-md); margin-top: var(--space-4);"></div>
+        </div>
+      }>
         {(u) => (
           <div class="settings-card">
             <Show when={activeTab() === "profile"}>

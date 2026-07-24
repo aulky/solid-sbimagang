@@ -1417,3 +1417,46 @@ a {
     opacity: 1;
   }
 }
+
+/* Skeleton Loading Shimmer */
+@keyframes shimmer {
+  0% { opacity: 0.55; }
+  50% { opacity: 0.25; }
+  100% { opacity: 0.55; }
+}
+
+.skeleton {
+  background-color: var(--color-border);
+  border-radius: var(--radius-sm);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-table-row {
+  display: flex;
+  gap: var(--space-3);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.skeleton-table-row > span {
+  display: inline-block;
+  height: 15px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-border);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  background: var(--surface-base);
+}
+
+.skeleton-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: var(--space-3);
+}
+

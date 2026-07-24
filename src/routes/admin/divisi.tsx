@@ -86,10 +86,25 @@ export default function AdminDivisi() {
     prevDeletingPending = pending;
   });
 
-  // Toast error notifications
-  createEffect(() => { if (creating.result instanceof Error) showToast(creating.result.message); });
-  createEffect(() => { if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message); });
-  createEffect(() => { if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message); });
+  // Toast error & success notifications
+  createEffect(() => {
+    if (creating.result) {
+      if (creating.result instanceof Error) showToast(creating.result.message, "error");
+      else showToast("Divisi berhasil ditambahkan!", "success");
+    }
+  });
+  createEffect(() => {
+    if (updating.result) {
+      if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message, "error");
+      else showToast("Divisi berhasil diperbarui!", "success");
+    }
+  });
+  createEffect(() => {
+    if (deleting.result) {
+      if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message, "error");
+      else showToast("Divisi berhasil dihapus!", "success");
+    }
+  });
 
   return (
     <main class="p-4">

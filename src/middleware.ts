@@ -101,21 +101,66 @@ export default createMiddleware({
       // 3. CSRF Protection for state-changing requests
       if (["POST", "PUT", "DELETE", "PATCH"].includes(method)) {
         const origin = event.request.headers.get("origin");
+        const referer = event.request.headers.get("referer");
         const host = event.request.headers.get("host");
+        let targetHost: string | null = null;
 
         if (origin) {
           try {
-            const originUrl = new URL(origin);
-            if (originUrl.host !== host) {
-              console.warn(`[SECURITY ALERT] CSRF blocked: Origin (${originUrl.host}) does not match Host (${host})`);
-              return new Response("Access Denied: CSRF Verification Failed", {
-                status: 403,
-                headers: { "Content-Type": "text/plain" }
-              });
-            }
-          } catch (_) {
-            return new Response("Access Denied: Invalid Origin", { status: 400 });
+            targetHost = new URL(origin).host;
+          } catch (_) {}
+        } else if (referer) {
+          try {
+            targetHost = new URL(referer).host;
+          } catch (_) {}
+        }
+
+        if (!targetHost || targetHost !== host) {
+          console.warn(`[SECURITY ALERT] CSRF blocked: Origin/Referer (${targetHost || "missing"}) does not match Host (${host})`);
+
+          const ip =
+            event.request.headers.get("cf-connecting-ip") ||
+            event.request.headers.get("x-real-ip") ||
+            event.request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+            event.clientAddress ||
+            "127.0.0.1";
+          const userAgent = event.request.headers.get("user-agent") || "Unknown";
+          const createdAt = new Date();
+          const action = "CSRF_BLOCKED";
+          const details = `Blocked CSRF attempt: ${method} ${path}${url.search}. Host: ${host}, Target: ${targetHost || "None"}`;
+
+          const signature = signLogEntry({
+            userId: null,
+            username: "SYSTEM",
+            action,
+            details,
+            ip,
+            userAgent,
+            createdAt,
+          });
+
+          try {
+            await db.auditLog.create({
+              data: {
+                userId: undefined,
+                username: "SYSTEM",
+                action,
+                details,
+                ip,
+                userAgent,
+                signature,
+                createdAt,
+                location: "CSRF Blocked",
+              },
+            });
+          } catch (e) {
+            console.error("Failed to log CSRF block to DB:", e);
           }
+
+          return new Response("Access Denied: CSRF Verification Failed", {
+            status: 403,
+            headers: { "Content-Type": "text/plain" }
+          });
         }
       }
     }

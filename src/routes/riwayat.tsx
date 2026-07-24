@@ -94,7 +94,36 @@ export default function Riwayat() {
         </button>
       </div>
 
-      <Show when={history()} fallback={<p>Memuat...</p>}>
+      <Show when={history()} fallback={
+        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Tanggal</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Status</th>
+                <th>Catatan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={[1, 2, 3, 4, 5]}>
+                {() => (
+                  <tr>
+                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 120px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 70px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 70px; height: 16px;"></div></td>
+                    <td><div class="skeleton" style="width: 60px; height: 20px; border-radius: 4px;"></div></td>
+                    <td><div class="skeleton" style="width: 150px; height: 16px;"></div></td>
+                  </tr>
+                )}
+              </For>
+            </tbody>
+          </table>
+        </div>
+      }>
         {(rList) => {
           if (rList.length === 999999) console.log(rList);
           return (

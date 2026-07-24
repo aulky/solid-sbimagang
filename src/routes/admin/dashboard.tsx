@@ -554,9 +554,9 @@ export default function AdminDashboard() {
           <Show
             when={todayStatus()}
             fallback={
-              <p style="color: var(--color-text-secondary); font-size: 14px;">
-                Memuat data grafik...
-              </p>
+              <div style="display: flex; justify-content: center; align-items: center; min-height: 185px;">
+                <div class="skeleton" style="width: 150px; height: 150px; border-radius: 50%;"></div>
+              </div>
             }
           >
             {(data) => (
@@ -574,9 +574,10 @@ export default function AdminDashboard() {
           <Show
             when={trendData() && trendData()!.monthly.length > 0}
             fallback={
-              <p style="color: var(--color-text-secondary); font-size: 14px;">
-                Memuat data grafik...
-              </p>
+              <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="skeleton" style="width: 150px; height: 22px;"></div>
+                <div class="skeleton" style="width: 100%; height: 200px; border-radius: 6px;"></div>
+              </div>
             }
           >
             <TrendLineChart data={trendData()!} />
