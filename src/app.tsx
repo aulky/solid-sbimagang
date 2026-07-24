@@ -847,7 +847,9 @@ export default function App() {
               </Show>
 
               <main class="app-main-content">
-                <div class="fade-in">{props.children}</div>
+                <Show when={location.pathname} keyed>
+                  <div class="fade-in">{props.children}</div>
+                </Show>
               </main>
             </div>
 

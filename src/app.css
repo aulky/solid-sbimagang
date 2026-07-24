@@ -964,7 +964,7 @@ button[type="submit"]:disabled {
 
 /* Animations */
 .fade-in {
-  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes slideIn {
@@ -981,7 +981,7 @@ button[type="submit"]:disabled {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
