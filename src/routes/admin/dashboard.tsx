@@ -1,11 +1,12 @@
-import { createAsync, type RouteDefinition } from "@solidjs/router";
-import { For, Show, createSignal } from "solid-js";
+import { createAsync, useSearchParams, type RouteDefinition } from "@solidjs/router";
+import { For, Show, createSignal, createEffect } from "solid-js";
 import {
   getAdminStats,
   getUser,
   getTodayAttendanceStatus,
   getInternTrendData,
 } from "~/lib";
+import { showToast } from "~/lib/toast";
 
 export const route = {
   preload() {
@@ -485,6 +486,14 @@ export default function AdminDashboard() {
   });
   const trendData = createAsync(() => getInternTrendData(), {
     deferStream: true,
+  });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  createEffect(() => {
+    if (searchParams.success === "settings") {
+      showToast("Pengaturan sistem berhasil diperbarui!", "success");
+      setSearchParams({ success: null });
+    }
   });
 
   return (

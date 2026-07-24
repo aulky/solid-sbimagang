@@ -1,6 +1,7 @@
 import {
   createAsync,
   useSubmission,
+  useSearchParams,
   type RouteDefinition,
 } from "@solidjs/router";
 import { Show, For, createSignal, createEffect } from "solid-js";
@@ -22,6 +23,20 @@ export const route = {
 
 export default function AdminDivisi() {
   const divisiList = createAsync(() => getAdminDivisi(), { deferStream: true });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  createEffect(() => {
+    if (searchParams.success === "create") {
+      showToast("Divisi berhasil ditambahkan!", "success");
+      setSearchParams({ success: null });
+    } else if (searchParams.success === "update") {
+      showToast("Divisi berhasil diperbarui!", "success");
+      setSearchParams({ success: null });
+    } else if (searchParams.success === "delete") {
+      showToast("Divisi berhasil dihapus!", "success");
+      setSearchParams({ success: null });
+    }
+  });
 
   const [showCreate, setShowCreate] = createSignal(false);
   const [editingDivisi, setEditingDivisi] = createSignal<{
@@ -86,25 +101,10 @@ export default function AdminDivisi() {
     prevDeletingPending = pending;
   });
 
-  // Toast error & success notifications
-  createEffect(() => {
-    if (creating.result) {
-      if (creating.result instanceof Error) showToast(creating.result.message, "error");
-      else showToast("Divisi berhasil ditambahkan!", "success");
-    }
-  });
-  createEffect(() => {
-    if (updating.result) {
-      if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message, "error");
-      else showToast("Divisi berhasil diperbarui!", "success");
-    }
-  });
-  createEffect(() => {
-    if (deleting.result) {
-      if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message, "error");
-      else showToast("Divisi berhasil dihapus!", "success");
-    }
-  });
+  // Toast error notifications
+  createEffect(() => { if (creating.result instanceof Error) showToast(creating.result.message, "error"); });
+  createEffect(() => { if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message, "error"); });
+  createEffect(() => { if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message, "error"); });
 
   return (
     <main class="p-4">

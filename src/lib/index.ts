@@ -178,7 +178,7 @@ export const updateSystemSettings = action(async (formData: FormData) => {
   const filePath = path.join(process.cwd(), "settings.json");
   await fs.writeFile(filePath, JSON.stringify(settings, null, 2), "utf-8");
   await logActivity("UPDATE_PENGATURAN", "update settings success");
-  return redirect("/admin/dashboard");
+  return redirect("/admin/dashboard?success=settings");
 });
 
 export const checkIn = action(async () => {
@@ -227,7 +227,7 @@ export const checkIn = action(async () => {
     },
   });
   await logActivity("CHECK_IN", `checkin success (${status.toLowerCase()})`);
-  return redirect("/dashboard");
+  return redirect("/dashboard?success=checkin");
 });
 
 export const checkOut = action(async () => {
@@ -273,7 +273,7 @@ export const checkOut = action(async () => {
     data: { checkOut: now },
   });
   await logActivity("CHECK_OUT", "checkout success");
-  return redirect("/dashboard");
+  return redirect("/dashboard?success=checkout");
 });
 
 export const getAttendanceHistory = query(async () => {
@@ -363,7 +363,7 @@ export const submitIzin = action(async (formData: FormData) => {
     "PENGAJUAN_IZIN",
     `submit leave success (${type.toLowerCase()})`,
   );
-  return redirect("/izin");
+  return redirect("/izin?success=create");
 });
 
 export const getUserIzinList = query(async () => {
@@ -393,7 +393,7 @@ export const updateProfile = action(async (formData: FormData) => {
     where: { id: user.id },
     data: { fullName, email, phone: phone || null },
   });
-  return redirect("/profil");
+  return redirect("/profil?success=update");
 });
 
 export const changePassword = action(async (formData: FormData) => {
@@ -638,7 +638,7 @@ export const createUser = action(async (formData: FormData) => {
     },
   });
   await logActivity("BUAT_PENGGUNA", `create user success (@${username})`);
-  return redirect("/admin/users");
+  return redirect("/admin/users?success=create");
 });
 
 export const bulkCreateUsers = action(async (formData: FormData) => {
@@ -764,7 +764,7 @@ export const updateUser = action(async (formData: FormData) => {
     "UPDATE_PENGGUNA",
     `update user success (@${updatedUser.username})`,
   );
-  return redirect("/admin/users");
+  return redirect("/admin/users?success=update");
 });
 
 export const deleteUser = action(async (formData: FormData) => {
@@ -778,7 +778,7 @@ export const deleteUser = action(async (formData: FormData) => {
     "HAPUS_PENGGUNA",
     `delete user success (${targetUsername})`,
   );
-  return redirect("/admin/users");
+  return redirect("/admin/users?success=delete");
 });
 
 export const adminResetPassword = action(async (formData: FormData) => {
@@ -823,7 +823,7 @@ export const createDivisi = action(async (formData: FormData) => {
     return new Error("Nama divisi minimal 2 karakter.");
   await db.divisi.create({ data: { name, description: description || null } });
   await logActivity("BUAT_DIVISI", `create division success (${name})`);
-  return redirect("/admin/divisi");
+  return redirect("/admin/divisi?success=create");
 });
 
 export const updateDivisi = action(async (formData: FormData) => {
@@ -837,7 +837,7 @@ export const updateDivisi = action(async (formData: FormData) => {
     data: { name, description: description || null },
   });
   await logActivity("UPDATE_DIVISI", `update division success (${name})`);
-  return redirect("/admin/divisi");
+  return redirect("/admin/divisi?success=update");
 });
 
 export const deleteDivisi = action(async (formData: FormData) => {
@@ -848,7 +848,7 @@ export const deleteDivisi = action(async (formData: FormData) => {
   const divisiName = targetDivisi ? targetDivisi.name : "Divisi";
   await db.divisi.delete({ where: { id } });
   await logActivity("HAPUS_DIVISI", `delete division success (${divisiName})`);
-  return redirect("/admin/divisi");
+  return redirect("/admin/divisi?success=delete");
 });
 
 //  ADMIN: ABSENSI 
@@ -1016,7 +1016,7 @@ export const approveIzin = action(async (formData: FormData) => {
     `${statusAction === "APPROVED" ? "approve" : "reject"} leave success (${typeStr.toLowerCase()} - ${targetUsername})`,
   );
 
-  return redirect("/admin/izin");
+  return redirect("/admin/izin?success=update");
 });
 
 //  ADMIN: LAPORAN 
@@ -1181,7 +1181,7 @@ export const createBatch = action(async (formData: FormData) => {
     data: { name, startDate, endDate, description: description || null },
   });
   await logActivity("BUAT_BATCH", `create batch success (${name})`);
-  return redirect("/admin/batch");
+  return redirect("/admin/batch?success=create");
 });
 
 export const updateBatch = action(async (formData: FormData) => {
@@ -1203,7 +1203,7 @@ export const updateBatch = action(async (formData: FormData) => {
     data: { name, startDate, endDate, description: description || null },
   });
   await logActivity("UPDATE_BATCH", `update batch success (${name})`);
-  return redirect("/admin/batch");
+  return redirect("/admin/batch?success=update");
 });
 
 export const deleteBatch = action(async (formData: FormData) => {
@@ -1213,5 +1213,5 @@ export const deleteBatch = action(async (formData: FormData) => {
   const target = await db.batchMagang.findUnique({ where: { id } });
   await db.batchMagang.delete({ where: { id } });
   await logActivity("HAPUS_BATCH", `delete batch success (${target?.name ?? "Batch"})`);
-  return redirect("/admin/batch");
+  return redirect("/admin/batch?success=delete");
 });

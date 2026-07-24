@@ -18,7 +18,14 @@ export default function Profil() {
   const user = createAsync(() => getUser());
   const updating = useSubmission(updateProfile);
   const changing = useSubmission(changePassword);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  createEffect(() => {
+    if (searchParams.success === "update") {
+      showToast("Profil berhasil diperbarui!", "success");
+      setSearchParams({ success: null });
+    }
+  });
 
   let changeFormRef: HTMLFormElement | undefined;
   const [successMessage, setSuccessMessage] = createSignal("");
@@ -38,16 +45,11 @@ export default function Profil() {
   });
 
   // Toast error and success notifications
-  createEffect(() => {
-    if (updating.result) {
-      if (updating.result instanceof Error) showToast(updating.result.message, "error");
-      else showToast("Profil berhasil diperbarui!", "success");
-    }
-  });
+  createEffect(() => { if (updating.result instanceof Error) showToast(updating.result.message, "error"); });
   createEffect(() => {
     if (changing.result) {
       if (changing.result instanceof Error) showToast(changing.result.message, "error");
-      else showToast("Password berhasil diubah!", "success");
+      else showToast("Kata sandi berhasil diubah!", "success");
     }
   });
 

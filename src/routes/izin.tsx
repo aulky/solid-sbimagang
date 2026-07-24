@@ -2,6 +2,7 @@ import {
   createAsync,
   useSubmission,
   useAction,
+  useSearchParams,
   type RouteDefinition,
 } from "@solidjs/router";
 import { For, Show, createSignal, createEffect } from "solid-js";
@@ -39,6 +40,14 @@ const statusText = (status: string) => {
 export default function Izin() {
   const izinList = createAsync(() => getUserIzinList());
   const submitting = useSubmission(submitIzin);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  createEffect(() => {
+    if (searchParams.success === "create") {
+      showToast("Pengajuan izin berhasil dikirim!", "success");
+      setSearchParams({ success: null });
+    }
+  });
 
   const [showCreate, setShowCreate] = createSignal(false);
   const [filterType, setFilterType] = createSignal("");
@@ -83,13 +92,8 @@ export default function Izin() {
     prevSubmittingPending = pending;
   });
 
-  // Toast notifications (success & error)
-  createEffect(() => {
-    if (submitting.result) {
-      if (submitting.result instanceof Error) showToast(submitting.result.message, "error");
-      else showToast("Pengajuan izin berhasil dikirim!", "success");
-    }
-  });
+  // Toast error notifications
+  createEffect(() => { if (submitting.result instanceof Error) showToast(submitting.result.message, "error"); });
 
   return (
     <main class="p-4" style="text-align: left;">

@@ -1,6 +1,7 @@
 import {
   createAsync,
   useSubmission,
+  useSearchParams,
   type RouteDefinition,
 } from "@solidjs/router";
 import { For, Show, Suspense, createSignal, createEffect } from "solid-js";
@@ -30,14 +31,18 @@ const statusText = (status: string) => {
 export default function AdminIzin() {
   const approving = useSubmission(approveIzin);
   const [viewingAttachment, setViewingAttachment] = createSignal<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   createEffect(() => {
-    if (approving.result) {
-      if ((approving.result as any) instanceof Error) {
-        showToast(((approving.result as any) as Error).message, "error");
-      } else {
-        showToast("Status pengajuan izin berhasil diperbarui!", "success");
-      }
+    if (searchParams.success === "update") {
+      showToast("Status pengajuan izin berhasil diperbarui!", "success");
+      setSearchParams({ success: null });
+    }
+  });
+
+  createEffect(() => {
+    if (approving.result && (approving.result as any) instanceof Error) {
+      showToast(((approving.result as any) as Error).message, "error");
     }
   });
 

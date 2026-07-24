@@ -1,6 +1,7 @@
 import {
   createAsync,
   useSubmission,
+  useSearchParams,
   type RouteDefinition,
 } from "@solidjs/router";
 import { Show, For, createSignal, createEffect } from "solid-js";
@@ -47,6 +48,20 @@ const getBatchStatus = (startDate: string | Date, endDate: string | Date) => {
 
 export default function AdminBatch() {
   const batchList = createAsync(() => getAdminBatches(), { deferStream: true });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  createEffect(() => {
+    if (searchParams.success === "create") {
+      showToast("Batch magang berhasil ditambahkan!", "success");
+      setSearchParams({ success: null });
+    } else if (searchParams.success === "update") {
+      showToast("Batch magang berhasil diperbarui!", "success");
+      setSearchParams({ success: null });
+    } else if (searchParams.success === "delete") {
+      showToast("Batch magang berhasil dihapus!", "success");
+      setSearchParams({ success: null });
+    }
+  });
 
   const [showCreate, setShowCreate] = createSignal(false);
   const [editingBatch, setEditingBatch] = createSignal<{
@@ -113,25 +128,10 @@ export default function AdminBatch() {
     prevDeletingPending = pending;
   });
 
-  // Toast error & success notifications
-  createEffect(() => {
-    if (creating.result) {
-      if (creating.result instanceof Error) showToast(creating.result.message, "error");
-      else showToast("Batch magang berhasil ditambahkan!", "success");
-    }
-  });
-  createEffect(() => {
-    if (updating.result) {
-      if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message, "error");
-      else showToast("Batch magang berhasil diperbarui!", "success");
-    }
-  });
-  createEffect(() => {
-    if (deleting.result) {
-      if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message, "error");
-      else showToast("Batch magang berhasil dihapus!", "success");
-    }
-  });
+  // Toast error notifications
+  createEffect(() => { if (creating.result instanceof Error) showToast(creating.result.message, "error"); });
+  createEffect(() => { if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message, "error"); });
+  createEffect(() => { if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message, "error"); });
 
   return (
     <main class="p-4">

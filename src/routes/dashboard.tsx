@@ -1,6 +1,7 @@
 import {
   createAsync,
   useSubmission,
+  useSearchParams,
   type RouteDefinition,
 } from "@solidjs/router";
 import { Show, createEffect } from "solid-js";
@@ -30,26 +31,21 @@ export default function Dashboard() {
   const settings = createAsync(() => getPublicSettings());
   const checkingIn = useSubmission(checkIn);
   const checkingOut = useSubmission(checkOut);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Toast notifications (success & error)
   createEffect(() => {
-    if (checkingIn.result) {
-      if ((checkingIn.result as any) instanceof Error) {
-        showToast(((checkingIn.result as any) as Error).message, "error");
-      } else {
-        showToast("Check-In berhasil! Selamat bekerja.", "success");
-      }
+    if (searchParams.success === "checkin") {
+      showToast("Check-In berhasil! Selamat bekerja.", "success");
+      setSearchParams({ success: null });
+    } else if (searchParams.success === "checkout") {
+      showToast("Check-Out berhasil! Sampai jumpa besok.", "success");
+      setSearchParams({ success: null });
     }
   });
-  createEffect(() => {
-    if (checkingOut.result) {
-      if ((checkingOut.result as any) instanceof Error) {
-        showToast(((checkingOut.result as any) as Error).message, "error");
-      } else {
-        showToast("Check-Out berhasil! Sampai jumpa besok.", "success");
-      }
-    }
-  });
+
+  // Toast error notifications
+  createEffect(() => { if ((checkingIn.result as any) instanceof Error) showToast(((checkingIn.result as any) as Error).message, "error"); });
+  createEffect(() => { if ((checkingOut.result as any) instanceof Error) showToast(((checkingOut.result as any) as Error).message, "error"); });
 
   const now = () => {
     const d = new Date();
