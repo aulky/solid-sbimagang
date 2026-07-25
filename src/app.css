@@ -208,11 +208,15 @@ body {
   margin-bottom: var(--space-3);
 }
 
-.sidebar-logo {
+.sidebar-logo-full {
   height: 40px;
   width: auto;
   object-fit: contain;
   margin-bottom: var(--space-2);
+}
+
+.sidebar-logo-favicon {
+  display: none;
 }
 
 .sidebar-title {
@@ -1243,9 +1247,14 @@ a {
     margin-bottom: var(--space-3) !important;
   }
 
-  .sidebar-logo {
+  .sidebar-logo-full {
     height: 40px !important;
     margin-bottom: var(--space-2) !important;
+    display: block !important;
+  }
+
+  .sidebar-logo-favicon {
+    display: none !important;
   }
 
   .sidebar-user {
@@ -1670,27 +1679,39 @@ a {
   }
 }
 
-/* Helper classes to prevent SSR Layout flash on reload */
-html.sidebar-is-collapsed .app-sidebar {
-  width: 70px !important;
+/* Helper classes to prevent SSR Layout flash on reload (Desktop only) */
+@media (min-width: 769px) {
+  html.sidebar-is-collapsed .app-sidebar {
+    width: 70px !important;
+  }
+
+  html.sidebar-is-collapsed .sidebar-logo-full {
+    display: none !important;
+  }
+
+  html.sidebar-is-collapsed .sidebar-logo-favicon {
+    display: block !important;
+  }
+
+  html.sidebar-is-collapsed .app-layout.has-sidebar .app-main-content {
+    margin-left: 70px !important;
+  }
 }
 
-html.sidebar-is-collapsed .sidebar-logo-full {
-  display: none !important;
-}
-
-html.sidebar-is-collapsed .sidebar-logo-favicon {
-  display: block !important;
-}
-
-html.sidebar-is-collapsed .app-layout.has-sidebar .app-main-content {
-  margin-left: 70px !important;
-}
-
-/* Hide toggle button on mobile */
+/* Hide toggle button and disable collapse styling on mobile */
 @media (max-width: 768px) {
   .sidebar-toggle-btn {
     display: none !important;
+  }
+
+  .app-sidebar.collapsed {
+    width: 260px !important;
+    transform: translateX(-100%) !important;
+    overflow: hidden !important;
+  }
+
+  .app-sidebar.collapsed.open {
+    transform: translateX(0) !important;
   }
 
   .app-layout.has-sidebar.sidebar-collapsed .app-main-content {
