@@ -2,6 +2,7 @@ import {
   createAsync,
   useSubmission,
   useSearchParams,
+  revalidate,
   type RouteDefinition,
 } from "@solidjs/router";
 import { Show, For, Suspense, createSignal, createEffect } from "solid-js";
@@ -13,7 +14,6 @@ import {
   createUser,
   updateUser,
   deleteUser,
-  bulkCreateUsers,
   getPageNumbers,
   adminResetPassword,
 } from "~/lib";
@@ -178,7 +178,7 @@ export default function AdminUsers() {
             style="width: auto; padding: 0 var(--space-4); height: 40px;"
             onClick={() => { setBulkResult(null); setShowBulk(true); }}
           >
-            Impor Massal
+            Impor Pengguna
           </button>
           <button
             class="btn-primary"
@@ -330,7 +330,7 @@ export default function AdminUsers() {
             >
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
                 <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">
-                  Impor Pengguna Massal
+                  Impor Pengguna
                 </h3>
                 <button
                   class="theme-toggle"
@@ -355,20 +355,69 @@ export default function AdminUsers() {
                 </a>
               </div>
 
+              <div style="margin-bottom: var(--space-4); padding: var(--space-3); border-radius: 8px; background: var(--color-surface); border: 1px solid var(--color-border); font-size: 13px; line-height: 1.6;">
+                <p style="margin: 0 0 var(--space-2); font-weight: 700; color: var(--color-text); display: flex; align-items: center; gap: 6px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  Petunjuk Pengisian:
+                </p>
+                <p style="margin: 0 0 var(--space-1); color: var(--color-success); display: flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Tambahkan data pengguna mulai dari <strong>baris 2</strong> ke bawah.
+                </p>
+                <p style="margin: 0 0 var(--space-1); color: var(--color-success); display: flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Kolom wajib: <strong>username, password, fullName, email</strong>.
+                </p>
+                <p style="margin: 0 0 var(--space-1); color: var(--color-success); display: flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Kolom opsional: phone, role (USER/ADMIN), divisi, batch.
+                </p>
+                <p style="margin: 0 0 var(--space-1); color: var(--color-success); display: flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Lihat sheet <strong>"Referensi"</strong> untuk daftar divisi & batch yang tersedia.
+                </p>
+                <hr style="border: none; border-top: 1px solid var(--color-border); margin: var(--space-2) 0;" />
+                <p style="margin: 0 0 var(--space-1); color: var(--color-danger); display: flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <strong>JANGAN UBAH</strong> baris 1 (header kolom) di sheet "Template".
+                </p>
+                <p style="margin: 0; color: var(--color-danger); display: flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <strong>JANGAN UBAH</strong> nama sheet "Template".
+                </p>
+              </div>
+
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 const fd = new FormData(e.currentTarget);
                 setBulkLoading(true);
                 setBulkResult(null);
                 try {
-                  const result = await bulkCreateUsers(fd);
-                  if (result instanceof Error) {
-                    setBulkResult({ total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: result.message }] });
+                  const res = await fetch("/api/users/import", {
+                    method: "POST",
+                    body: fd,
+                  });
+                  const data = await res.json();
+                  if (!res.ok) {
+                    setBulkResult({ total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: data.error || "Gagal mengimpor data." }] });
+                    showToast(data.error || "Gagal mengimpor data.", "error");
                   } else {
-                    setBulkResult(result as any);
+                    if (data.successCount > 0 && data.errors?.length === 0) {
+                      showToast(`${data.successCount}/${data.total} pengguna berhasil diimpor!`, "success");
+                      revalidate("adminUsers");
+                      setShowBulk(false);
+                    } else if (data.successCount > 0) {
+                      setBulkResult(data);
+                      showToast(`${data.successCount}/${data.total} berhasil, ${data.errors.length} gagal.`, "success");
+                      revalidate("adminUsers");
+                    } else {
+                      setBulkResult(data);
+                      showToast("Impor gagal. Periksa detail error di bawah.", "error");
+                    }
                   }
                 } catch (err: any) {
-                  setBulkResult({ total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: err.message }] });
+                  setBulkResult({ total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: err.message || "Terjadi kesalahan." }] });
+                  showToast(err.message || "Terjadi kesalahan.", "error");
                 }
                 setBulkLoading(false);
               }}>

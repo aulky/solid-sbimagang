@@ -5,7 +5,14 @@ import {
   useIsRouting,
 } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { Suspense, Show, createSignal, onMount, createEffect, onCleanup } from "solid-js";
+import {
+  Suspense,
+  Show,
+  createSignal,
+  onMount,
+  createEffect,
+  onCleanup,
+} from "solid-js";
 import { Portal } from "solid-js/web";
 import { createAsync } from "@solidjs/router";
 import { getUser, logout, logPageAccess } from "~/lib";
@@ -87,8 +94,16 @@ export default function App() {
           location.pathname === "/profil",
         );
         const [mobileSidebarOpen, setMobileSidebarOpen] = createSignal(false);
+        const [sidebarPinned, setSidebarPinned] = createSignal(true);
+        const [sidebarHovered, setSidebarHovered] = createSignal(false);
         const [progress, setProgress] = createSignal(0);
         const [visible, setVisible] = createSignal(false);
+
+        const toggleSidebarPinned = () => {
+          const next = !sidebarPinned();
+          setSidebarPinned(next);
+          localStorage.setItem("sidebar-pinned", String(next));
+        };
 
         createEffect(() => {
           if (isRouting()) {
@@ -130,16 +145,26 @@ export default function App() {
             setTheme("dark");
           }
 
+          // Load sidebar pinned state from localStorage
+          const savedPinned = localStorage.getItem("sidebar-pinned");
+          if (savedPinned === "false") {
+            setSidebarPinned(false);
+          }
+          document.documentElement.classList.remove("sidebar-is-collapsed");
+
           // Client-side auto logout after 5 hours of inactivity
           let timeoutId: any;
           const resetTimeout = () => {
             clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-              const u = user();
-              if (u) {
-                logout();
-              }
-            }, 5 * 60 * 60 * 1000); // 5 hours
+            timeoutId = setTimeout(
+              () => {
+                const u = user();
+                if (u) {
+                  logout();
+                }
+              },
+              5 * 60 * 60 * 1000,
+            ); // 5 hours
           };
 
           const events = ["mousemove", "keydown", "click", "scroll"];
@@ -147,7 +172,9 @@ export default function App() {
           resetTimeout();
 
           onCleanup(() => {
-            events.forEach((name) => window.removeEventListener(name, resetTimeout));
+            events.forEach((name) =>
+              window.removeEventListener(name, resetTimeout),
+            );
             clearTimeout(timeoutId);
           });
         });
@@ -216,7 +243,7 @@ export default function App() {
           "/admin/izin",
           "/admin/laporan",
           "/admin/settings",
-          "/admin/audit-log"
+          "/admin/audit-log",
         ];
         const is404Page = () => !validPaths.includes(location.pathname);
 
@@ -255,34 +282,91 @@ export default function App() {
         return (
           <Suspense
             fallback={
-              <div class="app-layout has-sidebar" style="opacity: 0.6; pointer-events: none;">
+              <div
+                class="app-layout has-sidebar"
+                style="opacity: 0.6; pointer-events: none;"
+              >
                 <aside class="app-sidebar no-print">
-                  <div class="sidebar-header" style="display: flex; justify-content: center; padding: 20px;">
-                    <div class="skeleton" style="width: 120px; height: 35px; border-radius: var(--radius-md);"></div>
+                  <div
+                    class="sidebar-header"
+                    style="display: flex; justify-content: center; padding: 20px;"
+                  >
+                    <div
+                      class="skeleton"
+                      style="width: 120px; height: 35px; border-radius: var(--radius-md);"
+                    ></div>
                   </div>
-                  <nav class="sidebar-nav" style="display: flex; flex-direction: column; gap: 15px; padding: 20px;">
-                    <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
-                    <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
-                    <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
-                    <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
+                  <nav
+                    class="sidebar-nav"
+                    style="display: flex; flex-direction: column; gap: 15px; padding: 20px;"
+                  >
+                    <div
+                      class="skeleton"
+                      style="width: 100%; height: 40px; border-radius: 8px;"
+                    ></div>
+                    <div
+                      class="skeleton"
+                      style="width: 100%; height: 40px; border-radius: 8px;"
+                    ></div>
+                    <div
+                      class="skeleton"
+                      style="width: 100%; height: 40px; border-radius: 8px;"
+                    ></div>
+                    <div
+                      class="skeleton"
+                      style="width: 100%; height: 40px; border-radius: 8px;"
+                    ></div>
                   </nav>
                 </aside>
                 <main class="app-main-content">
                   <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
-                    <div class="skeleton" style="width: 250px; height: 32px; border-radius: 6px;"></div>
-                    <div class="skeleton" style="width: 100%; height: 20px; border-radius: 4px;"></div>
+                    <div
+                      class="skeleton"
+                      style="width: 250px; height: 32px; border-radius: 6px;"
+                    ></div>
+                    <div
+                      class="skeleton"
+                      style="width: 100%; height: 20px; border-radius: 4px;"
+                    ></div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 20px;">
-                      <div class="skeleton-card" style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div class="skeleton" style="width: 40px; height: 30px;"></div>
-                        <div class="skeleton" style="width: 100px; height: 16px;"></div>
+                      <div
+                        class="skeleton-card"
+                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;"
+                      >
+                        <div
+                          class="skeleton"
+                          style="width: 40px; height: 30px;"
+                        ></div>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 16px;"
+                        ></div>
                       </div>
-                      <div class="skeleton-card" style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div class="skeleton" style="width: 40px; height: 30px;"></div>
-                        <div class="skeleton" style="width: 100px; height: 16px;"></div>
+                      <div
+                        class="skeleton-card"
+                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;"
+                      >
+                        <div
+                          class="skeleton"
+                          style="width: 40px; height: 30px;"
+                        ></div>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 16px;"
+                        ></div>
                       </div>
-                      <div class="skeleton-card" style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div class="skeleton" style="width: 40px; height: 30px;"></div>
-                        <div class="skeleton" style="width: 100px; height: 16px;"></div>
+                      <div
+                        class="skeleton-card"
+                        style="height: 120px; display: flex; flex-direction: column; justify-content: space-between;"
+                      >
+                        <div
+                          class="skeleton"
+                          style="width: 40px; height: 30px;"
+                        ></div>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 16px;"
+                        ></div>
                       </div>
                     </div>
                   </div>
@@ -302,13 +386,20 @@ export default function App() {
 
             <div
               class="app-layout"
-              classList={{ "has-sidebar": !!user() && !is404Page() }}
+              classList={{
+                "has-sidebar": !!user() && !is404Page(),
+                "sidebar-pinned": sidebarPinned(),
+                "sidebar-collapsed": !sidebarPinned(),
+              }}
             >
               <Show when={user()}>
                 {(u) => (
                   <>
                     <Show when={!is404Page()}>
-                      <header class="mobile-header no-print" style="justify-content: flex-start; gap: 8px;">
+                      <header
+                        class="mobile-header no-print"
+                        style="justify-content: flex-start; gap: 8px;"
+                      >
                         <button
                           type="button"
                           class="hamburger-btn"
@@ -324,525 +415,604 @@ export default function App() {
                         </span>
                       </header>
 
-                    <Show when={mobileSidebarOpen()}>
-                      <div
-                        class="mobile-sidebar-backdrop no-print"
-                        onClick={() => setMobileSidebarOpen(false)}
-                      />
-                    </Show>
-
-                    <aside
-                      class="app-sidebar no-print"
-                      classList={{ open: mobileSidebarOpen() }}
-                    >
-                    <div
-                      class="sidebar-header"
-                      style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px;"
-                    >
-                      <a
-                        href={u().role === "ADMIN" ? "/admin/dashboard" : "/dashboard"}
-                        style="display: flex; justify-content: center; width: 100%;"
-                      >
-                        <img
-                          src={
-                            theme() === "dark"
-                              ? "/logo-sigma-putih.png"
-                              : "/logo-sigma.png"
-                          }
-                          alt="Logo SIGMA"
-                          class="sidebar-logo"
-                          style="cursor: pointer;"
+                      <Show when={mobileSidebarOpen()}>
+                        <div
+                          class="mobile-sidebar-backdrop no-print"
+                          onClick={() => setMobileSidebarOpen(false)}
                         />
-                      </a>
-                    </div>
-
-                    <nav class="sidebar-nav">
-                      <Show when={u().role === "ADMIN"}>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/admin/dashboard",
-                          }}
-                          href="/admin/dashboard"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <rect x="3" y="3" width="7" height="9" />
-                            <rect x="14" y="3" width="7" height="5" />
-                            <rect x="14" y="12" width="7" height="9" />
-                            <rect x="3" y="16" width="7" height="5" />
-                          </svg>
-                          <span>Dashboard</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/admin/users",
-                          }}
-                          href="/admin/users"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                          </svg>
-                          <span>Pengguna</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/admin/divisi",
-                          }}
-                          href="/admin/divisi"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <rect
-                              x="4"
-                              y="2"
-                              width="16"
-                              height="20"
-                              rx="2"
-                              ry="2"
-                            />
-                            <line x1="9" y1="22" x2="9" y2="16" />
-                            <line x1="15" y1="22" x2="15" y2="16" />
-                            <line x1="9" y1="16" x2="15" y2="16" />
-                            <path d="M8 6h.01" />
-                            <path d="M16 6h.01" />
-                            <path d="M8 10h.01" />
-                            <path d="M16 10h.01" />
-                          </svg>
-                          <span>Divisi</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/admin/batch",
-                          }}
-                          href="/admin/batch"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                          </svg>
-                          <span>Batch Magang</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/admin/absensi",
-                          }}
-                          href="/admin/absensi"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          <span>Log Absensi</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/admin/izin",
-                          }}
-                          href="/admin/izin"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                            <polyline points="14 2 14 8 20 8" />
-                            <line x1="16" y1="13" x2="8" y2="13" />
-                            <line x1="16" y1="17" x2="8" y2="17" />
-                            <polyline points="10 9 9 9 8 9" />
-                          </svg>
-                          <span>Kelola Izin</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/admin/laporan",
-                          }}
-                          href="/admin/laporan"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                            <rect
-                              x="8"
-                              y="2"
-                              width="8"
-                              height="4"
-                              rx="1"
-                              ry="1"
-                            />
-                          </svg>
-                          <span>Laporan</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/admin/settings",
-                          }}
-                          href="/admin/settings"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <circle cx="12" cy="12" r="3" />
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                          </svg>
-                          <span>Pengaturan Sistem</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/admin/audit-log",
-                          }}
-                          href="/admin/audit-log"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                          </svg>
-                          <span>Audit Log</span>
-                        </a>
-
-                        <button
-                          type="button"
-                          class="nav-link"
-                          onClick={() =>
-                            setShowProfileDropdown(!showProfileDropdown())
-                          }
-                          classList={{
-                            active: location.pathname === "/profil",
-                          }}
-                        >
-                          <div style="display: flex; align-items: center; gap: var(--space-2);">
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                              <circle cx="12" cy="7" r="4" />
-                            </svg>
-                            <span>Profil Saya</span>
-                          </div>
-                          <span
-                            style={{
-                              "font-size": "10px",
-                              transition: "transform 0.2s",
-                              transform: showProfileDropdown()
-                                ? "rotate(180deg)"
-                                : "rotate(0deg)",
-                            }}
-                          >
-                            ▼
-                          </span>
-                        </button>
-                        <Show when={showProfileDropdown()}>
-                          <div class="nav-dropdown">
-                            <a
-                              class="nav-sub-link"
-                              classList={{
-                                active:
-                                  location.pathname === "/profil" &&
-                                  (!location.search ||
-                                    location.search.includes("tab=profile")),
-                              }}
-                              href="/profil?tab=profile"
-                            >
-                              Ubah Profil
-                            </a>
-                            <a
-                              class="nav-sub-link"
-                              classList={{
-                                active:
-                                  location.pathname === "/profil" &&
-                                  location.search.includes("tab=password"),
-                              }}
-                              href="/profil?tab=password"
-                            >
-                              Ubah Sandi
-                            </a>
-                          </div>
-                        </Show>
                       </Show>
 
-                      <Show when={u().role === "USER"}>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/dashboard",
-                          }}
-                          href="/dashboard"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <rect x="3" y="3" width="7" height="9" />
-                            <rect x="14" y="3" width="7" height="5" />
-                            <rect x="14" y="12" width="7" height="9" />
-                            <rect x="3" y="16" width="7" height="5" />
-                          </svg>
-                          <span>Dashboard</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{
-                            active: location.pathname === "/riwayat",
-                          }}
-                          href="/riwayat"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          <span>Riwayat</span>
-                        </a>
-                        <a
-                          class="nav-link"
-                          classList={{ active: location.pathname === "/izin" }}
-                          href="/izin"
-                        >
-                          <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                            <polyline points="14 2 14 8 20 8" />
-                            <line x1="16" y1="13" x2="8" y2="13" />
-                            <line x1="16" y1="17" x2="8" y2="17" />
-                            <polyline points="10 9 9 9 8 9" />
-                          </svg>
-                          <span>Pengajuan Izin</span>
-                        </a>
-                        <button
-                          type="button"
-                          class="nav-link"
-                          onClick={() =>
-                            setShowProfileDropdown(!showProfileDropdown())
-                          }
-                          classList={{
-                            active: location.pathname === "/profil",
-                          }}
-                        >
-                          <div style="display: flex; align-items: center; gap: var(--space-2);">
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                              <circle cx="12" cy="7" r="4" />
-                            </svg>
-                            <span>Profil Saya</span>
-                          </div>
-                          <span
-                            style={{
-                              "font-size": "10px",
-                              transition: "transform 0.2s",
-                              transform: showProfileDropdown()
-                                ? "rotate(180deg)"
-                                : "rotate(0deg)",
-                            }}
-                          >
-                            ▼
-                          </span>
-                        </button>
-                        <Show when={showProfileDropdown()}>
-                          <div class="nav-dropdown">
-                            <a
-                              class="nav-sub-link"
-                              classList={{
-                                active:
-                                  location.pathname === "/profil" &&
-                                  (!location.search ||
-                                    location.search.includes("tab=profile")),
-                              }}
-                              href="/profil?tab=profile"
-                            >
-                              Ubah Profil
-                            </a>
-                            <a
-                              class="nav-sub-link"
-                              classList={{
-                                active:
-                                  location.pathname === "/profil" &&
-                                  location.search.includes("tab=password"),
-                              }}
-                              href="/profil?tab=password"
-                            >
-                              Ubah Sandi
-                            </a>
-                          </div>
-                        </Show>
-                      </Show>
-                    </nav>
-
-                    <div
-                      class="sidebar-user"
-                      style="margin-top: auto;"
-                    >
-                      <div style="display: flex; align-items: center; gap: var(--space-3); min-width: 0; overflow: hidden;">
-                        <div class="user-avatar">
-                          {u().fullName
-                            ? u().fullName.charAt(0).toUpperCase()
-                            : "U"}
-                        </div>
-                        <div class="user-info">
-                          <div class="user-name">{u().fullName}</div>
-                          <div class="user-role">
-                            {u().role === "ADMIN"
-                              ? "Administrator"
-                              : u().divisi || "Anak Magang"}
-                          </div>
-                        </div>
-                      </div>
-                      <ThemeToggle theme={theme} setTheme={setTheme} />
-                    </div>
-
-                    <div class="sidebar-footer">
-                      <button
-                        class="btn-logout-sidebar"
-                        type="button"
-                        onClick={() => setShowLogoutConfirm(true)}
+                      <aside
+                        class="app-sidebar no-print"
+                        classList={{
+                          open: mobileSidebarOpen(),
+                          "sidebar-hovered":
+                            sidebarHovered() && !sidebarPinned(),
+                          collapsed: !sidebarPinned(),
+                          pinned: sidebarPinned(),
+                        }}
+                        onMouseEnter={() => setSidebarHovered(true)}
+                        onMouseLeave={() => setSidebarHovered(false)}
                       >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                        <button
+                          type="button"
+                          class="sidebar-toggle-btn"
+                          onClick={toggleSidebarPinned}
+                          title={
+                            sidebarPinned()
+                              ? "Kecilkan sidebar"
+                              : "Kunci sidebar"
+                          }
                         >
-                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                          <polyline points="16 17 21 12 16 7" />
-                          <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                        Logout
-                      </button>
-                    </div>
-                  </aside>
-                </Show>
-              </>
-            )}
-          </Show>
+                          <Show
+                            when={sidebarPinned()}
+                            fallback={
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <polyline points="6 17 11 12 6 7" />
+                                <line x1="18" y1="5" x2="18" y2="19" />
+                              </svg>
+                            }
+                          >
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <line x1="6" y1="5" x2="6" y2="19" />
+                              <polyline points="18 17 13 12 18 7" />
+                            </svg>
+                          </Show>
+                        </button>
+
+                        <div
+                          class="sidebar-header"
+                          style="width: 100%; display: flex; align-items: center; justify-content: space-between; position: relative;"
+                        >
+                          <a
+                            href={
+                              u().role === "ADMIN"
+                                ? "/admin/dashboard"
+                                : "/dashboard"
+                            }
+                            class="sidebar-logo-link"
+                            style="display: flex; align-items: center;"
+                          >
+                            <img
+                              src={
+                                !sidebarPinned() && !sidebarHovered()
+                                  ? "/favicon.png"
+                                  : theme() === "dark"
+                                    ? "/logo-sigma-putih.png"
+                                    : "/logo-sigma.png"
+                              }
+                              alt="Logo SIGMA"
+                              class="sidebar-logo"
+                              style="cursor: pointer;"
+                            />
+                          </a>
+                          <div class="sidebar-header-divider" />
+                        </div>
+
+                        <nav class="sidebar-nav">
+                          <Show when={u().role === "ADMIN"}>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active:
+                                  location.pathname === "/admin/dashboard",
+                              }}
+                              href="/admin/dashboard"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <rect x="3" y="3" width="7" height="9" />
+                                <rect x="14" y="3" width="7" height="5" />
+                                <rect x="14" y="12" width="7" height="9" />
+                                <rect x="3" y="16" width="7" height="5" />
+                              </svg>
+                              <span>Dashboard</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/admin/users",
+                              }}
+                              href="/admin/users"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                              </svg>
+                              <span>Pengguna</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/admin/divisi",
+                              }}
+                              href="/admin/divisi"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <rect
+                                  x="4"
+                                  y="2"
+                                  width="16"
+                                  height="20"
+                                  rx="2"
+                                  ry="2"
+                                />
+                                <line x1="9" y1="22" x2="9" y2="16" />
+                                <line x1="15" y1="22" x2="15" y2="16" />
+                                <line x1="9" y1="16" x2="15" y2="16" />
+                                <path d="M8 6h.01" />
+                                <path d="M16 6h.01" />
+                                <path d="M8 10h.01" />
+                                <path d="M16 10h.01" />
+                              </svg>
+                              <span>Divisi</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/admin/batch",
+                              }}
+                              href="/admin/batch"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <rect
+                                  x="3"
+                                  y="4"
+                                  width="18"
+                                  height="18"
+                                  rx="2"
+                                  ry="2"
+                                />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                              </svg>
+                              <span>Batch Magang</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/admin/absensi",
+                              }}
+                              href="/admin/absensi"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                              </svg>
+                              <span>Log Absensi</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/admin/izin",
+                              }}
+                              href="/admin/izin"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <polyline points="10 9 9 9 8 9" />
+                              </svg>
+                              <span>Kelola Izin</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/admin/laporan",
+                              }}
+                              href="/admin/laporan"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                                <rect
+                                  x="8"
+                                  y="2"
+                                  width="8"
+                                  height="4"
+                                  rx="1"
+                                  ry="1"
+                                />
+                              </svg>
+                              <span>Laporan</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/admin/settings",
+                              }}
+                              href="/admin/settings"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <circle cx="12" cy="12" r="3" />
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                              </svg>
+                              <span>Pengaturan Sistem</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active:
+                                  location.pathname === "/admin/audit-log",
+                              }}
+                              href="/admin/audit-log"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <rect
+                                  x="3"
+                                  y="4"
+                                  width="18"
+                                  height="16"
+                                  rx="2"
+                                  ry="2"
+                                />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                              </svg>
+                              <span>Audit Log</span>
+                            </a>
+
+                            <button
+                              type="button"
+                              class="nav-link"
+                              onClick={() =>
+                                setShowProfileDropdown(!showProfileDropdown())
+                              }
+                              classList={{
+                                active: location.pathname === "/profil",
+                              }}
+                            >
+                              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <svg
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                >
+                                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                  <circle cx="12" cy="7" r="4" />
+                                </svg>
+                                <span>Profil Saya</span>
+                              </div>
+                              <span
+                                style={{
+                                  "font-size": "10px",
+                                  transition: "transform 0.2s",
+                                  transform: showProfileDropdown()
+                                    ? "rotate(180deg)"
+                                    : "rotate(0deg)",
+                                }}
+                              >
+                                ▼
+                              </span>
+                            </button>
+                            <Show when={showProfileDropdown()}>
+                              <div class="nav-dropdown">
+                                <a
+                                  class="nav-sub-link"
+                                  classList={{
+                                    active:
+                                      location.pathname === "/profil" &&
+                                      (!location.search ||
+                                        location.search.includes(
+                                          "tab=profile",
+                                        )),
+                                  }}
+                                  href="/profil?tab=profile"
+                                >
+                                  Ubah Profil
+                                </a>
+                                <a
+                                  class="nav-sub-link"
+                                  classList={{
+                                    active:
+                                      location.pathname === "/profil" &&
+                                      location.search.includes("tab=password"),
+                                  }}
+                                  href="/profil?tab=password"
+                                >
+                                  Ubah Sandi
+                                </a>
+                              </div>
+                            </Show>
+                          </Show>
+
+                          <Show when={u().role === "USER"}>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/dashboard",
+                              }}
+                              href="/dashboard"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <rect x="3" y="3" width="7" height="9" />
+                                <rect x="14" y="3" width="7" height="5" />
+                                <rect x="14" y="12" width="7" height="9" />
+                                <rect x="3" y="16" width="7" height="5" />
+                              </svg>
+                              <span>Dashboard</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/riwayat",
+                              }}
+                              href="/riwayat"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                              </svg>
+                              <span>Riwayat</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/izin",
+                              }}
+                              href="/izin"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <polyline points="10 9 9 9 8 9" />
+                              </svg>
+                              <span>Pengajuan Izin</span>
+                            </a>
+                            <button
+                              type="button"
+                              class="nav-link"
+                              onClick={() =>
+                                setShowProfileDropdown(!showProfileDropdown())
+                              }
+                              classList={{
+                                active: location.pathname === "/profil",
+                              }}
+                            >
+                              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <svg
+                                  width="18"
+                                  height="18"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                >
+                                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                  <circle cx="12" cy="7" r="4" />
+                                </svg>
+                                <span>Profil Saya</span>
+                              </div>
+                              <span
+                                style={{
+                                  "font-size": "10px",
+                                  transition: "transform 0.2s",
+                                  transform: showProfileDropdown()
+                                    ? "rotate(180deg)"
+                                    : "rotate(0deg)",
+                                }}
+                              >
+                                ▼
+                              </span>
+                            </button>
+                            <Show when={showProfileDropdown()}>
+                              <div class="nav-dropdown">
+                                <a
+                                  class="nav-sub-link"
+                                  classList={{
+                                    active:
+                                      location.pathname === "/profil" &&
+                                      (!location.search ||
+                                        location.search.includes(
+                                          "tab=profile",
+                                        )),
+                                  }}
+                                  href="/profil?tab=profile"
+                                >
+                                  Ubah Profil
+                                </a>
+                                <a
+                                  class="nav-sub-link"
+                                  classList={{
+                                    active:
+                                      location.pathname === "/profil" &&
+                                      location.search.includes("tab=password"),
+                                  }}
+                                  href="/profil?tab=password"
+                                >
+                                  Ubah Sandi
+                                </a>
+                              </div>
+                            </Show>
+                          </Show>
+                        </nav>
+
+                        <div class="sidebar-user" style="margin-top: auto;">
+                          <div style="display: flex; align-items: center; gap: var(--space-3); min-width: 0; overflow: hidden;">
+                            <div class="user-avatar">
+                              {u().fullName
+                                ? u().fullName.charAt(0).toUpperCase()
+                                : "U"}
+                            </div>
+                            <div class="user-info">
+                              <div class="user-name">{u().fullName}</div>
+                              <div class="user-role">
+                                {u().role === "ADMIN"
+                                  ? "Administrator"
+                                  : u().divisi || "Anak Magang"}
+                              </div>
+                            </div>
+                          </div>
+                          <ThemeToggle theme={theme} setTheme={setTheme} />
+                        </div>
+
+                        <div class="sidebar-footer">
+                          <button
+                            class="btn-logout-sidebar"
+                            type="button"
+                            onClick={() => setShowLogoutConfirm(true)}
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                              <polyline points="16 17 21 12 16 7" />
+                              <line x1="21" y1="12" x2="9" y2="12" />
+                            </svg>
+                            <span>Logout</span>
+                          </button>
+                        </div>
+                      </aside>
+                    </Show>
+                  </>
+                )}
+              </Show>
 
               {/* Logout Confirmation Modal */}
               <Show when={showLogoutConfirm()}>
@@ -914,9 +1084,7 @@ export default function App() {
             <Show when={toastMessage()}>
               {(toast) => (
                 <Portal>
-                  <div
-                    style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 380px; width: calc(100% - 40px); animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
-                  >
+                  <div style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 380px; width: calc(100% - 40px); animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                     <div
                       role="alert"
                       style={`display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; margin: 0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2); border: 2px solid ${toast().type === "success" ? "var(--color-success)" : "var(--color-error)"}; border-radius: var(--radius-md); background-color: ${toast().type === "success" ? "rgba(22, 163, 74, 0.12)" : "rgba(220, 38, 38, 0.12)"}; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);`}
@@ -925,14 +1093,34 @@ export default function App() {
                         <Show
                           when={toast().type === "success"}
                           fallback={
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={`flex-shrink: 0; color: var(--color-error);`}>
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              style={`flex-shrink: 0; color: var(--color-error);`}
+                            >
                               <circle cx="12" cy="12" r="10" />
                               <line x1="12" y1="8" x2="12" y2="12" />
                               <line x1="12" y1="16" x2="12.01" y2="16" />
                             </svg>
                           }
                         >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style={`flex-shrink: 0; color: var(--color-success);`}>
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            style={`flex-shrink: 0; color: var(--color-success);`}
+                          >
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                             <polyline points="22 4 12 14.01 9 11.01" />
                           </svg>
@@ -954,7 +1142,6 @@ export default function App() {
                 </Portal>
               )}
             </Show>
-
           </Suspense>
         );
       }}

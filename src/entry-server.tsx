@@ -44,7 +44,10 @@ export default createHandler(() => (
         <html lang="id">
           <head>
             <meta charset="utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1"
+            />
             <title>{fullTitle}</title>
             <link rel="icon" type="image/png" href="/favicon.png" />
             <link rel="canonical" href={`${origin}${path}`} />
@@ -103,6 +106,10 @@ export default createHandler(() => (
                 var saved = localStorage.getItem("theme");
                 if (saved === "dark" || (!saved && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
                   document.documentElement.setAttribute("data-theme", "dark");
+                }
+                var savedPinned = localStorage.getItem("sidebar-pinned");
+                if (savedPinned === "false") {
+                  document.documentElement.classList.add("sidebar-is-collapsed");
                 }
               })();
             `}</script>

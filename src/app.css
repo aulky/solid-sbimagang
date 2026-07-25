@@ -126,9 +126,10 @@ body {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding: var(--space-4);
+  padding: var(--space-4) 14px;
   z-index: 100;
   flex-shrink: 0;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), padding 0.2s ease, box-shadow 0.2s ease;
 }
 
 .settings-card {
@@ -295,7 +296,7 @@ body {
   font-weight: 600;
   text-decoration: none;
   color: var(--color-text);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) 12px;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -462,6 +463,11 @@ body {
 
 .app-layout.has-sidebar .app-main-content {
   margin-left: 260px;
+  transition: margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-layout.has-sidebar.sidebar-collapsed .app-main-content {
+  margin-left: 70px;
 }
 
 /* Layout */
@@ -1460,3 +1466,188 @@ a {
   margin-bottom: var(--space-3);
 }
 
+/* ===== Collapsible Sidebar (Desktop only) ===== */
+@media (min-width: 769px) {
+  /* Collapsed state */
+  .app-sidebar.collapsed {
+    width: 70px;
+    overflow-x: hidden;
+  }
+
+  /* Hover expand — overlays content, doesn't shift layout */
+  .app-sidebar.collapsed.sidebar-hovered {
+    width: 260px;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    z-index: 110;
+  }
+
+  /* Hide/show transition for sidebar link text */
+  .sidebar-nav .nav-link span,
+  .sidebar-nav button.nav-link > span:last-child {
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.2s ease, margin 0.2s ease;
+    opacity: 1;
+    max-width: 150px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .app-sidebar.collapsed:not(.sidebar-hovered) .sidebar-nav .nav-link span,
+  .app-sidebar.collapsed:not(.sidebar-hovered) .sidebar-nav button.nav-link > span:last-child {
+    opacity: 0;
+    max-width: 0;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  /* Keep gap of buttons static */
+  .sidebar-nav .nav-link {
+    gap: var(--space-2);
+  }
+
+  /* Disable dropdown when collapsed */
+  .app-sidebar.collapsed:not(.sidebar-hovered) .sidebar-nav .nav-dropdown {
+    display: none;
+  }
+
+  /* Hide user text info and theme toggler smoothly when collapsed */
+  .sidebar-user .user-info {
+    transition: opacity 0.2s ease, max-width 0.2s ease;
+    opacity: 1;
+    max-width: 150px;
+    overflow: hidden;
+  }
+
+  .app-sidebar.collapsed:not(.sidebar-hovered) .sidebar-user .user-info {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+  }
+
+  .sidebar-user .theme-toggle {
+    transition: opacity 0.2s ease;
+    opacity: 1;
+  }
+
+  .app-sidebar.collapsed:not(.sidebar-hovered) .sidebar-user .theme-toggle {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    overflow: hidden;
+  }
+
+  /* Logout button text transition */
+  .btn-logout-sidebar span {
+    transition: opacity 0.2s ease, max-width 0.2s ease;
+    opacity: 1;
+    max-width: 100px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .app-sidebar.collapsed:not(.sidebar-hovered) .btn-logout-sidebar span {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+  }
+
+  /* Keep logout button layout centered when collapsed */
+  .app-sidebar.collapsed:not(.sidebar-hovered) .btn-logout-sidebar {
+    padding: var(--space-2);
+    justify-content: center;
+    border-radius: var(--radius-md);
+  }
+
+  /* Sidebar Header layout */
+  .sidebar-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-3);
+    transition: all 0.2s ease;
+  }
+
+  .sidebar-header-divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--color-border);
+    transition: opacity 0.2s ease, height 0.2s ease;
+    opacity: 1;
+    margin-right: 4px;
+  }
+
+  .sidebar-logo-link {
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    max-width: 140px;
+    display: flex;
+    align-items: center;
+  }
+
+  .sidebar-logo {
+    transition: all 0.2s ease;
+  }
+
+  /* Collapsed header logo adjustments */
+  .app-sidebar.collapsed:not(.sidebar-hovered) .sidebar-logo-link {
+    max-width: 32px;
+  }
+
+  .app-sidebar.collapsed:not(.sidebar-hovered) .sidebar-logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Toggle button style */
+  .sidebar-toggle-btn {
+    position: absolute;
+    right: -14px;
+    top: 44px;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--surface-base);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+    z-index: 1000;
+  }
+
+  .sidebar-toggle-btn:hover {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+  }
+}
+
+/* Helper classes to prevent SSR Layout flash on reload */
+html.sidebar-is-collapsed .app-sidebar {
+  width: 70px !important;
+}
+
+html.sidebar-is-collapsed .app-layout.has-sidebar .app-main-content {
+  margin-left: 70px !important;
+}
+
+/* Hide toggle button on mobile */
+@media (max-width: 768px) {
+  .sidebar-toggle-btn {
+    display: none !important;
+  }
+
+  .app-layout.has-sidebar.sidebar-collapsed .app-main-content {
+    margin-left: 0 !important;
+  }
+}
