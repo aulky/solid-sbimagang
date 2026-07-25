@@ -129,9 +129,18 @@ export default function AdminBatch() {
   });
 
   // Toast error notifications
-  createEffect(() => { if (creating.result instanceof Error) showToast(creating.result.message, "error"); });
-  createEffect(() => { if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message, "error"); });
-  createEffect(() => { if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message, "error"); });
+  createEffect(() => {
+    if (creating.result instanceof Error)
+      showToast(creating.result.message, "error");
+  });
+  createEffect(() => {
+    if ((updating.result as any) instanceof Error)
+      showToast((updating.result as any as Error).message, "error");
+  });
+  createEffect(() => {
+    if ((deleting.result as any) instanceof Error)
+      showToast((deleting.result as any as Error).message, "error");
+  });
 
   return (
     <main class="p-4">
@@ -254,7 +263,11 @@ export default function AdminBatch() {
                       <input
                         name="startDate"
                         type="date"
-                        value={new Date(batch().startDate).toISOString().split("T")[0]}
+                        value={
+                          new Date(batch().startDate)
+                            .toISOString()
+                            .split("T")[0]
+                        }
                         required
                       />
                     </div>
@@ -263,7 +276,9 @@ export default function AdminBatch() {
                       <input
                         name="endDate"
                         type="date"
-                        value={new Date(batch().endDate).toISOString().split("T")[0]}
+                        value={
+                          new Date(batch().endDate).toISOString().split("T")[0]
+                        }
                         required
                       />
                     </div>
@@ -385,7 +400,9 @@ export default function AdminBatch() {
                         {(currentPage() - 1) * itemsPerPage + i() + 1}
                       </td>
                       <td>
-                        <strong style="color: var(--color-text);">{b.name}</strong>
+                        <strong style="color: var(--color-text);">
+                          {b.name}
+                        </strong>
                         <Show when={b.description}>
                           <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
                             {b.description}

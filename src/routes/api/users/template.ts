@@ -12,19 +12,43 @@ export async function GET({ request }: APIEvent) {
   ]);
 
   // Main sheet with headers + example
-  const headers = ["username", "password", "fullName", "email", "phone", "role", "divisi", "batch"];
-  const example = ["budi123", "rahasia123", "Budi Santoso", "budi@email.com", "'081234567890", "USER",
-    divisiList[0]?.name || "IT", batchList[0]?.name || "Batch 1"];
+  const headers = [
+    "username",
+    "password",
+    "fullName",
+    "email",
+    "phone",
+    "role",
+    "divisi",
+    "batch",
+  ];
+  const example = [
+    "budi123",
+    "rahasia123",
+    "Budi Santoso",
+    "budi@email.com",
+    "'081234567890",
+    "USER",
+    divisiList[0]?.name || "IT",
+    batchList[0]?.name || "Batch 1",
+  ];
   const ws = XLSX.utils.aoa_to_sheet([headers, example]);
   ws["!cols"] = headers.map(() => ({ wch: 22 }));
 
   // Reference sheet — available divisi & batch names + instructions
   const refData: string[][] = [
     ["Daftar Divisi", "Daftar Batch", "", "PETUNJUK PENGISIAN"],
-    ...Array.from({ length: Math.max(divisiList.length, batchList.length) }, (_, i) => [
-      divisiList[i]?.name || "", batchList[i]?.name || "", "",
-      i === 0 ? "[PERINGATAN] JANGAN UBAH baris 1 (header) di sheet Template!" : "",
-    ]),
+    ...Array.from(
+      { length: Math.max(divisiList.length, batchList.length) },
+      (_, i) => [
+        divisiList[i]?.name || "",
+        batchList[i]?.name || "",
+        "",
+        i === 0
+          ? "[PERINGATAN] JANGAN UBAH baris 1 (header) di sheet Template!"
+          : "",
+      ],
+    ),
   ];
   // Add instructions if less than 7 rows
   const instructions = [
@@ -55,8 +79,10 @@ export async function GET({ request }: APIEvent) {
 
   return new Response(buf, {
     headers: {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": 'attachment; filename="Template_Import_Pengguna.xlsx"',
+      "Content-Type":
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "Content-Disposition":
+        'attachment; filename="Template_Import_Pengguna.xlsx"',
     },
   });
 }

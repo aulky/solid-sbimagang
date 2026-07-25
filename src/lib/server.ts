@@ -146,7 +146,8 @@ function parseUserAgent(ua: string): string {
   else if (ua.includes("Macintosh") || ua.includes("Mac OS X")) os = "macOS";
   else if (ua.includes("Linux") && !ua.includes("Android")) os = "Linux";
   else if (ua.includes("Android")) os = "Android";
-  else if (ua.includes("iPhone") || ua.includes("iPad") || ua.includes("iPod")) os = "iOS";
+  else if (ua.includes("iPhone") || ua.includes("iPad") || ua.includes("iPod"))
+    os = "iOS";
 
   let browser = "Browser Tidak Diketahui";
   if (ua.includes("Firefox/")) {
@@ -187,7 +188,11 @@ function isPrivateIp(ip: string): boolean {
   );
 }
 
-async function tryGeoFetch(url: string, extract: (data: any) => string | null, timeoutMs = 4000): Promise<string | null> {
+async function tryGeoFetch(
+  url: string,
+  extract: (data: any) => string | null,
+  timeoutMs = 4000,
+): Promise<string | null> {
   try {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeoutMs);
@@ -218,15 +223,22 @@ async function getIpLocation(ip: string): Promise<string> {
   // 2. ipapi.co — free 1000/day, HTTPS
   const loc2 = await tryGeoFetch(`https://ipapi.co/${ip}/json/`, (d) => {
     if (!d || d.error) return null;
-    return [d.city, d.region, d.country_name].filter(Boolean).join(", ") || null;
+    return (
+      [d.city, d.region, d.country_name].filter(Boolean).join(", ") || null
+    );
   });
   if (loc2) return loc2;
 
   // 3. ip-api.com — free, HTTPS via fields endpoint (non-commercial)
-  const loc3 = await tryGeoFetch(`https://ip-api.com/json/${ip}?fields=status,city,regionName,country`, (d) => {
-    if (!d || d.status !== "success") return null;
-    return [d.city, d.regionName, d.country].filter(Boolean).join(", ") || null;
-  });
+  const loc3 = await tryGeoFetch(
+    `https://ip-api.com/json/${ip}?fields=status,city,regionName,country`,
+    (d) => {
+      if (!d || d.status !== "success") return null;
+      return (
+        [d.city, d.regionName, d.country].filter(Boolean).join(", ") || null
+      );
+    },
+  );
   if (loc3) return loc3;
 
   return "Tidak diketahui";
@@ -277,17 +289,22 @@ export function verifyLogEntry(log: {
   );
 }
 
-export async function logActivity(action: string, details?: string, overrideUserId?: string) {
+export async function logActivity(
+  action: string,
+  details?: string,
+  overrideUserId?: string,
+) {
   try {
     const event = getRequestEvent();
 
     // 1. Get Client IP (Check proxy headers first to bypass reverse proxies / Cloudflare)
     const headers = event?.request?.headers;
-    const ip = headers?.get("cf-connecting-ip")
-      || headers?.get("x-real-ip")
-      || headers?.get("x-forwarded-for")?.split(",")[0]?.trim()
-      || event?.clientAddress
-      || "127.0.0.1";
+    const ip =
+      headers?.get("cf-connecting-ip") ||
+      headers?.get("x-real-ip") ||
+      headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      event?.clientAddress ||
+      "127.0.0.1";
 
     // 2. Get User Agent
     const rawUA = event?.request?.headers?.get("user-agent") || "Unknown";
@@ -307,7 +324,9 @@ export async function logActivity(action: string, details?: string, overrideUser
       const session = await getSession();
       if (session.data.userId) {
         userId = session.data.userId;
-        const user = await db.user.findUnique({ where: { id: userId || undefined } });
+        const user = await db.user.findUnique({
+          where: { id: userId || undefined },
+        });
         if (user) {
           username = user.username;
         }
@@ -342,19 +361,20 @@ export async function logActivity(action: string, details?: string, overrideUser
 
     // 5. Fetch location asynchronously (fire-and-forget background promise)
     if (ip && !isPrivateIp(ip)) {
-      getIpLocation(ip).then(async (loc) => {
-        if (loc) {
-          await (db as any).auditLog.update({
-            where: { id: logEntry.id },
-            data: { location: loc },
-          });
-        }
-      }).catch((e) => {
-        console.error("Geocoding background error:", e);
-      });
+      getIpLocation(ip)
+        .then(async (loc) => {
+          if (loc) {
+            await (db as any).auditLog.update({
+              where: { id: logEntry.id },
+              data: { location: loc },
+            });
+          }
+        })
+        .catch((e) => {
+          console.error("Geocoding background error:", e);
+        });
     }
   } catch (err) {
     console.error("Audit log error:", err);
   }
 }
-

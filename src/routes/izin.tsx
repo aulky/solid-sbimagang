@@ -17,7 +17,9 @@ export const route = {
 } satisfies RouteDefinition;
 
 const normalizeAttachmentUrl = (url: string) =>
-  url.startsWith("/uploads/") ? `/api/uploads?file=${url.replace("/uploads/", "")}` : url;
+  url.startsWith("/uploads/")
+    ? `/api/uploads?file=${url.replace("/uploads/", "")}`
+    : url;
 
 const statusBadge = (status: string) =>
   status === "PENDING"
@@ -52,7 +54,9 @@ export default function Izin() {
   const [showCreate, setShowCreate] = createSignal(false);
   const [filterType, setFilterType] = createSignal("");
   const [filterStatus, setFilterStatus] = createSignal("");
-  const [viewingAttachment, setViewingAttachment] = createSignal<string | null>(null);
+  const [viewingAttachment, setViewingAttachment] = createSignal<string | null>(
+    null,
+  );
   let createFormRef: HTMLFormElement | undefined;
 
   // Pagination signals
@@ -93,12 +97,17 @@ export default function Izin() {
   });
 
   // Toast error notifications
-  createEffect(() => { if (submitting.result instanceof Error) showToast(submitting.result.message, "error"); });
+  createEffect(() => {
+    if (submitting.result instanceof Error)
+      showToast(submitting.result.message, "error");
+  });
 
   return (
     <main class="p-4" style="text-align: left;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
-        <h1 class="page-title" style="margin-bottom: 0;">Pengajuan Izin Magang</h1>
+        <h1 class="page-title" style="margin-bottom: 0;">
+          Pengajuan Izin Magang
+        </h1>
         <button
           class="btn-primary"
           style="width: auto; padding: 0 var(--space-4); height: 40px;"
@@ -147,7 +156,12 @@ export default function Izin() {
                 <div style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
                   <div class="form-group" style="flex: 1; min-width: 150px;">
                     <label for="startDate">Tanggal Mulai</label>
-                    <input type="date" id="startDate" name="startDate" required />
+                    <input
+                      type="date"
+                      id="startDate"
+                      name="startDate"
+                      required
+                    />
                   </div>
                   <div class="form-group" style="flex: 1; min-width: 150px;">
                     <label for="endDate">Tanggal Selesai</label>
@@ -167,7 +181,9 @@ export default function Izin() {
                 </div>
 
                 <div class="form-group">
-                  <label for="attachment">Lampiran Bukti / Surat Sakit (Gambar / PDF, maks. 500KB)</label>
+                  <label for="attachment">
+                    Lampiran Bukti / Surat Sakit (Gambar / PDF, maks. 500KB)
+                  </label>
                   <input
                     type="file"
                     id="attachment"
@@ -252,177 +268,223 @@ export default function Izin() {
 
       {/* History Section */}
 
-      <Show when={izinList()} fallback={
-        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Tanggal Mulai</th>
-                <th>Tanggal Selesai</th>
-                <th>Tipe</th>
-                <th>Alasan</th>
-                <th>Lampiran</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={[1, 2, 3, 4, 5]}>
-                {() => (
-                  <tr>
-                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 100px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 100px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 50px; height: 20px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 150px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 80px; height: 24px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 60px; height: 20px; border-radius: 4px;"></div></td>
-                  </tr>
-                )}
-              </For>
-            </tbody>
-          </table>
-        </div>
-      }>
+      <Show
+        when={izinList()}
+        fallback={
+          <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal Mulai</th>
+                  <th>Tanggal Selesai</th>
+                  <th>Tipe</th>
+                  <th>Alasan</th>
+                  <th>Lampiran</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <For each={[1, 2, 3, 4, 5]}>
+                  {() => (
+                    <tr>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 24px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 50px; height: 20px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 150px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 80px; height: 24px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 60px; height: 20px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                    </tr>
+                  )}
+                </For>
+              </tbody>
+            </table>
+          </div>
+        }
+      >
         {(list) => {
           if (list.length === 999999) console.log(list);
           return (
             <>
-            <div style="overflow-x: auto;">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>Tanggal Mulai</th>
-                    <th>Tanggal Selesai</th>
-                    <th>Tipe</th>
-                    <th>Alasan</th>
-                    <th>Lampiran</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <Show
-                    when={paginatedList().length > 0}
-                    fallback={
-                      <tr>
-                        <td
-                          colspan="7"
-                          style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
-                        >
-                          Belum ada riwayat pengajuan izin magang.
-                        </td>
-                      </tr>
-                    }
-                  >
-                    <For each={paginatedList()}>
-                      {(r, i) => (
+              <div style="overflow-x: auto;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Tanggal Mulai</th>
+                      <th>Tanggal Selesai</th>
+                      <th>Tipe</th>
+                      <th>Alasan</th>
+                      <th>Lampiran</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <Show
+                      when={paginatedList().length > 0}
+                      fallback={
                         <tr>
-                          <td style="font-family: var(--font-mono); font-size: 13px;">
-                            {(currentPage() - 1) * itemsPerPage + i() + 1}
-                          </td>
-                          <td>
-                            {new Date(r.startDate).toLocaleDateString("id-ID", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
-                          </td>
-                          <td>
-                            {new Date(r.endDate).toLocaleDateString("id-ID", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
-                          </td>
-                          <td>
-                            <span class="badge badge-izin">{r.type}</span>
-                          </td>
                           <td
-                            style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                            title={r.reason}
+                            colspan="7"
+                            style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
                           >
-                            {r.reason}
-                          </td>
-                          <td>
-                            <Show
-                              when={r.attachment}
-                              fallback={
-                                <span style="color: var(--color-text-secondary); font-size: 13px;">
-                                  —
-                                </span>
-                              }
-                            >
-                              <button
-                                type="button"
-                                class="btn-secondary"
-                                style="width: auto; height: 32px; padding: 0 12px; font-size: 12px; display: inline-flex;"
-                                onClick={() => setViewingAttachment(normalizeAttachmentUrl(r.attachment!))}
-                              >
-                                Lihat Surat
-                              </button>
-                            </Show>
-                          </td>
-                          <td>
-                            <span class={`badge ${statusBadge(r.status)}`}>
-                              {statusText(r.status)}
-                            </span>
+                            Belum ada riwayat pengajuan izin magang.
                           </td>
                         </tr>
+                      }
+                    >
+                      <For each={paginatedList()}>
+                        {(r, i) => (
+                          <tr>
+                            <td style="font-family: var(--font-mono); font-size: 13px;">
+                              {(currentPage() - 1) * itemsPerPage + i() + 1}
+                            </td>
+                            <td>
+                              {new Date(r.startDate).toLocaleDateString(
+                                "id-ID",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                },
+                              )}
+                            </td>
+                            <td>
+                              {new Date(r.endDate).toLocaleDateString("id-ID", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </td>
+                            <td>
+                              <span class="badge badge-izin">{r.type}</span>
+                            </td>
+                            <td
+                              style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                              title={r.reason}
+                            >
+                              {r.reason}
+                            </td>
+                            <td>
+                              <Show
+                                when={r.attachment}
+                                fallback={
+                                  <span style="color: var(--color-text-secondary); font-size: 13px;">
+                                    —
+                                  </span>
+                                }
+                              >
+                                <button
+                                  type="button"
+                                  class="btn-secondary"
+                                  style="width: auto; height: 32px; padding: 0 12px; font-size: 12px; display: inline-flex;"
+                                  onClick={() =>
+                                    setViewingAttachment(
+                                      normalizeAttachmentUrl(r.attachment!),
+                                    )
+                                  }
+                                >
+                                  Lihat Surat
+                                </button>
+                              </Show>
+                            </td>
+                            <td>
+                              <span class={`badge ${statusBadge(r.status)}`}>
+                                {statusText(r.status)}
+                              </span>
+                            </td>
+                          </tr>
+                        )}
+                      </For>
+                    </Show>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination Controls */}
+              <Show when={filteredHistory().length > 0}>
+                <div class="pagination-container">
+                  <div class="pagination-info">
+                    Menampilkan {paginatedList().length} dari{" "}
+                    {filteredHistory().length} pengajuan izin
+                  </div>
+                  <div class="pagination-buttons">
+                    <button
+                      class="btn-pagination"
+                      disabled={currentPage() === 1}
+                      onClick={() => setCurrentPage(currentPage() - 1)}
+                    >
+                      Sebelumnya
+                    </button>
+                    <For each={getPageNumbers(currentPage(), totalPages())}>
+                      {(page) => (
+                        <Show
+                          when={page !== "..."}
+                          fallback={
+                            <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
+                              ...
+                            </span>
+                          }
+                        >
+                          <button
+                            class="btn-pagination"
+                            classList={{ active: currentPage() === page }}
+                            onClick={() => setCurrentPage(page as number)}
+                          >
+                            {page}
+                          </button>
+                        </Show>
                       )}
                     </For>
-                  </Show>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination Controls */}
-            <Show when={filteredHistory().length > 0}>
-              <div class="pagination-container">
-                <div class="pagination-info">
-                  Menampilkan {paginatedList().length} dari{" "}
-                  {filteredHistory().length} pengajuan izin
+                    <button
+                      class="btn-pagination"
+                      disabled={currentPage() === totalPages()}
+                      onClick={() => setCurrentPage(currentPage() + 1)}
+                    >
+                      Berikutnya
+                    </button>
+                  </div>
                 </div>
-                <div class="pagination-buttons">
-                  <button
-                    class="btn-pagination"
-                    disabled={currentPage() === 1}
-                    onClick={() => setCurrentPage(currentPage() - 1)}
-                  >
-                    Sebelumnya
-                  </button>
-                  <For each={getPageNumbers(currentPage(), totalPages())}>
-                    {(page) => (
-                      <Show
-                        when={page !== "..."}
-                        fallback={
-                          <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
-                            ...
-                          </span>
-                        }
-                      >
-                        <button
-                          class="btn-pagination"
-                          classList={{ active: currentPage() === page }}
-                          onClick={() => setCurrentPage(page as number)}
-                        >
-                          {page}
-                        </button>
-                      </Show>
-                    )}
-                  </For>
-                  <button
-                    class="btn-pagination"
-                    disabled={currentPage() === totalPages()}
-                    onClick={() => setCurrentPage(currentPage() + 1)}
-                  >
-                    Berikutnya
-                  </button>
-                </div>
-              </div>
-            </Show>
-          </>
-        ); }}
+              </Show>
+            </>
+          );
+        }}
       </Show>
 
       <Show when={viewingAttachment()}>
@@ -438,9 +500,7 @@ export default function Izin() {
                 style="max-width: 600px; text-align: center;"
               >
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
-                  <h3
-                    style="margin: 0; font-family: var(--font-headline); font-weight: 700;"
-                  >
+                  <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">
                     Surat Keterangan Sakit
                   </h3>
                   <button
@@ -484,9 +544,7 @@ export default function Izin() {
                   </object>
                 </Show>
 
-                <div
-                  style="margin-top: var(--space-4); display: flex; justify-content: center;"
-                >
+                <div style="margin-top: var(--space-4); display: flex; justify-content: center;">
                   <button
                     class="btn-ghost"
                     type="button"

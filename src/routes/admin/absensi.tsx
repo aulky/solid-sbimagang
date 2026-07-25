@@ -1,10 +1,23 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
 import { For, Show, Suspense, createSignal } from "solid-js";
-import { getAdminAbsensi, getAllDivisi, getAllBatches, getPageNumbers } from "~/lib";
+import {
+  getAdminAbsensi,
+  getAllDivisi,
+  getAllBatches,
+  getPageNumbers,
+} from "~/lib";
 
 export const route = {
   preload() {
-    getAdminAbsensi({ page: 1, limit: 10, search: "", date: "", status: "", divisiId: "", batchId: "" });
+    getAdminAbsensi({
+      page: 1,
+      limit: 10,
+      search: "",
+      date: "",
+      status: "",
+      divisiId: "",
+      batchId: "",
+    });
     getAllDivisi();
     getAllBatches();
   },
@@ -53,7 +66,7 @@ export default function AdminAbsensi() {
       status: filterStatus(),
       divisiId: filterDivisi(),
       batchId: filterBatch(),
-    })
+    }),
   );
 
   const totalPages = () => {
@@ -157,40 +170,82 @@ export default function AdminAbsensi() {
         </button>
       </div>
 
-      <Suspense fallback={
-        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Nama Lengkap</th>
-                <th>Divisi</th>
-                <th>Tanggal</th>
-                <th>Check-In</th>
-                <th>Check-Out</th>
-                <th>Status</th>
-                <th>Catatan</th>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={[1, 2, 3, 4, 5]}>
-                {() => (
-                  <tr>
-                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 120px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 100px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 60px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 60px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 70px; height: 20px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 150px; height: 16px;"></div></td>
-                  </tr>
-                )}
-              </For>
-            </tbody>
-          </table>
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Lengkap</th>
+                  <th>Divisi</th>
+                  <th>Tanggal</th>
+                  <th>Check-In</th>
+                  <th>Check-Out</th>
+                  <th>Status</th>
+                  <th>Catatan</th>
+                </tr>
+              </thead>
+              <tbody>
+                <For each={[1, 2, 3, 4, 5]}>
+                  {() => (
+                    <tr>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 24px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 120px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 80px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 60px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 60px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 70px; height: 20px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 150px; height: 16px;"
+                        ></div>
+                      </td>
+                    </tr>
+                  )}
+                </For>
+              </tbody>
+            </table>
+          </div>
+        }
+      >
         <div style="overflow-x: auto;">
           <table class="data-table">
             <thead>
@@ -265,7 +320,9 @@ export default function AdminAbsensi() {
                           {checkOutTime}
                         </td>
                         <td>
-                          <span class={`badge badge-${row.status.toLowerCase()}`}>
+                          <span
+                            class={`badge badge-${row.status.toLowerCase()}`}
+                          >
                             {row.status}
                           </span>
                         </td>

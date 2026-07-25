@@ -13,7 +13,12 @@ export async function GET({ request }: APIEvent) {
   const url = new URL(request.url);
   const filename = url.searchParams.get("file");
 
-  if (!filename || filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
+  if (
+    !filename ||
+    filename.includes("..") ||
+    filename.includes("/") ||
+    filename.includes("\\")
+  ) {
     return new Response("Not found", { status: 404 });
   }
 

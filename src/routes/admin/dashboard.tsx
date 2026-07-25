@@ -1,4 +1,8 @@
-import { createAsync, useSearchParams, type RouteDefinition } from "@solidjs/router";
+import {
+  createAsync,
+  useSearchParams,
+  type RouteDefinition,
+} from "@solidjs/router";
 import { For, Show, createSignal, createEffect } from "solid-js";
 import {
   getAdminStats,
@@ -330,7 +334,11 @@ const TrendLineChart = (props: {
 
         {/* Area fill */}
         <Show when={activeData().length >= 2}>
-          <path class="chart-area-anim" d={areaPath()} fill="url(#chartAreaGrad)" />
+          <path
+            class="chart-area-anim"
+            d={areaPath()}
+            fill="url(#chartAreaGrad)"
+          />
         </Show>
 
         {/* Line */}
@@ -498,7 +506,10 @@ export default function AdminDashboard() {
 
   return (
     <main>
-      <div class="fade-in-up" style="margin-bottom: var(--space-5); text-align: left;">
+      <div
+        class="fade-in-up"
+        style="margin-bottom: var(--space-5); text-align: left;"
+      >
         <h1 class="page-title" style="margin-bottom: var(--space-1);">
           Dashboard Admin
         </h1>
@@ -510,22 +521,34 @@ export default function AdminDashboard() {
 
       {/* Stats Section 1: Overview */}
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-4); text-align: left;">
-        <div class="stat-card fade-in-up stagger-1" style="border-left: 4px solid #3b82f6;">
+        <div
+          class="stat-card fade-in-up stagger-1"
+          style="border-left: 4px solid #3b82f6;"
+        >
           <div class="stat-value">{stats()?.totalUsers ?? 0}</div>
           <div class="stat-label">Total Anak Magang</div>
         </div>
 
-        <div class="stat-card fade-in-up stagger-2" style="border-left: 4px solid #8b5cf6;">
+        <div
+          class="stat-card fade-in-up stagger-2"
+          style="border-left: 4px solid #8b5cf6;"
+        >
           <div class="stat-value">{stats()?.totalDivisi ?? 0}</div>
           <div class="stat-label">Total Divisi</div>
         </div>
 
-        <div class="stat-card fade-in-up stagger-3" style="border-left: 4px solid #10b981;">
+        <div
+          class="stat-card fade-in-up stagger-3"
+          style="border-left: 4px solid #10b981;"
+        >
           <div class="stat-value">{stats()?.batchAktif ?? 0}</div>
           <div class="stat-label">Batch Aktif</div>
         </div>
 
-        <div class="stat-card fade-in-up stagger-4" style="border-left: 4px solid #6b7280;">
+        <div
+          class="stat-card fade-in-up stagger-4"
+          style="border-left: 4px solid #6b7280;"
+        >
           <div class="stat-value">{stats()?.batchSelesai ?? 0}</div>
           <div class="stat-label">Batch Selesai</div>
         </div>
@@ -533,22 +556,34 @@ export default function AdminDashboard() {
 
       {/* Stats Section 2: Attendance & Future */}
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); text-align: left;">
-        <div class="stat-card fade-in-up stagger-5" style="border-left: 4px solid #10b981;">
+        <div
+          class="stat-card fade-in-up stagger-5"
+          style="border-left: 4px solid #10b981;"
+        >
           <div class="stat-value">{stats()?.todayHadir ?? 0}</div>
           <div class="stat-label">Hadir Hari Ini</div>
         </div>
 
-        <div class="stat-card fade-in-up stagger-6" style="border-left: 4px solid #f59e0b;">
+        <div
+          class="stat-card fade-in-up stagger-6"
+          style="border-left: 4px solid #f59e0b;"
+        >
           <div class="stat-value">{stats()?.todayTelat ?? 0}</div>
           <div class="stat-label">Terlambat Hari Ini</div>
         </div>
 
-        <div class="stat-card fade-in-up stagger-7" style="border-left: 4px solid #ef4444;">
+        <div
+          class="stat-card fade-in-up stagger-7"
+          style="border-left: 4px solid #ef4444;"
+        >
           <div class="stat-value">{stats()?.pendingIzin ?? 0}</div>
           <div class="stat-label">Izin Menunggu Persetujuan</div>
         </div>
 
-        <div class="stat-card fade-in-up stagger-8" style="border-left: 4px solid #3b82f6;">
+        <div
+          class="stat-card fade-in-up stagger-8"
+          style="border-left: 4px solid #3b82f6;"
+        >
           <div class="stat-value">{stats()?.batchMendatang ?? 0}</div>
           <div class="stat-label">Batch Mendatang</div>
         </div>
@@ -556,7 +591,10 @@ export default function AdminDashboard() {
 
       {/* Charts Section */}
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); text-align: left;">
-        <div class="stat-card fade-in-up" style="padding: var(--space-4); animation-delay: 0.45s;">
+        <div
+          class="stat-card fade-in-up"
+          style="padding: var(--space-4); animation-delay: 0.45s;"
+        >
           <h3 style="font-family: var(--font-headline); font-weight: 700; font-size: 1.2rem; margin-top: 0; margin-bottom: var(--space-4); color: var(--color-text);">
             Status Kehadiran Hari Ini
           </h3>
@@ -564,7 +602,10 @@ export default function AdminDashboard() {
             when={todayStatus()}
             fallback={
               <div style="display: flex; justify-content: center; align-items: center; min-height: 185px;">
-                <div class="skeleton" style="width: 150px; height: 150px; border-radius: 50%;"></div>
+                <div
+                  class="skeleton"
+                  style="width: 150px; height: 150px; border-radius: 50%;"
+                ></div>
               </div>
             }
           >
@@ -579,13 +620,19 @@ export default function AdminDashboard() {
           </Show>
         </div>
 
-        <div class="stat-card fade-in-up" style="padding: var(--space-4); animation-delay: 0.5s;">
+        <div
+          class="stat-card fade-in-up"
+          style="padding: var(--space-4); animation-delay: 0.5s;"
+        >
           <Show
             when={trendData() && trendData()!.monthly.length > 0}
             fallback={
               <div style="display: flex; flex-direction: column; gap: 15px;">
                 <div class="skeleton" style="width: 150px; height: 22px;"></div>
-                <div class="skeleton" style="width: 100%; height: 200px; border-radius: 6px;"></div>
+                <div
+                  class="skeleton"
+                  style="width: 100%; height: 200px; border-radius: 6px;"
+                ></div>
               </div>
             }
           >

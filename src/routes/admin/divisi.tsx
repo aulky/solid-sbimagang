@@ -102,9 +102,18 @@ export default function AdminDivisi() {
   });
 
   // Toast error notifications
-  createEffect(() => { if (creating.result instanceof Error) showToast(creating.result.message, "error"); });
-  createEffect(() => { if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message, "error"); });
-  createEffect(() => { if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message, "error"); });
+  createEffect(() => {
+    if (creating.result instanceof Error)
+      showToast(creating.result.message, "error");
+  });
+  createEffect(() => {
+    if ((updating.result as any) instanceof Error)
+      showToast((updating.result as any as Error).message, "error");
+  });
+  createEffect(() => {
+    if ((deleting.result as any) instanceof Error)
+      showToast((deleting.result as any as Error).message, "error");
+  });
 
   return (
     <main class="p-4">

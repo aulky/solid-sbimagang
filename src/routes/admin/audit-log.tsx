@@ -33,7 +33,7 @@ export default function AdminAuditLog() {
       limit: itemsPerPage,
       search: debouncedSearch(),
       action: filterAction(),
-    })
+    }),
   );
 
   const totalPages = () => {
@@ -76,7 +76,20 @@ export default function AdminAuditLog() {
   const formatDate = (dateStr: Date | string) => {
     const d = new Date(dateStr);
     const day = d.getDate();
-    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Agu",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
+    ];
     const month = months[d.getMonth()];
     const year = d.getFullYear();
     return `${day} ${month} ${year}`;
@@ -151,40 +164,82 @@ export default function AdminAuditLog() {
         </button>
       </div>
 
-      <Suspense fallback={
-        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Waktu</th>
-                <th>Pengguna</th>
-                <th>Aktivitas</th>
-                <th>Detail</th>
-                <th>IP Address</th>
-                <th>Lokasi</th>
-                <th>Browser / OS</th>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={[1, 2, 3, 4, 5]}>
-                {() => (
-                  <tr>
-                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 100px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 80px; height: 20px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 150px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 90px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 90px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 120px; height: 16px;"></div></td>
-                  </tr>
-                )}
-              </For>
-            </tbody>
-          </table>
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Waktu</th>
+                  <th>Pengguna</th>
+                  <th>Aktivitas</th>
+                  <th>Detail</th>
+                  <th>IP Address</th>
+                  <th>Lokasi</th>
+                  <th>Browser / OS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <For each={[1, 2, 3, 4, 5]}>
+                  {() => (
+                    <tr>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 24px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 80px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 80px; height: 20px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 150px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 90px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 90px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 120px; height: 16px;"
+                        ></div>
+                      </td>
+                    </tr>
+                  )}
+                </For>
+              </tbody>
+            </table>
+          </div>
+        }
+      >
         <div style="overflow-x: auto;">
           <table class="data-table">
             <thead>
@@ -221,23 +276,43 @@ export default function AdminAuditLog() {
                       </td>
                       <td style="font-size: 13px; white-space: nowrap;">
                         <div>{formatDate(row.createdAt)}</div>
-                        <div style="font-size: 12px; color: var(--color-text-secondary);">{formatTime(row.createdAt)}</div>
+                        <div style="font-size: 12px; color: var(--color-text-secondary);">
+                          {formatTime(row.createdAt)}
+                        </div>
                       </td>
-                      <td style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title={row.user?.fullName ? `${row.user.fullName} (@${row.username})` : row.username || "Anonim"}>
-                        <Show when={row.user} fallback={
-                          <span>
-                            <strong style="color: var(--color-text-secondary); display: block; overflow: hidden; text-overflow: ellipsis;">{row.username || "Anonim"}</strong>
-                            <div style="font-size: 11px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis;">Non-aktif / Tamu</div>
-                          </span>
-                        }>
-                          <strong style="display: block; overflow: hidden; text-overflow: ellipsis;">{row.user?.fullName}</strong>
+                      <td
+                        style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        title={
+                          row.user?.fullName
+                            ? `${row.user.fullName} (@${row.username})`
+                            : row.username || "Anonim"
+                        }
+                      >
+                        <Show
+                          when={row.user}
+                          fallback={
+                            <span>
+                              <strong style="color: var(--color-text-secondary); display: block; overflow: hidden; text-overflow: ellipsis;">
+                                {row.username || "Anonim"}
+                              </strong>
+                              <div style="font-size: 11px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis;">
+                                Non-aktif / Tamu
+                              </div>
+                            </span>
+                          }
+                        >
+                          <strong style="display: block; overflow: hidden; text-overflow: ellipsis;">
+                            {row.user?.fullName}
+                          </strong>
                           <div style="font-size: 12px; color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis;">
                             @{row.username}
                           </div>
                         </Show>
                       </td>
                       <td>
-                        <span class={`badge ${getActionBadgeClass(row.action)}`}>
+                        <span
+                          class={`badge ${getActionBadgeClass(row.action)}`}
+                        >
                           {row.action.replace(/_/g, " ")}
                         </span>
                       </td>
@@ -277,8 +352,8 @@ export default function AdminAuditLog() {
         <Show when={(logs()?.total ?? 0) > 0}>
           <div class="pagination-container">
             <div class="pagination-info">
-              Menampilkan {paginatedLogs().length} dari{" "}
-              {logs()?.total ?? 0} log aktivitas
+              Menampilkan {paginatedLogs().length} dari {logs()?.total ?? 0} log
+              aktivitas
             </div>
             <div class="pagination-buttons">
               <button

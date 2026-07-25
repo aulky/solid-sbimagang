@@ -17,7 +17,9 @@ export const route = {
 
 // Backward compat: data lama pakai /uploads/, data baru /api/uploads?file=
 const normalizeAttachmentUrl = (url: string) =>
-  url.startsWith("/uploads/") ? `/api/uploads?file=${url.replace("/uploads/", "")}` : url;
+  url.startsWith("/uploads/")
+    ? `/api/uploads?file=${url.replace("/uploads/", "")}`
+    : url;
 
 const statusText = (status: string) => {
   const map: Record<string, string> = {
@@ -30,7 +32,9 @@ const statusText = (status: string) => {
 
 export default function AdminIzin() {
   const approving = useSubmission(approveIzin);
-  const [viewingAttachment, setViewingAttachment] = createSignal<string | null>(null);
+  const [viewingAttachment, setViewingAttachment] = createSignal<string | null>(
+    null,
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
   createEffect(() => {
@@ -42,7 +46,7 @@ export default function AdminIzin() {
 
   createEffect(() => {
     if (approving.result && (approving.result as any) instanceof Error) {
-      showToast(((approving.result as any) as Error).message, "error");
+      showToast((approving.result as any as Error).message, "error");
     }
   });
 
@@ -73,7 +77,7 @@ export default function AdminIzin() {
       search: debouncedSearch(),
       type: filterType(),
       status: filterStatus(),
-    })
+    }),
   );
 
   const totalPages = () => {
@@ -144,8 +148,90 @@ export default function AdminIzin() {
         </button>
       </div>
 
-      <Suspense fallback={
-        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+      <Suspense
+        fallback={
+          <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama</th>
+                  <th>Tipe</th>
+                  <th>Tanggal Mulai</th>
+                  <th>Tanggal Selesai</th>
+                  <th>Alasan</th>
+                  <th>Lampiran</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <For each={[1, 2, 3, 4, 5]}>
+                  {() => (
+                    <tr>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 24px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 50px; height: 20px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 80px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 80px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 150px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 70px; height: 24px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 60px; height: 20px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 24px;"
+                        ></div>
+                      </td>
+                    </tr>
+                  )}
+                </For>
+              </tbody>
+            </table>
+          </div>
+        }
+      >
+        <div style="overflow-x: auto;">
           <table class="data-table">
             <thead>
               <tr>
@@ -161,223 +247,194 @@ export default function AdminIzin() {
               </tr>
             </thead>
             <tbody>
-              <For each={[1, 2, 3, 4, 5]}>
-                {() => (
+              <Show
+                when={paginatedRecords().length > 0}
+                fallback={
                   <tr>
-                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 100px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 50px; height: 20px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 150px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 70px; height: 24px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 60px; height: 20px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 100px; height: 24px;"></div></td>
+                    <td
+                      colspan="9"
+                      style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
+                    >
+                      Belum ada pengajuan izin.
+                    </td>
                   </tr>
-                )}
-              </For>
-            </tbody>
-          </table>
-        </div>
-      }>
-        <div style="overflow-x: auto;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Nama</th>
-              <th>Tipe</th>
-              <th>Tanggal Mulai</th>
-              <th>Tanggal Selesai</th>
-              <th>Alasan</th>
-              <th>Lampiran</th>
-              <th>Status</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <Show
-              when={paginatedRecords().length > 0}
-              fallback={
-                <tr>
-                  <td
-                    colspan="9"
-                    style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
-                  >
-                    Belum ada pengajuan izin.
-                  </td>
-                </tr>
-              }
-            >
-              <For each={paginatedRecords()}>
-                {(row, idx) => {
-                  const startDate = new Date(row.startDate).toLocaleDateString(
-                    "id-ID",
-                  );
-                  const endDate = new Date(row.endDate).toLocaleDateString(
-                    "id-ID",
-                  );
+                }
+              >
+                <For each={paginatedRecords()}>
+                  {(row, idx) => {
+                    const startDate = new Date(
+                      row.startDate,
+                    ).toLocaleDateString("id-ID");
+                    const endDate = new Date(row.endDate).toLocaleDateString(
+                      "id-ID",
+                    );
 
-                  return (
-                    <tr>
-                      <td style="font-family: var(--font-mono); font-size: 13px;">
-                        {(currentPage() - 1) * itemsPerPage + idx() + 1}
-                      </td>
-                      <td>
-                        <strong>{row.user.fullName}</strong>
-                        <div style="font-size: 12px; color: var(--color-text-secondary);">
-                          @{row.user.username}
-                        </div>
-                        <Show when={row.user.phone}>
-                          <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 4px;">
-                            <svg
-                              width="12"
-                              height="12"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              style="flex-shrink: 0; stroke: currentColor;"
-                            >
-                              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                            </svg>
-                            <span>{row.user.phone}</span>
+                    return (
+                      <tr>
+                        <td style="font-family: var(--font-mono); font-size: 13px;">
+                          {(currentPage() - 1) * itemsPerPage + idx() + 1}
+                        </td>
+                        <td>
+                          <strong>{row.user.fullName}</strong>
+                          <div style="font-size: 12px; color: var(--color-text-secondary);">
+                            @{row.user.username}
                           </div>
-                        </Show>
-                      </td>
-                      <td>
-                        <span class="badge badge-izin">{row.type}</span>
-                      </td>
-                      <td>{startDate}</td>
-                      <td>{endDate}</td>
-                      <td title={row.reason}>
-                        <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                          {row.reason}
-                        </div>
-                      </td>
-                      <td>
-                        <Show
-                          when={row.attachment}
-                          fallback={
+                          <Show when={row.user.phone}>
+                            <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                              <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                style="flex-shrink: 0; stroke: currentColor;"
+                              >
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                              </svg>
+                              <span>{row.user.phone}</span>
+                            </div>
+                          </Show>
+                        </td>
+                        <td>
+                          <span class="badge badge-izin">{row.type}</span>
+                        </td>
+                        <td>{startDate}</td>
+                        <td>{endDate}</td>
+                        <td title={row.reason}>
+                          <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {row.reason}
+                          </div>
+                        </td>
+                        <td>
+                          <Show
+                            when={row.attachment}
+                            fallback={
+                              <span style="color: var(--color-text-secondary); font-size: 13px;">
+                                —
+                              </span>
+                            }
+                          >
+                            <button
+                              type="button"
+                              class="btn-secondary"
+                              style="width: auto; height: 32px; padding: 0 12px; font-size: 12px; display: inline-flex;"
+                              onClick={() =>
+                                setViewingAttachment(
+                                  normalizeAttachmentUrl(row.attachment!),
+                                )
+                              }
+                            >
+                              Lihat Surat
+                            </button>
+                          </Show>
+                        </td>
+                        <td>
+                          <span
+                            class={`badge badge-${row.status.toLowerCase()}`}
+                          >
+                            {statusText(row.status)}
+                          </span>
+                        </td>
+                        <td>
+                          <Show when={row.status === "PENDING"}>
+                            <div style="display: flex; gap: var(--space-2);">
+                              <form action={approveIzin} method="post">
+                                <input type="hidden" name="id" value={row.id} />
+                                <input
+                                  type="hidden"
+                                  name="status"
+                                  value="APPROVED"
+                                />
+                                <button
+                                  type="submit"
+                                  class="btn-secondary"
+                                  style="width: auto; height: 32px; padding: 0 12px; font-size: 12px;"
+                                  disabled={approving.pending}
+                                >
+                                  Setujui
+                                </button>
+                              </form>
+                              <form action={approveIzin} method="post">
+                                <input type="hidden" name="id" value={row.id} />
+                                <input
+                                  type="hidden"
+                                  name="status"
+                                  value="REJECTED"
+                                />
+                                <button
+                                  type="submit"
+                                  class="btn-danger"
+                                  style="width: auto; height: 32px; padding: 0 12px; font-size: 12px;"
+                                  disabled={approving.pending}
+                                >
+                                  Tolak
+                                </button>
+                              </form>
+                            </div>
+                          </Show>
+                          <Show when={row.status !== "PENDING"}>
                             <span style="color: var(--color-text-secondary); font-size: 13px;">
                               —
                             </span>
-                          }
-                        >
-                          <button
-                            type="button"
-                            class="btn-secondary"
-                            style="width: auto; height: 32px; padding: 0 12px; font-size: 12px; display: inline-flex;"
-                            onClick={() => setViewingAttachment(normalizeAttachmentUrl(row.attachment!))}
-                          >
-                            Lihat Surat
-                          </button>
-                        </Show>
-                      </td>
-                      <td>
-                        <span class={`badge badge-${row.status.toLowerCase()}`}>
-                          {statusText(row.status)}
-                        </span>
-                      </td>
-                      <td>
-                        <Show when={row.status === "PENDING"}>
-                          <div style="display: flex; gap: var(--space-2);">
-                            <form action={approveIzin} method="post">
-                              <input type="hidden" name="id" value={row.id} />
-                              <input
-                                type="hidden"
-                                name="status"
-                                value="APPROVED"
-                              />
-                              <button
-                                type="submit"
-                                class="btn-secondary"
-                                style="width: auto; height: 32px; padding: 0 12px; font-size: 12px;"
-                                disabled={approving.pending}
-                              >
-                                Setujui
-                              </button>
-                            </form>
-                            <form action={approveIzin} method="post">
-                              <input type="hidden" name="id" value={row.id} />
-                              <input
-                                type="hidden"
-                                name="status"
-                                value="REJECTED"
-                              />
-                              <button
-                                type="submit"
-                                class="btn-danger"
-                                style="width: auto; height: 32px; padding: 0 12px; font-size: 12px;"
-                                disabled={approving.pending}
-                              >
-                                Tolak
-                              </button>
-                            </form>
-                          </div>
-                        </Show>
-                        <Show when={row.status !== "PENDING"}>
-                          <span style="color: var(--color-text-secondary); font-size: 13px;">
-                            —
-                          </span>
-                        </Show>
-                      </td>
-                    </tr>
-                  );
-                }}
-              </For>
-            </Show>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Controls */}
-      <Show when={(recordsData()?.total ?? 0) > 0}>
-        <div class="pagination-container">
-          <div class="pagination-info">
-            Menampilkan {paginatedRecords().length} dari {recordsData()?.total ?? 0}{" "}
-            pengajuan izin
-          </div>
-          <div class="pagination-buttons">
-            <button
-              class="btn-pagination"
-              disabled={currentPage() === 1}
-              onClick={() => setCurrentPage(currentPage() - 1)}
-            >
-              Sebelumnya
-            </button>
-            <For each={getPageNumbers(currentPage(), totalPages())}>
-              {(page) => (
-                <Show
-                  when={page !== "..."}
-                  fallback={
-                    <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
-                      ...
-                    </span>
-                  }
-                >
-                  <button
-                    class="btn-pagination"
-                    classList={{ active: currentPage() === page }}
-                    onClick={() => setCurrentPage(page as number)}
-                  >
-                    {page}
-                  </button>
-                </Show>
-              )}
-            </For>
-            <button
-              class="btn-pagination"
-              disabled={currentPage() === totalPages()}
-              onClick={() => setCurrentPage(currentPage() + 1)}
-            >
-              Berikutnya
-            </button>
-          </div>
+                          </Show>
+                        </td>
+                      </tr>
+                    );
+                  }}
+                </For>
+              </Show>
+            </tbody>
+          </table>
         </div>
-      </Show>
+
+        {/* Pagination Controls */}
+        <Show when={(recordsData()?.total ?? 0) > 0}>
+          <div class="pagination-container">
+            <div class="pagination-info">
+              Menampilkan {paginatedRecords().length} dari{" "}
+              {recordsData()?.total ?? 0} pengajuan izin
+            </div>
+            <div class="pagination-buttons">
+              <button
+                class="btn-pagination"
+                disabled={currentPage() === 1}
+                onClick={() => setCurrentPage(currentPage() - 1)}
+              >
+                Sebelumnya
+              </button>
+              <For each={getPageNumbers(currentPage(), totalPages())}>
+                {(page) => (
+                  <Show
+                    when={page !== "..."}
+                    fallback={
+                      <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
+                        ...
+                      </span>
+                    }
+                  >
+                    <button
+                      class="btn-pagination"
+                      classList={{ active: currentPage() === page }}
+                      onClick={() => setCurrentPage(page as number)}
+                    >
+                      {page}
+                    </button>
+                  </Show>
+                )}
+              </For>
+              <button
+                class="btn-pagination"
+                disabled={currentPage() === totalPages()}
+                onClick={() => setCurrentPage(currentPage() + 1)}
+              >
+                Berikutnya
+              </button>
+            </div>
+          </div>
+        </Show>
       </Suspense>
 
       <Show when={viewingAttachment()}>
@@ -393,9 +450,7 @@ export default function AdminIzin() {
                 style="max-width: 600px; text-align: center;"
               >
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
-                  <h3
-                    style="margin: 0; font-family: var(--font-headline); font-weight: 700;"
-                  >
+                  <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">
                     Surat Keterangan Sakit
                   </h3>
                   <button
@@ -424,9 +479,7 @@ export default function AdminIzin() {
                     style="border-radius: var(--radius-md); border: 1px solid var(--color-border);"
                   />
                 </Show>
-                <div
-                  style="margin-top: var(--space-4); display: flex; justify-content: center;"
-                >
+                <div style="margin-top: var(--space-4); display: flex; justify-content: center;">
                   <button
                     class="btn-ghost"
                     type="button"

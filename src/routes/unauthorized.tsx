@@ -42,7 +42,8 @@ export default function Unauthorized() {
           Anda tidak memiliki izin untuk mengakses halaman ini.
         </p>
         <p style="color: var(--color-warning); font-weight: 700; font-size: 14px; margin-bottom: var(--space-4);">
-          Mengalihkan Anda secara otomatis ke Dashboard dalam {countdown()} detik...
+          Mengalihkan Anda secara otomatis ke Dashboard dalam {countdown()}{" "}
+          detik...
         </p>
         <A
           href={getTargetHref()}

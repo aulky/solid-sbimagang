@@ -21,7 +21,14 @@ import { showToast } from "~/lib/toast";
 
 export const route = {
   preload() {
-    getAdminUsers({ page: 1, limit: 10, search: "", role: "", status: "", divisiId: "" });
+    getAdminUsers({
+      page: 1,
+      limit: 10,
+      search: "",
+      role: "",
+      status: "",
+      divisiId: "",
+    });
     getAllDivisi();
     getAllBatches();
   },
@@ -57,7 +64,8 @@ export default function AdminUsers() {
   // Bulk import signals
   const [showBulk, setShowBulk] = createSignal(false);
   const [bulkResult, setBulkResult] = createSignal<{
-    total: number; successCount: number;
+    total: number;
+    successCount: number;
     errors: Array<{ row: number; username: string; error: string }>;
   } | null>(null);
   const [bulkLoading, setBulkLoading] = createSignal(false);
@@ -97,7 +105,7 @@ export default function AdminUsers() {
       status: filterStatus(),
       divisiId: filterDivisi(),
       batchId: filterBatch(),
-    })
+    }),
   );
 
   const totalPages = () => {
@@ -156,12 +164,22 @@ export default function AdminUsers() {
   });
 
   // Toast notifications (success & error)
-  createEffect(() => { if (creating.result instanceof Error) showToast(creating.result.message, "error"); });
-  createEffect(() => { if ((updating.result as any) instanceof Error) showToast(((updating.result as any) as Error).message, "error"); });
-  createEffect(() => { if ((deleting.result as any) instanceof Error) showToast(((deleting.result as any) as Error).message, "error"); });
+  createEffect(() => {
+    if (creating.result instanceof Error)
+      showToast(creating.result.message, "error");
+  });
+  createEffect(() => {
+    if ((updating.result as any) instanceof Error)
+      showToast((updating.result as any as Error).message, "error");
+  });
+  createEffect(() => {
+    if ((deleting.result as any) instanceof Error)
+      showToast((deleting.result as any as Error).message, "error");
+  });
   createEffect(() => {
     if (resetting.result) {
-      if ((resetting.result as any) instanceof Error) showToast(((resetting.result as any) as Error).message, "error");
+      if ((resetting.result as any) instanceof Error)
+        showToast((resetting.result as any as Error).message, "error");
       else showToast("Sandi pengguna berhasil direset!", "success");
     }
   });
@@ -176,7 +194,10 @@ export default function AdminUsers() {
           <button
             class="btn-ghost"
             style="width: auto; padding: 0 var(--space-4); height: 40px;"
-            onClick={() => { setBulkResult(null); setShowBulk(true); }}
+            onClick={() => {
+              setBulkResult(null);
+              setShowBulk(true);
+            }}
           >
             Impor Pengguna
           </button>
@@ -232,19 +253,43 @@ export default function AdminUsers() {
                     <button
                       type="button"
                       class="password-toggle-btn"
-                      onClick={() => setShowCreatePassword(!showCreatePassword())}
-                      title={showCreatePassword() ? "Sembunyikan sandi" : "Tampilkan sandi"}
+                      onClick={() =>
+                        setShowCreatePassword(!showCreatePassword())
+                      }
+                      title={
+                        showCreatePassword()
+                          ? "Sembunyikan sandi"
+                          : "Tampilkan sandi"
+                      }
                     >
                       <Show
                         when={showCreatePassword()}
                         fallback={
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                             <circle cx="12" cy="12" r="3" />
                           </svg>
                         }
                       >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
                           <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                           <line x1="1" y1="1" x2="23" y2="23" />
                         </svg>
@@ -343,7 +388,8 @@ export default function AdminUsers() {
 
               <div style="margin-bottom: var(--space-4);">
                 <p style="margin: 0 0 var(--space-2); font-size: 14px; color: var(--color-text-secondary);">
-                  1. Unduh template Excel, isi data pengguna, lalu upload kembali.
+                  1. Unduh template Excel, isi data pengguna, lalu upload
+                  kembali.
                 </p>
                 <a
                   href="/api/users/template"
@@ -357,70 +403,190 @@ export default function AdminUsers() {
 
               <div style="margin-bottom: var(--space-4); padding: var(--space-3); border-radius: 8px; background: var(--color-surface); border: 1px solid var(--color-border); font-size: 13px; line-height: 1.6;">
                 <p style="margin: 0 0 var(--space-2); font-weight: 700; color: var(--color-text); display: flex; align-items: center; gap: 6px;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
                   Petunjuk Pengisian:
                 </p>
                 <p style="margin: 0 0 var(--space-1); color: var(--color-success); display: flex; align-items: center; gap: 6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  Tambahkan data pengguna mulai dari <strong>baris 2</strong> ke bawah.
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Tambahkan data pengguna mulai dari <strong>baris 2</strong> ke
+                  bawah.
                 </p>
                 <p style="margin: 0 0 var(--space-1); color: var(--color-success); display: flex; align-items: center; gap: 6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  Kolom wajib: <strong>username, password, fullName, email</strong>.
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Kolom wajib:{" "}
+                  <strong>username, password, fullName, email</strong>.
                 </p>
                 <p style="margin: 0 0 var(--space-1); color: var(--color-success); display: flex; align-items: center; gap: 6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                   Kolom opsional: phone, role (USER/ADMIN), divisi, batch.
                 </p>
                 <p style="margin: 0 0 var(--space-1); color: var(--color-success); display: flex; align-items: center; gap: 6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  Lihat sheet <strong>"Referensi"</strong> untuk daftar divisi & batch yang tersedia.
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Lihat sheet <strong>"Referensi"</strong> untuk daftar divisi &
+                  batch yang tersedia.
                 </p>
                 <hr style="border: none; border-top: 1px solid var(--color-border); margin: var(--space-2) 0;" />
                 <p style="margin: 0 0 var(--space-1); color: var(--color-danger); display: flex; align-items: center; gap: 6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  <strong>JANGAN UBAH</strong> baris 1 (header kolom) di sheet "Template".
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <strong>JANGAN UBAH</strong> baris 1 (header kolom) di sheet
+                  "Template".
                 </p>
                 <p style="margin: 0; color: var(--color-danger); display: flex; align-items: center; gap: 6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
                   <strong>JANGAN UBAH</strong> nama sheet "Template".
                 </p>
               </div>
 
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                setBulkLoading(true);
-                setBulkResult(null);
-                try {
-                  const res = await fetch("/api/users/import", {
-                    method: "POST",
-                    body: fd,
-                  });
-                  const data = await res.json();
-                  if (!res.ok) {
-                    setBulkResult({ total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: data.error || "Gagal mengimpor data." }] });
-                    showToast(data.error || "Gagal mengimpor data.", "error");
-                  } else {
-                    if (data.successCount > 0 && data.errors?.length === 0) {
-                      showToast(`${data.successCount}/${data.total} pengguna berhasil diimpor!`, "success");
-                      revalidate("adminUsers");
-                      setShowBulk(false);
-                    } else if (data.successCount > 0) {
-                      setBulkResult(data);
-                      showToast(`${data.successCount}/${data.total} berhasil, ${data.errors.length} gagal.`, "success");
-                      revalidate("adminUsers");
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const fd = new FormData(e.currentTarget);
+                  setBulkLoading(true);
+                  setBulkResult(null);
+                  try {
+                    const res = await fetch("/api/users/import", {
+                      method: "POST",
+                      body: fd,
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                      setBulkResult({
+                        total: 0,
+                        successCount: 0,
+                        errors: [
+                          {
+                            row: 0,
+                            username: "-",
+                            error: data.error || "Gagal mengimpor data.",
+                          },
+                        ],
+                      });
+                      showToast(data.error || "Gagal mengimpor data.", "error");
                     } else {
-                      setBulkResult(data);
-                      showToast("Impor gagal. Periksa detail error di bawah.", "error");
+                      if (data.successCount > 0 && data.errors?.length === 0) {
+                        showToast(
+                          `${data.successCount}/${data.total} pengguna berhasil diimpor!`,
+                          "success",
+                        );
+                        revalidate("adminUsers");
+                        setShowBulk(false);
+                      } else if (data.successCount > 0) {
+                        setBulkResult(data);
+                        showToast(
+                          `${data.successCount}/${data.total} berhasil, ${data.errors.length} gagal.`,
+                          "success",
+                        );
+                        revalidate("adminUsers");
+                      } else {
+                        setBulkResult(data);
+                        showToast(
+                          "Impor gagal. Periksa detail error di bawah.",
+                          "error",
+                        );
+                      }
                     }
+                  } catch (err: any) {
+                    setBulkResult({
+                      total: 0,
+                      successCount: 0,
+                      errors: [
+                        {
+                          row: 0,
+                          username: "-",
+                          error: err.message || "Terjadi kesalahan.",
+                        },
+                      ],
+                    });
+                    showToast(err.message || "Terjadi kesalahan.", "error");
                   }
-                } catch (err: any) {
-                  setBulkResult({ total: 0, successCount: 0, errors: [{ row: 0, username: "-", error: err.message || "Terjadi kesalahan." }] });
-                  showToast(err.message || "Terjadi kesalahan.", "error");
-                }
-                setBulkLoading(false);
-              }}>
+                  setBulkLoading(false);
+                }}
+              >
                 <div class="form-group">
                   <label>2. Upload file Excel (.xlsx)</label>
                   <input name="file" type="file" accept=".xlsx" required />
@@ -439,19 +605,28 @@ export default function AdminUsers() {
                 {(res) => (
                   <div style="margin-top: var(--space-4); border-top: 1px solid var(--color-border); padding-top: var(--space-4);">
                     <p style="margin: 0 0 var(--space-2); font-size: 14px;">
-                      <strong>Hasil:</strong> {res().successCount}/{res().total} berhasil ditambahkan.
+                      <strong>Hasil:</strong> {res().successCount}/{res().total}{" "}
+                      berhasil ditambahkan.
                     </p>
                     <Show when={res().errors.length > 0}>
                       <div style="max-height: 200px; overflow-y: auto;">
                         <table class="data-table" style="font-size: 12px;">
-                          <thead><tr><th>Baris</th><th>Username</th><th>Error</th></tr></thead>
+                          <thead>
+                            <tr>
+                              <th>Baris</th>
+                              <th>Username</th>
+                              <th>Error</th>
+                            </tr>
+                          </thead>
                           <tbody>
                             <For each={res().errors}>
                               {(err) => (
                                 <tr>
                                   <td>{err.row}</td>
                                   <td>{err.username}</td>
-                                  <td style="color: var(--color-danger);">{err.error}</td>
+                                  <td style="color: var(--color-danger);">
+                                    {err.error}
+                                  </td>
                                 </tr>
                               )}
                             </For>
@@ -638,13 +813,22 @@ export default function AdminUsers() {
                   <div class="form-group">
                     <label>Status</label>
                     <select name="status">
-                      <option value="AKTIF" selected={user().status === "AKTIF"}>
+                      <option
+                        value="AKTIF"
+                        selected={user().status === "AKTIF"}
+                      >
                         Aktif
                       </option>
-                      <option value="ALUMNI" selected={user().status === "ALUMNI"}>
+                      <option
+                        value="ALUMNI"
+                        selected={user().status === "ALUMNI"}
+                      >
                         Alumni
                       </option>
-                      <option value="NONAKTIF" selected={user().status === "NONAKTIF"}>
+                      <option
+                        value="NONAKTIF"
+                        selected={user().status === "NONAKTIF"}
+                      >
                         Nonaktif
                       </option>
                     </select>
@@ -763,19 +947,43 @@ export default function AdminUsers() {
                       <button
                         type="button"
                         class="password-toggle-btn"
-                        onClick={() => setShowResetPassword(!showResetPassword())}
-                        title={showResetPassword() ? "Sembunyikan sandi" : "Tampilkan sandi"}
+                        onClick={() =>
+                          setShowResetPassword(!showResetPassword())
+                        }
+                        title={
+                          showResetPassword()
+                            ? "Sembunyikan sandi"
+                            : "Tampilkan sandi"
+                        }
                       >
                         <Show
                           when={showResetPassword()}
                           fallback={
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
                               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                               <circle cx="12" cy="12" r="3" />
                             </svg>
                           }
                         >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
                             <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                             <line x1="1" y1="1" x2="23" y2="23" />
                           </svg>
@@ -806,42 +1014,89 @@ export default function AdminUsers() {
         )}
       </Show>
 
-      <Suspense fallback={
-        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Username</th>
-                <th>Nama</th>
-                <th>Email</th>
-                <th>Divisi</th>
-                <th>Batch</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={[1, 2, 3, 4, 5]}>
-                {() => (
-                  <tr>
-                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 90px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 110px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 140px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 80px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 50px; height: 20px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 50px; height: 20px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 100px; height: 24px;"></div></td>
-                  </tr>
-                )}
-              </For>
-            </tbody>
-          </table>
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Username</th>
+                  <th>Nama</th>
+                  <th>Email</th>
+                  <th>Divisi</th>
+                  <th>Batch</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <For each={[1, 2, 3, 4, 5]}>
+                  {() => (
+                    <tr>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 24px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 90px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 110px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 140px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 80px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 80px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 50px; height: 20px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 50px; height: 20px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 100px; height: 24px;"
+                        ></div>
+                      </td>
+                    </tr>
+                  )}
+                </For>
+              </tbody>
+            </table>
+          </div>
+        }
+      >
         <div style="overflow-x: auto;">
           <table class="data-table">
             <thead>
@@ -917,7 +1172,9 @@ export default function AdminUsers() {
                         <button
                           class="btn-ghost"
                           style="display: inline-flex; width: auto; height: 32px; padding: 0 12px; font-size: 13px; color: var(--color-info);"
-                          onClick={() => setResettingUser({ id: u.id, username: u.username })}
+                          onClick={() =>
+                            setResettingUser({ id: u.id, username: u.username })
+                          }
                         >
                           Reset
                         </button>{" "}
@@ -943,8 +1200,8 @@ export default function AdminUsers() {
         <Show when={(usersData()?.total ?? 0) > 0}>
           <div class="pagination-container">
             <div class="pagination-info">
-              Menampilkan {paginatedUsers().length} dari {usersData()?.total ?? 0}{" "}
-              pengguna
+              Menampilkan {paginatedUsers().length} dari{" "}
+              {usersData()?.total ?? 0} pengguna
             </div>
             <div class="pagination-buttons">
               <button

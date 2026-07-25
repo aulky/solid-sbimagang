@@ -12,7 +12,9 @@ export const route = {
 export default function Laporan() {
   const [filterDateStart, setFilterDateStart] = createSignal("");
   const [filterDateEnd, setFilterDateEnd] = createSignal("");
-  const records = createAsync(() => getLaporan(filterDateStart(), filterDateEnd()));
+  const records = createAsync(() =>
+    getLaporan(filterDateStart(), filterDateEnd()),
+  );
   const divisiList = createAsync(() => getAllDivisi());
   const [filterDivisi, setFilterDivisi] = createSignal("");
   const [searchQuery, setSearchQuery] = createSignal("");
@@ -250,10 +252,7 @@ export default function Laporan() {
       </div>
 
       {/* Print header — Kop Surat Resmi */}
-      <div
-        class="print-only"
-        style="display: none; margin-bottom: 20px;"
-      >
+      <div class="print-only" style="display: none; margin-bottom: 20px;">
         <div style="display: flex; align-items: center; border-bottom: 3px double #1e293b; padding-bottom: 15px; margin-bottom: 10px; gap: 15px; width: 100%; box-sizing: border-box;">
           <img
             src="/logo-sigma.png"
@@ -261,7 +260,9 @@ export default function Laporan() {
             style="height: 55px;"
           />
           <div>
-            <h2 style="margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; color: #0f172a;">SIGMA - Sistem Informasi dan Manajemen Magang</h2>
+            <h2 style="margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 0.5px; color: #0f172a;">
+              SIGMA - Sistem Informasi dan Manajemen Magang
+            </h2>
             <p style="margin: 2px 0 0 0; font-size: 11px; color: #475569; line-height: 1.4;">
               Pabrik Cilacap — Jl. Ir. H. Juanda, Cilacap, Jawa Tengah
             </p>
@@ -269,9 +270,30 @@ export default function Laporan() {
         </div>
 
         <div style="text-align: center; margin-bottom: 15px;">
-          <h3 style="margin: 0; font-size: 15px; font-weight: 700; letter-spacing: 1px; color: #0f172a; text-transform: uppercase;">Laporan Kehadiran Mahasiswa / Siswa Magang</h3>
+          <h3 style="margin: 0; font-size: 15px; font-weight: 700; letter-spacing: 1px; color: #0f172a; text-transform: uppercase;">
+            Laporan Kehadiran Mahasiswa / Siswa Magang
+          </h3>
           <p style="margin: 6px 0 0 0; font-size: 12px; color: #475569;">
-            Periode: {filterDateStart() ? new Date(filterDateStart()).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "—"} s/d {filterDateEnd() ? new Date(filterDateEnd()).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+            Periode:{" "}
+            {filterDateStart()
+              ? new Date(filterDateStart()).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "—"}{" "}
+            s/d{" "}
+            {filterDateEnd()
+              ? new Date(filterDateEnd()).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : new Date().toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
           </p>
         </div>
       </div>

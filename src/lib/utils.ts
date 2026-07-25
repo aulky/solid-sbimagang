@@ -1,4 +1,7 @@
-export function getPageNumbers(current: number, total: number): (number | string)[] {
+export function getPageNumbers(
+  current: number,
+  total: number,
+): (number | string)[] {
   const pages: (number | string)[] = [];
 
   if (total <= 4) {

@@ -18,7 +18,7 @@ import {
   logActivity,
 } from "./server";
 
-//  AUTH 
+//  AUTH
 
 export const getUser = query(async () => {
   "use server";
@@ -42,7 +42,11 @@ export const getUser = query(async () => {
       divisi: user.divisi?.name ?? null,
       divisiId: user.divisiId,
       batch: user.batch
-        ? { name: user.batch.name, startDate: user.batch.startDate, endDate: user.batch.endDate }
+        ? {
+            name: user.batch.name,
+            startDate: user.batch.startDate,
+            endDate: user.batch.endDate,
+          }
         : null,
       batchId: user.batchId,
       avatar: user.avatar,
@@ -64,11 +68,12 @@ export const loginOrRegister = action(async (formData: FormData) => {
 
   const event = getRequestEvent();
   const headers = event?.request?.headers;
-  const ip = headers?.get("cf-connecting-ip")
-    || headers?.get("x-real-ip")
-    || headers?.get("x-forwarded-for")?.split(",")[0]?.trim()
-    || event?.clientAddress
-    || "127.0.0.1";
+  const ip =
+    headers?.get("cf-connecting-ip") ||
+    headers?.get("x-real-ip") ||
+    headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    event?.clientAddress ||
+    "127.0.0.1";
 
   if (loginType === "login") {
     const cooldown = 2 * 60 * 1000; // 2 minutes
@@ -76,16 +81,15 @@ export const loginOrRegister = action(async (formData: FormData) => {
     const failureCount = await db.auditLog.count({
       where: {
         action: "LOGIN_GAGAL",
-        OR: [
-          { details: { contains: `@${username}` } },
-          { ip: ip }
-        ],
-        createdAt: { gte: cutoff }
-      }
+        OR: [{ details: { contains: `@${username}` } }, { ip: ip }],
+        createdAt: { gte: cutoff },
+      },
     });
 
     if (failureCount >= 5) {
-      return new Error("Terlalu banyak percobaan masuk yang salah. Silakan coba lagi dalam 2 menit.");
+      return new Error(
+        "Terlalu banyak percobaan masuk yang salah. Silakan coba lagi dalam 2 menit.",
+      );
     }
   }
 
@@ -119,7 +123,7 @@ export const logout = action(async () => {
   return redirect("/login");
 });
 
-//  ABSENSI (ATTENDANCE) 
+//  ABSENSI (ATTENDANCE)
 
 const getLocalDateAsUTC = () => {
   const d = new Date();
@@ -195,7 +199,9 @@ export const checkIn = action(async () => {
     where: { userId_date: { userId: user.id, date: today } },
   });
   if (existing?.status === "IZIN") {
-    return new Error("Anda tidak perlu melakukan absensi karena sedang izin hari ini.");
+    return new Error(
+      "Anda tidak perlu melakukan absensi karena sedang izin hari ini.",
+    );
   }
   if (existing?.checkIn) {
     return new Error("Anda sudah Check-In hari ini.");
@@ -207,10 +213,13 @@ export const checkIn = action(async () => {
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
   if (nowMinutes < startCheckInMinutes) {
-    return new Error(`Check-In baru bisa dilakukan mulai jam ${settings.jamMasuk}.`);
+    return new Error(
+      `Check-In baru bisa dilakukan mulai jam ${settings.jamMasuk}.`,
+    );
   }
 
-  const limitMinutes = startCheckInMinutes + Number(settings.toleransiMenit || 0);
+  const limitMinutes =
+    startCheckInMinutes + Number(settings.toleransiMenit || 0);
   const status = nowMinutes > limitMinutes ? "TELAT" : "HADIR";
   const location = settings.lokasiKantor || "Kantor PT. SBI Cilacap";
 
@@ -247,7 +256,9 @@ export const checkOut = action(async () => {
     return new Error("Anda belum Check-In hari ini.");
   }
   if (existing.status === "IZIN") {
-    return new Error("Anda tidak perlu melakukan absensi karena sedang izin hari ini.");
+    return new Error(
+      "Anda tidak perlu melakukan absensi karena sedang izin hari ini.",
+    );
   }
   if (existing.checkOut) {
     return new Error("Anda sudah Check-Out hari ini.");
@@ -264,7 +275,9 @@ export const checkOut = action(async () => {
     const ah = Math.floor(earliestCheckout / 60);
     const am = earliestCheckout % 60;
     const allowedTimeStr = `${String(ah).padStart(2, "0")}:${String(am).padStart(2, "0")}`;
-    return new Error(`Check-Out hanya bisa dilakukan antara jam ${allowedTimeStr} - 23:59.`);
+    return new Error(
+      `Check-Out hanya bisa dilakukan antara jam ${allowedTimeStr} - 23:59.`,
+    );
   }
 
   await db.absensi.update({
@@ -285,7 +298,7 @@ export const getAttendanceHistory = query(async () => {
   });
 }, "attendanceHistory");
 
-//  IZIN (LEAVE REQUEST) 
+//  IZIN (LEAVE REQUEST)
 
 const parseLocalDateAsUTC = (dateStr: string) => {
   const [year, month, day] = dateStr.split("-").map(Number);
@@ -315,9 +328,7 @@ export const submitIzin = action(async (formData: FormData) => {
   if (file && file.size > 0 && file.name) {
     const MAX_FILE_SIZE = 500 * 1024; // 500KB
     if (file.size > MAX_FILE_SIZE) {
-      return new Error(
-        "Ukuran berkas lampiran maksimal 500KB.",
-      );
+      return new Error("Ukuran berkas lampiran maksimal 500KB.");
     }
 
     const extension = path.extname(file.name).toLowerCase();
@@ -375,7 +386,7 @@ export const getUserIzinList = query(async () => {
   });
 }, "userIzinList");
 
-//  PROFIL 
+//  PROFIL
 
 export const updateProfile = action(async (formData: FormData) => {
   "use server";
@@ -425,26 +436,47 @@ export const changePassword = action(async (formData: FormData) => {
   return { success: true };
 });
 
-//  ADMIN: DASHBOARD 
+//  ADMIN: DASHBOARD
 
 export const getAdminStats = query(async () => {
   "use server";
   await requireAdmin();
   const today = getLocalDateAsUTC();
 
-  const [totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin, batchAktif, batchSelesai, batchMendatang] =
-    await Promise.all([
-      db.user.count({ where: { role: "USER", status: "AKTIF" } }),
-      db.divisi.count(),
-      db.absensi.count({ where: { date: today, status: { in: ["HADIR", "TELAT"] } } }),
-      db.absensi.count({ where: { date: today, status: "TELAT" } }),
-      db.izin.count({ where: { status: "PENDING" } }),
-      db.batchMagang.count({ where: { startDate: { lte: today }, endDate: { gte: today } } }),
-      db.batchMagang.count({ where: { endDate: { lt: today } } }),
-      db.batchMagang.count({ where: { startDate: { gt: today } } }),
-    ]);
+  const [
+    totalUsers,
+    totalDivisi,
+    todayHadir,
+    todayTelat,
+    pendingIzin,
+    batchAktif,
+    batchSelesai,
+    batchMendatang,
+  ] = await Promise.all([
+    db.user.count({ where: { role: "USER", status: "AKTIF" } }),
+    db.divisi.count(),
+    db.absensi.count({
+      where: { date: today, status: { in: ["HADIR", "TELAT"] } },
+    }),
+    db.absensi.count({ where: { date: today, status: "TELAT" } }),
+    db.izin.count({ where: { status: "PENDING" } }),
+    db.batchMagang.count({
+      where: { startDate: { lte: today }, endDate: { gte: today } },
+    }),
+    db.batchMagang.count({ where: { endDate: { lt: today } } }),
+    db.batchMagang.count({ where: { startDate: { gt: today } } }),
+  ]);
 
-  return { totalUsers, totalDivisi, todayHadir, todayTelat, pendingIzin, batchAktif, batchSelesai, batchMendatang };
+  return {
+    totalUsers,
+    totalDivisi,
+    todayHadir,
+    todayTelat,
+    pendingIzin,
+    batchAktif,
+    batchSelesai,
+    batchMendatang,
+  };
 }, "adminStats");
 
 export const getTodayAttendanceStatus = query(async () => {
@@ -483,9 +515,23 @@ export const getInternTrendData = query(async () => {
   "use server";
   await requireAdmin();
 
-  const MONTHS_ID = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  const MONTHS_ID = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
+  ];
 
-  const getMonthLabel = (d: Date) => `${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
+  const getMonthLabel = (d: Date) =>
+    `${MONTHS_ID[d.getMonth()]} ${d.getFullYear()}`;
   const getWeekLabel = (d: Date) => {
     const t = new Date(d.getTime());
     const day = t.getDay();
@@ -502,7 +548,10 @@ export const getInternTrendData = query(async () => {
 
   const now = new Date();
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
-  const startDate = users.length > 0 ? new Date(Math.min(users[0].createdAt.getTime(), sixMonthsAgo.getTime())) : sixMonthsAgo;
+  const startDate =
+    users.length > 0
+      ? new Date(Math.min(users[0].createdAt.getTime(), sixMonthsAgo.getTime()))
+      : sixMonthsAgo;
 
   // Build cumulative counts per period label
   const monthlyCounts: Record<string, number> = {};
@@ -528,7 +577,10 @@ export const getInternTrendData = query(async () => {
   // Monthly: from startDate to now
   const monthLabels: string[] = [];
   const mc = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-  while (mc <= now) { monthLabels.push(getMonthLabel(mc)); mc.setMonth(mc.getMonth() + 1); }
+  while (mc <= now) {
+    monthLabels.push(getMonthLabel(mc));
+    mc.setMonth(mc.getMonth() + 1);
+  }
 
   // Weekly: from startDate to now (last 12 weeks max for readability)
   const weekLabels: string[] = [];
@@ -536,12 +588,16 @@ export const getInternTrendData = query(async () => {
   const wDay = wc.getDay();
   wc.setDate(wc.getDate() - wDay + (wDay === 0 ? -6 : 1));
   wc.setHours(0, 0, 0, 0);
-  while (wc <= now) { weekLabels.push(getWeekLabel(wc)); wc.setDate(wc.getDate() + 7); }
+  while (wc <= now) {
+    weekLabels.push(getWeekLabel(wc));
+    wc.setDate(wc.getDate() + 7);
+  }
   const recentWeeks = weekLabels.slice(-12);
 
   // Yearly: from startDate to now
   const yearLabels: string[] = [];
-  for (let y = startDate.getFullYear(); y <= now.getFullYear(); y++) yearLabels.push(`${y}`);
+  for (let y = startDate.getFullYear(); y <= now.getFullYear(); y++)
+    yearLabels.push(`${y}`);
 
   return {
     weekly: fillSeries(recentWeeks, weeklyCounts),
@@ -550,56 +606,59 @@ export const getInternTrendData = query(async () => {
   };
 }, "internTrendData");
 
-//  ADMIN: USERS CRUD 
+//  ADMIN: USERS CRUD
 
-export const getAdminUsers = query(async (options?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  role?: string;
-  status?: string;
-  divisiId?: string;
-  batchId?: string;
-}) => {
-  "use server";
-  await requireAdmin();
+export const getAdminUsers = query(
+  async (options?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: string;
+    status?: string;
+    divisiId?: string;
+    batchId?: string;
+  }) => {
+    "use server";
+    await requireAdmin();
 
-  const page = options?.page ?? 1;
-  const limit = options?.limit ?? 10;
-  const search = options?.search?.trim() ?? "";
-  const role = options?.role ?? "";
-  const status = options?.status ?? "";
-  const divisiId = options?.divisiId ?? "";
-  const batchId = options?.batchId ?? "";
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 10;
+    const search = options?.search?.trim() ?? "";
+    const role = options?.role ?? "";
+    const status = options?.status ?? "";
+    const divisiId = options?.divisiId ?? "";
+    const batchId = options?.batchId ?? "";
 
-  const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-  const where: any = {};
-  if (role) where.role = role;
-  if (status) where.status = status;
-  if (divisiId) where.divisiId = divisiId;
-  if (batchId) where.batchId = batchId;
+    const where: any = {};
+    if (role) where.role = role;
+    if (status) where.status = status;
+    if (divisiId) where.divisiId = divisiId;
+    if (batchId) where.batchId = batchId;
 
-  if (search) {
-    where.OR = [
-      { fullName: { contains: search } },
-      { username: { contains: search } },
-    ];
-  }
+    if (search) {
+      where.OR = [
+        { fullName: { contains: search } },
+        { username: { contains: search } },
+      ];
+    }
 
-  const [items, total] = await Promise.all([
-    db.user.findMany({
-      where,
-      include: { divisi: true, batch: true },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    db.user.count({ where }),
-  ]);
+    const [items, total] = await Promise.all([
+      db.user.findMany({
+        where,
+        include: { divisi: true, batch: true },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      db.user.count({ where }),
+    ]);
 
-  return { items, total };
-}, "adminUsers");
+    return { items, total };
+  },
+  "adminUsers",
+);
 
 export const createUser = action(async (formData: FormData) => {
   "use server";
@@ -658,7 +717,15 @@ export const updateUser = action(async (formData: FormData) => {
 
   const updatedUser = await db.user.update({
     where: { id },
-    data: { fullName, email, phone: phone || null, role, divisiId, batchId, status },
+    data: {
+      fullName,
+      email,
+      phone: phone || null,
+      role,
+      divisiId,
+      batchId,
+      status,
+    },
   });
   await logActivity(
     "UPDATE_PENGGUNA",
@@ -694,7 +761,10 @@ export const adminResetPassword = action(async (formData: FormData) => {
     where: { id },
     data: { password: hashPassword(newPassword) },
   });
-  await logActivity("RESET_PASSWORD", `reset password success (@${targetUser.username})`);
+  await logActivity(
+    "RESET_PASSWORD",
+    `reset password success (@${targetUser.username})`,
+  );
   return { success: true };
 });
 
@@ -751,119 +821,125 @@ export const deleteDivisi = action(async (formData: FormData) => {
   return redirect("/admin/divisi?success=delete");
 });
 
-//  ADMIN: ABSENSI 
+//  ADMIN: ABSENSI
 
-export const getAdminAbsensi = query(async (options?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  date?: string;
-  status?: string;
-  divisiId?: string;
-  batchId?: string;
-}) => {
-  "use server";
-  await requireAdmin();
+export const getAdminAbsensi = query(
+  async (options?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    date?: string;
+    status?: string;
+    divisiId?: string;
+    batchId?: string;
+  }) => {
+    "use server";
+    await requireAdmin();
 
-  const page = options?.page ?? 1;
-  const limit = options?.limit ?? 10;
-  const search = options?.search?.trim() ?? "";
-  const dateStr = options?.date ?? "";
-  const status = options?.status ?? "";
-  const divisiId = options?.divisiId ?? "";
-  const batchId = options?.batchId ?? "";
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 10;
+    const search = options?.search?.trim() ?? "";
+    const dateStr = options?.date ?? "";
+    const status = options?.status ?? "";
+    const divisiId = options?.divisiId ?? "";
+    const batchId = options?.batchId ?? "";
 
-  const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-  const where: any = {};
-  if (status) where.status = status;
+    const where: any = {};
+    if (status) where.status = status;
 
-  if (dateStr) {
-    const [year, month, day] = dateStr.split("-").map(Number);
-    const filterUtc = new Date(Date.UTC(year, month - 1, day));
-    where.date = filterUtc;
-  }
-
-  if (divisiId || batchId) {
-    where.user = {};
-    if (divisiId) where.user.divisiId = divisiId;
-    if (batchId) where.user.batchId = batchId;
-  }
-
-  if (search) {
-    const searchCond = {
-      OR: [
-        { fullName: { contains: search } },
-        { username: { contains: search } },
-      ],
-    };
-    if (where.user) {
-      where.user = { ...where.user, ...searchCond };
-    } else {
-      where.user = searchCond;
+    if (dateStr) {
+      const [year, month, day] = dateStr.split("-").map(Number);
+      const filterUtc = new Date(Date.UTC(year, month - 1, day));
+      where.date = filterUtc;
     }
-  }
 
-  const [items, total] = await Promise.all([
-    db.absensi.findMany({
-      where,
-      include: { user: { include: { divisi: true } } },
-      orderBy: { date: "desc" },
-      skip,
-      take: limit,
-    }),
-    db.absensi.count({ where }),
-  ]);
+    if (divisiId || batchId) {
+      where.user = {};
+      if (divisiId) where.user.divisiId = divisiId;
+      if (batchId) where.user.batchId = batchId;
+    }
 
-  return { items, total };
-}, "adminAbsensi");
+    if (search) {
+      const searchCond = {
+        OR: [
+          { fullName: { contains: search } },
+          { username: { contains: search } },
+        ],
+      };
+      if (where.user) {
+        where.user = { ...where.user, ...searchCond };
+      } else {
+        where.user = searchCond;
+      }
+    }
 
-//  ADMIN: IZIN 
+    const [items, total] = await Promise.all([
+      db.absensi.findMany({
+        where,
+        include: { user: { include: { divisi: true } } },
+        orderBy: { date: "desc" },
+        skip,
+        take: limit,
+      }),
+      db.absensi.count({ where }),
+    ]);
 
-export const getAdminIzin = query(async (options?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  type?: string;
-  status?: string;
-}) => {
-  "use server";
-  await requireAdmin();
+    return { items, total };
+  },
+  "adminAbsensi",
+);
 
-  const page = options?.page ?? 1;
-  const limit = options?.limit ?? 10;
-  const search = options?.search?.trim() ?? "";
-  const type = options?.type ?? "";
-  const status = options?.status ?? "";
+//  ADMIN: IZIN
 
-  const skip = (page - 1) * limit;
+export const getAdminIzin = query(
+  async (options?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    type?: string;
+    status?: string;
+  }) => {
+    "use server";
+    await requireAdmin();
 
-  const where: any = {};
-  if (type) where.type = type;
-  if (status) where.status = status;
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 10;
+    const search = options?.search?.trim() ?? "";
+    const type = options?.type ?? "";
+    const status = options?.status ?? "";
 
-  if (search) {
-    where.user = {
-      OR: [
-        { fullName: { contains: search } },
-        { username: { contains: search } },
-      ],
-    };
-  }
+    const skip = (page - 1) * limit;
 
-  const [items, total] = await Promise.all([
-    db.izin.findMany({
-      where,
-      include: { user: true },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    db.izin.count({ where }),
-  ]);
+    const where: any = {};
+    if (type) where.type = type;
+    if (status) where.status = status;
 
-  return { items, total };
-}, "adminIzin");
+    if (search) {
+      where.user = {
+        OR: [
+          { fullName: { contains: search } },
+          { username: { contains: search } },
+        ],
+      };
+    }
+
+    const [items, total] = await Promise.all([
+      db.izin.findMany({
+        where,
+        include: { user: true },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      db.izin.count({ where }),
+    ]);
+
+    return { items, total };
+  },
+  "adminIzin",
+);
 
 export const approveIzin = action(async (formData: FormData) => {
   "use server";
@@ -919,7 +995,7 @@ export const approveIzin = action(async (formData: FormData) => {
   return redirect("/admin/izin?success=update");
 });
 
-//  ADMIN: LAPORAN 
+//  ADMIN: LAPORAN
 
 export const getLaporan = query(
   async (startDate?: string, endDate?: string) => {
@@ -938,7 +1014,7 @@ export const getLaporan = query(
   "laporan",
 );
 
-//  ADMIN: EXPORT CSV 
+//  ADMIN: EXPORT CSV
 
 export const exportCSV = query(async () => {
   "use server";
@@ -966,56 +1042,59 @@ export const exportCSV = query(async () => {
   return header + rows;
 }, "exportCSV");
 
-//  ADMIN: AUDIT LOGS 
+//  ADMIN: AUDIT LOGS
 
-export const getAdminAuditLogs = query(async (options?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  action?: string;
-}) => {
-  "use server";
-  await requireAdmin();
+export const getAdminAuditLogs = query(
+  async (options?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    action?: string;
+  }) => {
+    "use server";
+    await requireAdmin();
 
-  const page = options?.page ?? 1;
-  const limit = options?.limit ?? 15;
-  const search = options?.search?.trim() ?? "";
-  const actionFilter = options?.action ?? "";
+    const page = options?.page ?? 1;
+    const limit = options?.limit ?? 15;
+    const search = options?.search?.trim() ?? "";
+    const actionFilter = options?.action ?? "";
 
-  const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-  const where: any = {};
-  if (actionFilter) {
-    where.action = actionFilter;
-  }
+    const where: any = {};
+    if (actionFilter) {
+      where.action = actionFilter;
+    }
 
-  if (search) {
-    where.OR = [
-      { username: { contains: search } },
-      { details: { contains: search } },
-      { ip: { contains: search } },
-      { location: { contains: search } },
-      {
-        user: {
-          fullName: { contains: search },
+    if (search) {
+      where.OR = [
+        { username: { contains: search } },
+        { details: { contains: search } },
+        { ip: { contains: search } },
+        { location: { contains: search } },
+        {
+          user: {
+            fullName: { contains: search },
+          },
         },
-      },
-    ];
-  }
+      ];
+    }
 
-  const [items, total] = await Promise.all([
-    (db as any).auditLog.findMany({
-      where,
-      include: { user: { select: { fullName: true, username: true } } },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    (db as any).auditLog.count({ where }),
-  ]);
+    const [items, total] = await Promise.all([
+      (db as any).auditLog.findMany({
+        where,
+        include: { user: { select: { fullName: true, username: true } } },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      (db as any).auditLog.count({ where }),
+    ]);
 
-  return { items, total };
-}, "adminAuditLogs");
+    return { items, total };
+  },
+  "adminAuditLogs",
+);
 
 export async function logPageAccess(pathname: string) {
   "use server";
@@ -1046,7 +1125,7 @@ export async function logPageAccess(pathname: string) {
   }
 }
 
-//  ADMIN: BATCH MAGANG CRUD 
+//  ADMIN: BATCH MAGANG CRUD
 
 export const getAdminBatches = query(async () => {
   "use server";
@@ -1070,12 +1149,15 @@ export const createBatch = action(async (formData: FormData) => {
   const endDateStr = String(formData.get("endDate"));
   const description = String(formData.get("description") || "");
 
-  if (!name || name.length < 2) return new Error("Nama batch minimal 2 karakter.");
-  if (!startDateStr || !endDateStr) return new Error("Tanggal mulai dan selesai harus diisi.");
+  if (!name || name.length < 2)
+    return new Error("Nama batch minimal 2 karakter.");
+  if (!startDateStr || !endDateStr)
+    return new Error("Tanggal mulai dan selesai harus diisi.");
 
   const startDate = new Date(startDateStr);
   const endDate = new Date(endDateStr);
-  if (startDate > endDate) return new Error("Tanggal mulai tidak boleh melebihi tanggal selesai.");
+  if (startDate > endDate)
+    return new Error("Tanggal mulai tidak boleh melebihi tanggal selesai.");
 
   await db.batchMagang.create({
     data: { name, startDate, endDate, description: description || null },
@@ -1093,10 +1175,12 @@ export const updateBatch = action(async (formData: FormData) => {
   const endDateStr = String(formData.get("endDate"));
   const description = String(formData.get("description") || "");
 
-  if (!name || name.length < 2) return new Error("Nama batch minimal 2 karakter.");
+  if (!name || name.length < 2)
+    return new Error("Nama batch minimal 2 karakter.");
   const startDate = new Date(startDateStr);
   const endDate = new Date(endDateStr);
-  if (startDate > endDate) return new Error("Tanggal mulai tidak boleh melebihi tanggal selesai.");
+  if (startDate > endDate)
+    return new Error("Tanggal mulai tidak boleh melebihi tanggal selesai.");
 
   await db.batchMagang.update({
     where: { id },
@@ -1112,6 +1196,9 @@ export const deleteBatch = action(async (formData: FormData) => {
   const id = String(formData.get("id"));
   const target = await db.batchMagang.findUnique({ where: { id } });
   await db.batchMagang.delete({ where: { id } });
-  await logActivity("HAPUS_BATCH", `delete batch success (${target?.name ?? "Batch"})`);
+  await logActivity(
+    "HAPUS_BATCH",
+    `delete batch success (${target?.name ?? "Batch"})`,
+  );
   return redirect("/admin/batch?success=delete");
 });

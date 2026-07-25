@@ -51,7 +51,9 @@ export default function Riwayat() {
 
   return (
     <div>
-      <h1 class="page-title" style="text-align: left;">Riwayat Absensi</h1>
+      <h1 class="page-title" style="text-align: left;">
+        Riwayat Absensi
+      </h1>
 
       <div class="filter-card" style="margin-bottom: var(--space-4);">
         <div class="form-group">
@@ -94,149 +96,187 @@ export default function Riwayat() {
         </button>
       </div>
 
-      <Show when={history()} fallback={
-        <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Tanggal</th>
-                <th>Check-In</th>
-                <th>Check-Out</th>
-                <th>Status</th>
-                <th>Catatan</th>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={[1, 2, 3, 4, 5]}>
-                {() => (
-                  <tr>
-                    <td><div class="skeleton" style="width: 24px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 120px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 70px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 70px; height: 16px;"></div></td>
-                    <td><div class="skeleton" style="width: 60px; height: 20px; border-radius: 4px;"></div></td>
-                    <td><div class="skeleton" style="width: 150px; height: 16px;"></div></td>
-                  </tr>
-                )}
-              </For>
-            </tbody>
-          </table>
-        </div>
-      }>
+      <Show
+        when={history()}
+        fallback={
+          <div style="overflow-x: auto; opacity: 0.6; pointer-events: none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Tanggal</th>
+                  <th>Check-In</th>
+                  <th>Check-Out</th>
+                  <th>Status</th>
+                  <th>Catatan</th>
+                </tr>
+              </thead>
+              <tbody>
+                <For each={[1, 2, 3, 4, 5]}>
+                  {() => (
+                    <tr>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 24px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 120px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 70px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 70px; height: 16px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 60px; height: 20px; border-radius: 4px;"
+                        ></div>
+                      </td>
+                      <td>
+                        <div
+                          class="skeleton"
+                          style="width: 150px; height: 16px;"
+                        ></div>
+                      </td>
+                    </tr>
+                  )}
+                </For>
+              </tbody>
+            </table>
+          </div>
+        }
+      >
         {(rList) => {
           if (rList.length === 999999) console.log(rList);
           return (
             <>
-            <div style="overflow-x: auto;">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>Tanggal</th>
-                    <th>Check-In</th>
-                    <th>Check-Out</th>
-                    <th>Status</th>
-                    <th>Catatan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <Show
-                    when={paginatedRecords().length > 0}
-                    fallback={
-                      <tr>
-                        <td
-                          colspan="6"
-                          style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
-                        >
-                          Belum ada riwayat absensi.
-                        </td>
-                      </tr>
-                    }
-                  >
-                    <For each={paginatedRecords()}>
-                      {(r, i) => (
-                        <tr>
-                          <td style="font-family: var(--font-mono); font-size: 13px;">
-                            {(currentPage() - 1) * itemsPerPage + i() + 1}
-                          </td>
-                          <td>
-                            {new Date(r.date).toLocaleDateString("id-ID", {
-                              weekday: "short",
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </td>
-                          <td style="font-family: var(--font-mono);">
-                            {r.checkIn
-                              ? new Date(r.checkIn).toLocaleTimeString("id-ID")
-                              : "-"}
-                          </td>
-                          <td style="font-family: var(--font-mono);">
-                            {r.checkOut
-                              ? new Date(r.checkOut).toLocaleTimeString("id-ID")
-                              : "-"}
-                          </td>
-                          <td>
-                            <span class={`badge ${statusBadge(r.status)}`}>
-                              {r.status}
-                            </span>
-                          </td>
-                          <td>{r.notes ?? "-"}</td>
-                        </tr>
-                      )}
-                    </For>
-                  </Show>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination Controls */}
-            <div class="pagination-container">
-              <div class="pagination-info">
-                Menampilkan {paginatedRecords().length} dari{" "}
-                {filteredRecords().length} riwayat
-              </div>
-              <div class="pagination-buttons">
-                <button
-                  class="btn-pagination"
-                  disabled={currentPage() === 1}
-                  onClick={() => setCurrentPage(currentPage() - 1)}
-                >
-                  Sebelumnya
-                </button>
-                <For each={getPageNumbers(currentPage(), totalPages())}>
-                  {(page) => (
+              <div style="overflow-x: auto;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Tanggal</th>
+                      <th>Check-In</th>
+                      <th>Check-Out</th>
+                      <th>Status</th>
+                      <th>Catatan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     <Show
-                      when={page !== "..."}
+                      when={paginatedRecords().length > 0}
                       fallback={
-                        <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
-                          ...
-                        </span>
+                        <tr>
+                          <td
+                            colspan="6"
+                            style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
+                          >
+                            Belum ada riwayat absensi.
+                          </td>
+                        </tr>
                       }
                     >
-                      <button
-                        class="btn-pagination"
-                        classList={{ active: currentPage() === page }}
-                        onClick={() => setCurrentPage(page as number)}
-                      >
-                        {page}
-                      </button>
+                      <For each={paginatedRecords()}>
+                        {(r, i) => (
+                          <tr>
+                            <td style="font-family: var(--font-mono); font-size: 13px;">
+                              {(currentPage() - 1) * itemsPerPage + i() + 1}
+                            </td>
+                            <td>
+                              {new Date(r.date).toLocaleDateString("id-ID", {
+                                weekday: "short",
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </td>
+                            <td style="font-family: var(--font-mono);">
+                              {r.checkIn
+                                ? new Date(r.checkIn).toLocaleTimeString(
+                                    "id-ID",
+                                  )
+                                : "-"}
+                            </td>
+                            <td style="font-family: var(--font-mono);">
+                              {r.checkOut
+                                ? new Date(r.checkOut).toLocaleTimeString(
+                                    "id-ID",
+                                  )
+                                : "-"}
+                            </td>
+                            <td>
+                              <span class={`badge ${statusBadge(r.status)}`}>
+                                {r.status}
+                              </span>
+                            </td>
+                            <td>{r.notes ?? "-"}</td>
+                          </tr>
+                        )}
+                      </For>
                     </Show>
-                  )}
-                </For>
-                <button
-                  class="btn-pagination"
-                  disabled={currentPage() === totalPages()}
-                  onClick={() => setCurrentPage(currentPage() + 1)}
-                >
-                  Berikutnya
-                </button>
+                  </tbody>
+                </table>
               </div>
-            </div>
-          </>
-        ); }}
+
+              {/* Pagination Controls */}
+              <div class="pagination-container">
+                <div class="pagination-info">
+                  Menampilkan {paginatedRecords().length} dari{" "}
+                  {filteredRecords().length} riwayat
+                </div>
+                <div class="pagination-buttons">
+                  <button
+                    class="btn-pagination"
+                    disabled={currentPage() === 1}
+                    onClick={() => setCurrentPage(currentPage() - 1)}
+                  >
+                    Sebelumnya
+                  </button>
+                  <For each={getPageNumbers(currentPage(), totalPages())}>
+                    {(page) => (
+                      <Show
+                        when={page !== "..."}
+                        fallback={
+                          <span style="padding: 0 8px; color: var(--color-text-secondary); align-self: center; font-weight: 600;">
+                            ...
+                          </span>
+                        }
+                      >
+                        <button
+                          class="btn-pagination"
+                          classList={{ active: currentPage() === page }}
+                          onClick={() => setCurrentPage(page as number)}
+                        >
+                          {page}
+                        </button>
+                      </Show>
+                    )}
+                  </For>
+                  <button
+                    class="btn-pagination"
+                    disabled={currentPage() === totalPages()}
+                    onClick={() => setCurrentPage(currentPage() + 1)}
+                  >
+                    Berikutnya
+                  </button>
+                </div>
+              </div>
+            </>
+          );
+        }}
       </Show>
     </div>
   );
