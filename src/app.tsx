@@ -489,22 +489,25 @@ export default function App() {
                                 : "/dashboard"
                             }
                             class="sidebar-logo-link"
-                            style="display: flex; align-items: center;"
+                            style="display: flex; align-items: center; justify-content: center; width: 100%;"
                           >
                             <img
                               src={
-                                !sidebarPinned() && !sidebarHovered()
-                                  ? "/favicon.png"
-                                  : theme() === "dark"
-                                    ? "/logo-sigma-putih.png"
-                                    : "/logo-sigma.png"
+                                theme() === "dark"
+                                  ? "/logo-sigma-putih.png"
+                                  : "/logo-sigma.png"
                               }
                               alt="Logo SIGMA"
-                              class="sidebar-logo"
+                              class="sidebar-logo-full"
+                              style="cursor: pointer;"
+                            />
+                            <img
+                              src="/favicon.png"
+                              alt="Logo SIGMA"
+                              class="sidebar-logo-favicon"
                               style="cursor: pointer;"
                             />
                           </a>
-                          <div class="sidebar-header-divider" />
                         </div>
 
                         <nav class="sidebar-nav">
