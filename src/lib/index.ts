@@ -1298,9 +1298,57 @@ export const getPublicTestimoni = query(async () => {
   "use server";
   return db.landingTestimoni.findMany({
     where: { isActive: true },
-    orderBy: { order: "asc" },
+    // select eksplisit: tanpa ini userId (UUID akun alumni) ikut
+    // terserialisasi ke payload halaman publik anonim.
+    select: { id: true, name: true, roleInfo: true, message: true },
+    // createdAt desc sebagai tiebreaker: kiriman alumni baru (order default 0)
+    // langsung terlihat tanpa menunggu admin mengatur urutan.
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
   });
 }, "publicTestimoni");
+
+//  ALUMNI: TESTIMONI ("KATA MEREKA")
+
+export const getMyTestimoni = query(async () => {
+  "use server";
+  const user = await requireUser();
+  return db.landingTestimoni.findUnique({ where: { userId: user.id } });
+}, "myTestimoni");
+
+export const submitTestimoniAlumni = action(async (formData: FormData) => {
+  "use server";
+  const user = await requireUser();
+  if (user.role !== "USER" || (user as any).status !== "ALUMNI") {
+    return new Error(
+      "Hanya alumni magang yang dapat mengirim testimoni. Testimoni terbuka setelah batch magang Anda selesai.",
+    );
+  }
+  const message = String(formData.get("message") || "").trim();
+  if (message.length < 10) return new Error("Testimoni minimal 10 karakter.");
+  if (message.length > 500) return new Error("Testimoni maksimal 500 karakter.");
+
+  const existing = await db.landingTestimoni.findUnique({
+    where: { userId: user.id },
+  });
+  if (existing) return new Error("Anda sudah pernah mengirim testimoni.");
+
+  // Identitas diambil dari akun, bukan input form, agar tidak bisa dipalsukan.
+  const roleInfo = [
+    user.divisi ? `Alumni Divisi ${user.divisi.name}` : "Alumni Magang",
+    user.batch?.name ?? null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  await db.landingTestimoni.create({
+    data: { userId: user.id, name: user.fullName, roleInfo, message },
+  });
+  await logActivity(
+    "BUAT_TESTIMONI",
+    `alumni submit testimoni success (${user.fullName})`,
+  );
+  return redirect("/dashboard?success=testimoni");
+});
 
 //  ADMIN: LANDING SETTINGS (HERO & KONTAK)
 
@@ -1431,30 +1479,16 @@ export const deleteLandingListItem = action(async (formData: FormData) => {
 
 //  ADMIN: LANDING TESTIMONI
 
+// Testimoni HANYA dibuat oleh alumni (submitTestimoniAlumni di atas).
+// Admin sengaja tidak punya action create - hanya edit/hapus/moderasi.
 export const getAdminTestimoni = query(async () => {
   "use server";
   await requireAdmin();
-  return db.landingTestimoni.findMany({ orderBy: { order: "asc" } });
-}, "adminTestimoni");
-
-export const createTestimoni = action(async (formData: FormData) => {
-  "use server";
-  await requireAdmin();
-  const name = String(formData.get("name") || "").trim();
-  const roleInfo = String(formData.get("roleInfo") || "").trim();
-  const message = String(formData.get("message") || "").trim();
-  const order = Number(formData.get("order") || 0);
-
-  if (!name || name.length < 2) return new Error("Nama minimal 2 karakter.");
-  if (!message || message.length < 5)
-    return new Error("Testimoni minimal 5 karakter.");
-
-  await db.landingTestimoni.create({
-    data: { name, roleInfo: roleInfo || null, message, order },
+  return db.landingTestimoni.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+    include: { user: { select: { username: true } } },
   });
-  await logActivity("BUAT_TESTIMONI", `create testimoni success (${name})`);
-  return redirect("/admin/landing?tab=testimoni&success=create");
-});
+}, "adminTestimoni");
 
 export const updateTestimoni = action(async (formData: FormData) => {
   "use server";

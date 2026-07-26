@@ -1789,13 +1789,29 @@ a {
 
   /* Full-bleed: batalkan padding .app-main-content (48px/32px) supaya header
      glass & gradient hero sampai ke tepi. width:auto WAJIB - width:100% +
-     margin negatif akan overflow ke kanan dan memicu scrollbar horizontal. */
+     margin negatif akan overflow ke kanan dan memicu scrollbar horizontal.
+     Ini hanya FALLBACK untuk browser tanpa :has() - lihat rule di bawah. */
   width: auto;
   margin: calc(var(--space-6) * -1) calc(var(--space-5) * -1);
   min-height: 100vh;
-  background: var(--surface-base);
+  /* Sedikit lebih gelap dari --surface-base: area di luar .landing-shell
+     jadi "gutter" sehingga batas kiri-kanan kolom konten terbaca jelas. */
+  background: #f8fafc;
   color: var(--color-text);
   text-align: left;
+}
+
+/* Padding scroll container ikut menggeser pin position:sticky (Chrome
+   menghitung batas sticky dari content edge scroller, sehingga header
+   "mengambang" 48px di bawah tepi atas saat discroll - bug lama yang baru
+   terlihat setelah gutter diberi warna). Untuk halaman landing, buang padding
+   container sekalian; margin negatif fallback di atas ikut dinolkan. */
+.app-main-content:has(.landing-page) {
+  padding: 0;
+}
+
+.app-main-content:has(.landing-page) .landing-page {
+  margin: 0;
 }
 
 [data-theme="dark"] .landing-page {
@@ -1805,22 +1821,41 @@ a {
     rgba(225, 29, 72, 0.14),
     transparent 70%
   );
+  background: #0b1120;
+}
+
+/* Kolom konten berbatas: semua section + footer hidup di sini. Border samping
+   + latar surface-base yang kontras dengan gutter .landing-page membuat alur
+   baca halaman jelas dari atas ke bawah. */
+.landing-shell {
+  max-width: var(--landing-max-width);
+  margin-inline: auto;
+  background: var(--surface-base);
+  border-inline: 1px solid var(--color-border);
+  min-height: calc(100vh - var(--landing-header-h));
 }
 
 .landing-header {
   position: sticky;
   top: 0;
   z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-5);
   /* Solid, bukan glass - sengaja bukan --surface-glass/backdrop-filter:
      latar tembus + blur membuat header terkesan "mengambang" di atas
      konten yang tergulir di baliknya. Bar rata/opak menghilangkan kesan itu. */
   background: var(--surface-base);
   border-bottom: 1px solid var(--color-border);
+}
+
+/* Isi header sejajar dengan tepi .landing-shell (max-width sama) supaya logo
+   dan nav lurus dengan garis batas kolom konten di bawahnya. */
+.landing-header-inner {
+  max-width: var(--landing-max-width);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-5);
 }
 
 .landing-header-actions {
@@ -1921,6 +1956,15 @@ a {
    display:flex). Semua (0,1,0); blok landing ada di akhir file jadi menang
    lewat source order tanpa !important. ---------- */
 
+.landing-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+
 .landing-cta {
   width: auto;
   min-width: 140px;
@@ -1932,7 +1976,6 @@ a {
   justify-content: center;
   gap: var(--space-2);
   text-decoration: none;
-  margin-top: var(--space-2);
 }
 
 .landing-cta svg {
@@ -1958,6 +2001,13 @@ a {
   text-decoration: none;
 }
 
+/* Varian besar untuk hero, sejajar dengan .landing-cta (48px). */
+.landing-ghost-cta-lg {
+  height: 48px;
+  padding: 0 24px;
+  font-size: 15px;
+}
+
 .landing-ghost-cta:hover {
   background-color: rgba(225, 29, 72, 0.08);
   color: var(--color-primary);
@@ -1977,11 +2027,43 @@ a {
 }
 
 .landing-section {
-  max-width: var(--landing-max-width);
-  margin: 0 auto;
+  /* max-width/margin auto pindah ke .landing-shell; section cukup padding. */
   padding: var(--space-6) var(--space-5);
+  /* Garis pembatas antar-section: bersama border samping shell, tiap section
+     terbaca sebagai blok yang jelas awal-akhirnya. */
+  border-top: 1px solid var(--color-border);
   /* Anchor jump mendarat di bawah header sticky, bukan tertutup olehnya. */
   scroll-margin-top: calc(var(--landing-header-h) + var(--space-3));
+}
+
+/* Label kecil di atas judul section - penanda ritme visual antar section. */
+.landing-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+.landing-eyebrow::before,
+.landing-eyebrow::after {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background-color: currentColor;
+  opacity: 0.5;
+}
+
+/* #e11d48 di atas shell gelap (#0f172a) hanya ~3.8:1 - gagal AA untuk teks
+   12-14px; #fb7185 ~5.6:1, konsisten dengan override avatar/alur-num. */
+[data-theme="dark"] .landing-eyebrow,
+[data-theme="dark"] .landing-alur-cta a {
+  color: #fb7185;
 }
 
 .landing-section-title {
@@ -1990,6 +2072,16 @@ a {
   font-size: clamp(22px, 3vw, 28px);
   margin: 0 0 var(--space-4);
   text-align: center;
+}
+
+.landing-section-sub {
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 560px;
+  /* Menempel ke judul di atasnya (judul sudah punya margin-bottom space-4). */
+  margin: calc(var(--space-2) * -1) auto var(--space-5);
 }
 
 .landing-empty {
@@ -2240,6 +2332,134 @@ a {
   margin-top: calc((1.8em - 16px) / 2);
 }
 
+/* ---------- Alur Magang ---------- */
+/* Mobile-first: timeline vertikal (nomor kiri + garis penghubung ke bawah).
+   Di >=900px berubah jadi stepper horizontal 5 kolom dengan garis antar
+   nomor - pola yang sama, hanya arah alurnya yang berputar. */
+
+.landing-alur {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.landing-alur-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  column-gap: var(--space-3);
+  min-width: 0;
+}
+
+/* Garis penghubung antar langkah (vertikal, mobile): dari bawah lingkaran
+   nomor sampai lingkaran langkah berikutnya (menembus gap grid). */
+.landing-alur-step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 21px;
+  top: 48px;
+  bottom: calc(var(--space-4) * -1);
+  width: 2px;
+  background-color: var(--color-border);
+}
+
+.landing-alur-num {
+  grid-row: 1 / span 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: 16px;
+  /* Tint merah ala avatar testimoni - aksen, bukan blok merah solid. */
+  background-color: rgba(225, 29, 72, 0.1);
+  color: #be123c;
+  border: 1px solid rgba(225, 29, 72, 0.25);
+  /* Menutupi garis penghubung yang lewat di belakangnya. */
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="dark"] .landing-alur-num {
+  background-color: rgba(225, 29, 72, 0.22);
+  color: #fb7185;
+  border-color: rgba(251, 113, 133, 0.35);
+}
+
+.landing-alur-step h3 {
+  margin: 0;
+  align-self: center;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.landing-alur-step p {
+  grid-column: 2;
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.landing-alur-cta {
+  text-align: center;
+  margin: var(--space-5) 0 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.landing-alur-cta a {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.landing-alur-cta a:hover,
+.landing-alur-cta a:focus-visible {
+  text-decoration: underline;
+}
+
+@media (min-width: 900px) {
+  .landing-alur {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  .landing-alur-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Garis penghubung horizontal: dari tepi kanan lingkaran ini ke tepi kiri
+     lingkaran berikutnya. Jarak antar pusat kolom = 100% + gap. */
+  .landing-alur-step:not(:last-child)::before {
+    top: 21px;
+    bottom: auto;
+    left: calc(50% + 28px);
+    width: calc(100% + var(--space-3) - 56px);
+    height: 2px;
+  }
+
+  .landing-alur-step h3 {
+    margin-top: var(--space-3);
+    font-size: 15px;
+  }
+
+  .landing-alur-step p {
+    font-size: 13px;
+  }
+}
+
 /* ---------- Testimoni ---------- */
 
 .landing-testimoni-grid {
@@ -2260,12 +2480,37 @@ a {
 }
 
 .landing-testimoni-card {
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--landing-card-radius);
   padding: var(--space-4);
   background: var(--surface-glass);
   backdrop-filter: blur(12px);
   box-shadow: var(--shadow-glass);
+}
+
+/* Tanda kutip dekoratif - aksen halus, bukan elemen baca (aria tak perlu:
+   pseudo-element murni dekorasi). */
+.landing-testimoni-card::before {
+  content: "\201C";
+  position: absolute;
+  top: 4px;
+  right: 16px;
+  font-family: var(--font-headline);
+  font-size: 64px;
+  line-height: 1;
+  color: rgba(225, 29, 72, 0.12);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .landing-testimoni-card::before {
+  color: rgba(251, 113, 133, 0.16);
+}
+
+.landing-testimoni-msg {
+  margin: 0;
+  line-height: 1.6;
 }
 
 .landing-testimoni-head {
@@ -2414,6 +2659,13 @@ a {
   .landing-footer {
     padding-bottom: calc(var(--space-10) + env(safe-area-inset-bottom, 0px));
   }
+
+  /* Di bawah ~1024px shell praktis selebar layar (max-width 1000px): border
+     samping jadi garis nyasar di tepi viewport, gutter pun tak terlihat -
+     matikan saja. */
+  .landing-shell {
+    border-inline: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -2430,7 +2682,7 @@ a {
   /* Header 2 baris: logo+CTA tetap space-between di baris 1, nav dapat baris
      penuh sendiri yang scroll horizontal - dibanding flex-direction:column
      lama (~153px, 40% dari viewport 375px) ini ~101px dan CTA tetap kanan-atas. */
-  .landing-header {
+  .landing-header-inner {
     flex-wrap: wrap;
     row-gap: var(--space-2);
     padding: var(--space-2) var(--space-4);
@@ -2459,7 +2711,8 @@ a {
     padding: var(--space-6) var(--space-4);
   }
 
-  .landing-cta {
+  .landing-cta,
+  .landing-ghost-cta-lg {
     width: 100%;
     max-width: 320px;
   }

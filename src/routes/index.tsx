@@ -66,14 +66,43 @@ const initialOf = (name: string | null | undefined) => {
   return (Array.from(trimmed)[0] ?? "?").toUpperCase();
 };
 
-const NAV_ITEMS = ["tentang", "kuota", "syarat", "faq", "kontak"] as const;
+const NAV_ITEMS = ["tentang", "alur", "kuota", "syarat", "faq", "kontak"] as const;
 const NAV_LABELS: Record<(typeof NAV_ITEMS)[number], string> = {
   tentang: "Tentang",
+  alur: "Alur",
   kuota: "Kuota",
   syarat: "Syarat",
   faq: "FAQ",
   kontak: "Kontak",
 };
+
+/**
+ * Alur proses magang - konten statis by design: ini deskripsi prosedur baku
+ * perusahaan (bukan konten kampanye yang sering diganti admin), jadi tidak
+ * lewat CMS seperti section lain.
+ */
+const ALUR_STEPS = [
+  {
+    title: "Hubungi HRD & Kirim Berkas",
+    desc: "Kirim CV, surat pengantar kampus/sekolah, dan proposal magang melalui WhatsApp atau email HRD.",
+  },
+  {
+    title: "Seleksi & Verifikasi",
+    desc: "Tim HRD meninjau berkas dan mencocokkannya dengan sisa kuota divisi yang masih tersedia.",
+  },
+  {
+    title: "Penempatan & Akun SIGMA",
+    desc: "Peserta diterima, ditempatkan di divisi tujuan, dan mendapatkan akun SIGMA dari admin.",
+  },
+  {
+    title: "Jalani Magang",
+    desc: "Absensi harian, pengajuan izin, dan pemantauan kegiatan dilakukan melalui SIGMA.",
+  },
+  {
+    title: "Lulus & Jadi Alumni",
+    desc: "Status berubah menjadi alumni - dapatkan sertifikat dan bagikan testimonimu di halaman ini.",
+  },
+] as const;
 
 function BatchSkeleton() {
   return (
@@ -109,6 +138,7 @@ export default function Home() {
   // menyembunyikan item nav yang targetnya tidak ada (bukan sekadar warna beda).
   const navWhen: Record<(typeof NAV_ITEMS)[number], () => boolean> = {
     tentang: () => !!settings()?.aboutText,
+    alur: () => true,
     kuota: () => true,
     syarat: () => (syarat()?.length ?? 0) > 0,
     faq: () => (faq()?.length ?? 0) > 0,
@@ -225,6 +255,7 @@ export default function Home() {
   return (
     <div class="landing-page" ref={pageRef}>
       <header class="landing-header">
+        <div class="landing-header-inner">
         <div class="landing-header-logo">
           <img
             src={theme() === "dark" ? "/logo-sigma-putih.png" : "/logo-sigma.png"}
@@ -319,7 +350,13 @@ export default function Home() {
             </Show>
           </button>
         </div>
+        </div>
       </header>
+
+      {/* Shell: kolom konten dengan batas kiri-kanan yang terlihat (border
+          samping) supaya alur baca halaman jelas - semua section & footer
+          hidup di dalamnya, hanya header yang full-width. */}
+      <div class="landing-shell">
 
       <section class="landing-hero">
         <h1>
@@ -329,27 +366,33 @@ export default function Home() {
         <Show when={settings()?.heroSubtitle}>
           <p>{settings()!.heroSubtitle}</p>
         </Show>
-        <a href="#kuota" class="btn-primary landing-cta">
-          <span>Lihat Kuota Tersedia</span>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </svg>
-        </a>
+        <div class="landing-hero-actions">
+          <a href="#kuota" class="btn-primary landing-cta">
+            <span>Lihat Kuota Tersedia</span>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </a>
+          <a href="#alur" class="btn-ghost landing-ghost-cta landing-ghost-cta-lg">
+            Pelajari Alurnya
+          </a>
+        </div>
       </section>
 
       <Show when={settings()?.aboutText}>
         <section class="landing-section" id="tentang" data-spy="">
+          <span class="landing-eyebrow">Profil Program</span>
           <h2 class="landing-section-title">Tentang Program</h2>
           <p style="color: var(--color-text-secondary); line-height: 1.7; text-align: center; max-width: 720px; margin: 0 auto;">
             {settings()!.aboutText}
@@ -357,7 +400,34 @@ export default function Home() {
         </section>
       </Show>
 
+      <section class="landing-section" id="alur" data-spy="">
+        <span class="landing-eyebrow">Langkah demi Langkah</span>
+        <h2 class="landing-section-title">Alur Program Magang</h2>
+        <p class="landing-section-sub">
+          Dari pendaftaran sampai resmi menjadi alumni &mdash; begini perjalanan
+          magang di PT SBI Cilacap.
+        </p>
+        <ol class="landing-alur">
+          <For each={ALUR_STEPS}>
+            {(step, i) => (
+              <li class="landing-alur-step">
+                <span class="landing-alur-num" aria-hidden="true">
+                  {i() + 1}
+                </span>
+                <h3>{step.title}</h3>
+                <p>{step.desc}</p>
+              </li>
+            )}
+          </For>
+        </ol>
+        <p class="landing-alur-cta">
+          Siap memulai? <a href="#kontak">Hubungi HRD</a> atau cek{" "}
+          <a href="#kuota">kuota yang tersedia</a>.
+        </p>
+      </section>
+
       <section class="landing-section" id="kuota" data-spy="">
+        <span class="landing-eyebrow">Transparansi Kuota</span>
         <h2 class="landing-section-title">Kuota &amp; Periode Batch</h2>
         <Show
           when={kuota() !== undefined}
@@ -462,6 +532,7 @@ export default function Home() {
 
       <Show when={syarat() && syarat()!.length > 0}>
         <section class="landing-section" id="syarat" data-spy="">
+          <span class="landing-eyebrow">Sebelum Mendaftar</span>
           <h2 class="landing-section-title">Syarat &amp; Ketentuan</h2>
           <ul class="landing-syarat-list">
             <For each={syarat()}>
@@ -490,7 +561,8 @@ export default function Home() {
 
       <Show when={faq() && faq()!.length > 0}>
         <section class="landing-section" id="faq" data-spy="">
-          <h2 class="landing-section-title">Pertanyaan Umum (FAQ)</h2>
+          <span class="landing-eyebrow">FAQ</span>
+          <h2 class="landing-section-title">Pertanyaan Umum</h2>
           <For each={faq()}>
             {(f) => (
               <details class="landing-faq-item">
@@ -517,9 +589,13 @@ export default function Home() {
         </section>
       </Show>
 
-      <Show when={testimoni() && testimoni()!.length > 0}>
-        <section class="landing-section">
+      <Show when={(testimoni()?.length ?? 0) > 0}>
+        <section class="landing-section" id="testimoni">
+          <span class="landing-eyebrow">Testimoni Alumni</span>
           <h2 class="landing-section-title">Kata Mereka</h2>
+          <p class="landing-section-sub">
+            Cerita langsung dari para alumni magang PT SBI Cilacap.
+          </p>
           <div class="landing-testimoni-grid">
             <For each={testimoni()}>
               {(t) => (
@@ -538,7 +614,7 @@ export default function Home() {
                       </Show>
                     </div>
                   </div>
-                  <p style="margin: 0; line-height: 1.6;">&ldquo;{t.message}&rdquo;</p>
+                  <p class="landing-testimoni-msg">&ldquo;{t.message}&rdquo;</p>
                 </div>
               )}
             </For>
@@ -583,6 +659,9 @@ export default function Home() {
           Manajemen Magang.
         </p>
       </footer>
+
+      </div>
+      {/* ^ penutup .landing-shell */}
 
       {/* Floating WhatsApp button (mobile/tablet). Dirender via <Portal> ke
           document.body karena .fade-in (pembungkus route di app.tsx) punya

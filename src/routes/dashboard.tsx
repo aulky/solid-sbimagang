@@ -4,7 +4,7 @@ import {
   useSearchParams,
   type RouteDefinition,
 } from "@solidjs/router";
-import { Show, createEffect } from "solid-js";
+import { Show, createEffect, createSignal } from "solid-js";
 import {
   getUser,
   getTodayAttendance,
@@ -12,6 +12,8 @@ import {
   checkOut,
   getAttendanceHistory,
   getPublicSettings,
+  getMyTestimoni,
+  submitTestimoniAlumni,
 } from "~/lib";
 import { showToast } from "~/lib/toast";
 
@@ -21,17 +23,25 @@ export const route = {
     getTodayAttendance();
     getAttendanceHistory();
     getPublicSettings();
+    getMyTestimoni();
   },
 } satisfies RouteDefinition;
+
+const TESTIMONI_MAX = 500;
 
 export default function Dashboard() {
   const user = createAsync(() => getUser());
   const today = createAsync(() => getTodayAttendance());
   const history = createAsync(() => getAttendanceHistory());
   const settings = createAsync(() => getPublicSettings());
+  const myTestimoni = createAsync(() => getMyTestimoni());
   const checkingIn = useSubmission(checkIn);
   const checkingOut = useSubmission(checkOut);
+  const submittingTestimoni = useSubmission(submitTestimoniAlumni);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [testimoniLen, setTestimoniLen] = createSignal(0);
+
+  const isAlumni = () => user()?.status === "ALUMNI";
 
   createEffect(() => {
     if (searchParams.success === "checkin") {
@@ -39,6 +49,12 @@ export default function Dashboard() {
       setSearchParams({ success: null });
     } else if (searchParams.success === "checkout") {
       showToast("Check-Out berhasil! Sampai jumpa besok.", "success");
+      setSearchParams({ success: null });
+    } else if (searchParams.success === "testimoni") {
+      showToast(
+        "Testimoni berhasil dikirim! Terima kasih sudah berbagi cerita.",
+        "success",
+      );
       setSearchParams({ success: null });
     }
   });
@@ -51,6 +67,10 @@ export default function Dashboard() {
   createEffect(() => {
     if ((checkingOut.result as any) instanceof Error)
       showToast((checkingOut.result as any as Error).message, "error");
+  });
+  createEffect(() => {
+    if ((submittingTestimoni.result as any) instanceof Error)
+      showToast((submittingTestimoni.result as any as Error).message, "error");
   });
 
   const now = () => {
@@ -289,6 +309,124 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Alumni: server menolak semua aksi absensi, jadi kartunya diganti
+          kartu alumni + form testimoni "Kata Mereka" (1x kirim per alumni). */}
+      <Show when={isAlumni()}>
+        <div
+          id="testimoni"
+          class="stat-card fade-in-up stagger-5"
+          style={{ "margin-top": "var(--space-4)", "scroll-margin-top": "var(--space-4)" }}
+        >
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+            <div style="background: rgba(225, 29, 72, 0.1); padding: 10px; border-radius: var(--radius-md); display: flex; flex-shrink: 0;">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="color: var(--color-primary);"
+                aria-hidden="true"
+              >
+                <path d="M22 10 12 5 2 10l10 5 10-5z" />
+                <path d="M6 12.5V16c0 1.66 2.69 3 6 3s6-1.34 6-3v-3.5" />
+                <path d="M22 10v6" />
+              </svg>
+            </div>
+            <div>
+              <h2 style="font-family: var(--font-headline); font-weight: 700; font-size: 1.2rem; margin: 0; color: var(--color-text);">
+                Kamu Resmi Alumni SIGMA
+              </h2>
+              <p style="margin: 2px 0 0; font-size: 13px; color: var(--color-text-secondary);">
+                Batch magangmu sudah selesai. Terima kasih atas kontribusimu di
+                PT SBI Cilacap.
+              </p>
+            </div>
+          </div>
+
+          <Show
+            when={myTestimoni()}
+            fallback={
+              <form action={submitTestimoniAlumni} method="post">
+                <p style="font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; margin: 0 0 var(--space-3);">
+                  Bagikan pengalaman magangmu &mdash; ceritamu akan tampil di
+                  bagian <strong>&ldquo;Kata Mereka&rdquo;</strong> pada halaman
+                  depan SIGMA dan membantu calon peserta magang berikutnya.
+                </p>
+                <div class="form-group">
+                  <label for="testimoni-message">Testimoni</label>
+                  <textarea
+                    id="testimoni-message"
+                    name="message"
+                    rows="4"
+                    required
+                    minLength={10}
+                    maxLength={TESTIMONI_MAX}
+                    placeholder="Ceritakan pengalaman, ilmu baru, dan kesan selama magang di PT SBI Cilacap..."
+                    onInput={(e) => setTestimoniLen(e.currentTarget.value.length)}
+                  />
+                  <div style="display: flex; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">
+                    <span>
+                      Tampil sebagai: <strong>{user()?.fullName}</strong>
+                      {" — "}
+                      {user()?.divisi
+                        ? `Alumni Divisi ${user()!.divisi}`
+                        : "Alumni Magang"}
+                      {user()?.batch ? `, ${user()!.batch!.name}` : ""}
+                    </span>
+                    <span>
+                      {testimoniLen()}/{TESTIMONI_MAX}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  class="btn-primary"
+                  type="submit"
+                  disabled={submittingTestimoni.pending}
+                  style="width: auto; padding: 0 var(--space-4);"
+                >
+                  {submittingTestimoni.pending
+                    ? "Mengirim..."
+                    : "Kirim Testimoni"}
+                </button>
+              </form>
+            }
+          >
+            {(t) => (
+              <div>
+                <p style="font-size: 14px; color: var(--color-text-secondary); margin: 0 0 var(--space-2);">
+                  Testimoni yang kamu kirim:
+                </p>
+                <blockquote style="margin: 0; padding: var(--space-3) var(--space-4); border-left: 3px solid var(--color-primary); background: rgba(225, 29, 72, 0.05); border-radius: var(--radius-md); line-height: 1.6;">
+                  &ldquo;{t().message}&rdquo;
+                </blockquote>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: var(--space-2); flex-wrap: wrap;">
+                  <span
+                    class={`badge ${t().isActive ? "badge-approved" : "badge-rejected"}`}
+                  >
+                    {t().isActive
+                      ? "Tayang di halaman depan"
+                      : "Disembunyikan admin"}
+                  </span>
+                  <span style="font-size: 12px; color: var(--color-text-secondary);">
+                    Dikirim{" "}
+                    {new Date(t().createdAt).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+              </div>
+            )}
+          </Show>
+        </div>
+      </Show>
+
+      <Show when={!isAlumni()}>
       <div
         class="stat-card fade-in-up stagger-5"
         style={{ "margin-top": "var(--space-4)" }}
@@ -458,6 +596,7 @@ export default function Dashboard() {
           </div>
         </Show>
       </div>
+      </Show>
     </div>
   );
 }

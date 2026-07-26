@@ -59,6 +59,7 @@ model User {
   absensi   Absensi[]
   izin      Izin[]
   auditLogs AuditLog[]
+  testimoni LandingTestimoni?
 }
 
 model Divisi {
@@ -155,6 +156,11 @@ model LandingListItem {
 
 model LandingTestimoni {
   id        String   @id @default(uuid())
+  // Terisi jika dikirim alumni dari dashboard (1 testimoni per user);
+  // null untuk data lama buatan admin. SetNull: konten tetap tampil
+  // walau akun alumninya dihapus.
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   name      String
   roleInfo  String?
   message   String   @db.Text

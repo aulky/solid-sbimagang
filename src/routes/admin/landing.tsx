@@ -14,7 +14,6 @@ import {
   updateLandingListItem,
   deleteLandingListItem,
   getAdminTestimoni,
-  createTestimoni,
   updateTestimoni,
   deleteTestimoni,
   getAdminKuota,
@@ -536,7 +535,6 @@ function LandingListTab(props: { section: "FAQ" | "SYARAT"; label: string }) {
 
 function TestimoniTab() {
   const list = createAsync(() => getAdminTestimoni());
-  const [showCreate, setShowCreate] = createSignal(false);
   const [editingItem, setEditingItem] = createSignal<{
     id: string;
     name: string;
@@ -549,21 +547,10 @@ function TestimoniTab() {
     id: string;
     name: string;
   } | null>(null);
-  let createFormRef: HTMLFormElement | undefined;
 
-  const creating = useSubmission(createTestimoni);
   const updating = useSubmission(updateTestimoni);
   const deleting = useSubmission(deleteTestimoni);
 
-  let prevCreatingPending = false;
-  createEffect(() => {
-    const pending = !!creating.pending;
-    if (prevCreatingPending && !pending && !creating.error) {
-      createFormRef?.reset();
-      setShowCreate(false);
-    }
-    prevCreatingPending = pending;
-  });
   let prevUpdatingPending = false;
   createEffect(() => {
     const pending = !!updating.pending;
@@ -578,10 +565,6 @@ function TestimoniTab() {
   });
 
   createEffect(() => {
-    if (creating.result instanceof Error)
-      showToast(creating.result.message, "error");
-  });
-  createEffect(() => {
     if ((updating.result as any) instanceof Error)
       showToast((updating.result as any as Error).message, "error");
   });
@@ -592,62 +575,31 @@ function TestimoniTab() {
 
   return (
     <div>
-      <div style="display: flex; justify-content: flex-end; margin-bottom: var(--space-3);">
-        <button
-          class="btn-primary"
-          style="width: auto; padding: 0 var(--space-4); height: 40px;"
-          onClick={() => setShowCreate(true)}
+      <div
+        style="display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); background: rgba(37, 99, 235, 0.08); border-left: 4px solid var(--color-info); border-radius: var(--radius-md); font-size: 13px; color: var(--color-text-secondary); line-height: 1.5;"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="flex-shrink: 0; margin-top: 2px; color: var(--color-info);"
+          aria-hidden="true"
         >
-          Tambah Testimoni
-        </button>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+        <span>
+          Testimoni dikirim langsung oleh <strong>alumni</strong> dari dashboard
+          mereka setelah batch magang selesai. Admin hanya dapat mengedit,
+          menonaktifkan, atau menghapus testimoni yang masuk.
+        </span>
       </div>
-
-      <Show when={showCreate()}>
-        <Portal>
-          <div class="modal-overlay" onClick={() => setShowCreate(false)}>
-            <div class="modal modal-animate" onClick={(e) => e.stopPropagation()}>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
-                <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">
-                  Tambah Testimoni
-                </h3>
-                <button
-                  class="theme-toggle"
-                  style="font-size: 24px; padding: 0; cursor: pointer;"
-                  onClick={() => setShowCreate(false)}
-                >
-                  ×
-                </button>
-              </div>
-              <form ref={createFormRef} action={createTestimoni} method="post">
-                <div class="form-group">
-                  <label>Nama</label>
-                  <input name="name" required minLength={2} placeholder="Nama anak magang/alumni" />
-                </div>
-                <div class="form-group">
-                  <label>Peran / Divisi</label>
-                  <input name="roleInfo" placeholder="Contoh: Alumni Divisi IT, Batch 2025" />
-                </div>
-                <div class="form-group">
-                  <label>Testimoni</label>
-                  <textarea name="message" rows="4" required minLength={5} placeholder="Isi testimoni" />
-                </div>
-                <div class="form-group">
-                  <label>Urutan</label>
-                  <input name="order" type="number" min="0" value="0" />
-                </div>
-                <div style="display: flex; gap: var(--space-2); margin-top: var(--space-4);">
-                  <button class="btn-primary" type="submit" disabled={creating.pending}>
-                    {creating.pending ? "Menyimpan..." : "Simpan"}
-                  </button>
-                  <button class="btn-ghost" type="button" onClick={() => setShowCreate(false)}>
-                    Batal
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </Portal>
-      </Show>
 
       <Show when={editingItem()}>
         {(item) => (
@@ -771,6 +723,7 @@ function TestimoniTab() {
               <th>Nama</th>
               <th>Peran</th>
               <th>Testimoni</th>
+              <th>Pengirim</th>
               <th>Urutan</th>
               <th>Status</th>
               <th>Aksi</th>
@@ -782,10 +735,10 @@ function TestimoniTab() {
               fallback={
                 <tr>
                   <td
-                    colspan="6"
+                    colspan="7"
                     style="text-align: center; color: var(--color-text-secondary); padding: var(--space-5);"
                   >
-                    Belum ada data testimoni.
+                    Belum ada testimoni yang dikirim alumni.
                   </td>
                 </tr>
               }
@@ -800,6 +753,18 @@ function TestimoniTab() {
                       title={item.message}
                     >
                       {item.message}
+                    </td>
+                    <td>
+                      <Show
+                        when={item.user}
+                        fallback={
+                          <span style="color: var(--color-text-secondary);">
+                            Data lama
+                          </span>
+                        }
+                      >
+                        {(u) => <span>@{u().username}</span>}
+                      </Show>
                     </td>
                     <td>{item.order}</td>
                     <td>
