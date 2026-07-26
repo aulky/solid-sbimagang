@@ -162,13 +162,13 @@ export default function Laporan() {
   return (
     <main>
       <div
-        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);"
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3);"
         class="no-print"
       >
         <h1 class="page-title" style="margin-bottom: 0;">
           Laporan Absensi
         </h1>
-        <div style="display: flex; gap: var(--space-2);">
+        <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
           <button
             onClick={downloadXLSX}
             class="btn-primary"

@@ -144,7 +144,7 @@ export default function AdminBatch() {
 
   return (
     <main class="p-4">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3); text-align: left;">
         <h1 class="page-title" style="margin-bottom: 0;">
           Kelola Batch Magang
         </h1>

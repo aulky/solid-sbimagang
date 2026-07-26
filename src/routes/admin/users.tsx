@@ -186,11 +186,11 @@ export default function AdminUsers() {
 
   return (
     <main class="p-4">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3); text-align: left;">
         <h1 class="page-title" style="margin-bottom: 0;">
           Kelola Pengguna
         </h1>
-        <div style="display: flex; gap: var(--space-2);">
+        <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
           <button
             class="btn-ghost"
             style="width: auto; padding: 0 var(--space-4); height: 40px;"

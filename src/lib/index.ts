@@ -1202,3 +1202,357 @@ export const deleteBatch = action(async (formData: FormData) => {
   );
   return redirect("/admin/batch?success=delete");
 });
+
+//  PUBLIC: LANDING PAGE
+
+export const getPublicUser = query(async () => {
+  "use server";
+  try {
+    const session = await getSession();
+    const userId = session.data.userId;
+    if (!userId) return null;
+    const user = await db.user.findUnique({ where: { id: userId } });
+    if (!user || (user as any).status === "NONAKTIF") return null;
+    return { fullName: user.fullName, role: user.role };
+  } catch {
+    return null;
+  }
+}, "publicUser");
+
+export const getLandingSettings = query(async () => {
+  "use server";
+  const settings = await db.landingSettings.findUnique({
+    where: { id: "main" },
+  });
+  return (
+    settings ?? {
+      id: "main",
+      heroTitle: "Program Magang PT Solusi Bangun Indonesia Cilacap",
+      heroSubtitle: "Kembangkan kompetensimu bersama SIGMA",
+      aboutText: null,
+      contactWhatsapp: null,
+      contactEmail: null,
+      contactAddress: null,
+      updatedAt: new Date(),
+    }
+  );
+}, "landingSettings");
+
+export const getPublicKuota = query(async () => {
+  "use server";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const batches = await db.batchMagang.findMany({
+    where: { endDate: { gte: today } },
+    include: { kuotaEntries: { include: { divisi: true } } },
+    orderBy: { startDate: "asc" },
+  });
+  const batchIds = batches.map((b) => b.id);
+  const filledCounts = batchIds.length
+    ? await db.user.groupBy({
+        by: ["batchId", "divisiId"],
+        where: { status: "AKTIF", batchId: { in: batchIds } },
+        _count: { _all: true },
+      })
+    : [];
+  const filledMap = new Map<string, number>();
+  for (const row of filledCounts) {
+    if (row.batchId && row.divisiId) {
+      filledMap.set(`${row.batchId}:${row.divisiId}`, row._count._all);
+    }
+  }
+  return batches.map((b) => ({
+    id: b.id,
+    name: b.name,
+    startDate: b.startDate,
+    endDate: b.endDate,
+    description: b.description,
+    divisi: b.kuotaEntries
+      .map((k) => ({
+        divisiId: k.divisiId,
+        divisiName: k.divisi.name,
+        quota: k.quota,
+        filled: filledMap.get(`${b.id}:${k.divisiId}`) ?? 0,
+      }))
+      .sort((a, c) => a.divisiName.localeCompare(c.divisiName)),
+  }));
+}, "publicKuota");
+
+export const getPublicFaq = query(async () => {
+  "use server";
+  return db.landingListItem.findMany({
+    where: { section: "FAQ", isActive: true },
+    orderBy: { order: "asc" },
+  });
+}, "publicFaq");
+
+export const getPublicSyarat = query(async () => {
+  "use server";
+  return db.landingListItem.findMany({
+    where: { section: "SYARAT", isActive: true },
+    orderBy: { order: "asc" },
+  });
+}, "publicSyarat");
+
+export const getPublicTestimoni = query(async () => {
+  "use server";
+  return db.landingTestimoni.findMany({
+    where: { isActive: true },
+    orderBy: { order: "asc" },
+  });
+}, "publicTestimoni");
+
+//  ADMIN: LANDING SETTINGS (HERO & KONTAK)
+
+export const getAdminLandingSettings = query(async () => {
+  "use server";
+  await requireAdmin();
+  const settings = await db.landingSettings.findUnique({
+    where: { id: "main" },
+  });
+  return (
+    settings ?? {
+      id: "main",
+      heroTitle: "",
+      heroSubtitle: "",
+      aboutText: "",
+      contactWhatsapp: "",
+      contactEmail: "",
+      contactAddress: "",
+      updatedAt: new Date(),
+    }
+  );
+}, "adminLandingSettings");
+
+export const updateLandingSettings = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const heroTitle = String(formData.get("heroTitle") || "").trim();
+  const heroSubtitle = String(formData.get("heroSubtitle") || "").trim();
+  const aboutText = String(formData.get("aboutText") || "").trim();
+  const contactWhatsapp = String(formData.get("contactWhatsapp") || "").trim();
+  const contactEmail = String(formData.get("contactEmail") || "").trim();
+  const contactAddress = String(formData.get("contactAddress") || "").trim();
+
+  if (!heroTitle || heroTitle.length < 3)
+    return new Error("Judul hero minimal 3 karakter.");
+
+  const data = {
+    heroTitle,
+    heroSubtitle: heroSubtitle || null,
+    aboutText: aboutText || null,
+    contactWhatsapp: contactWhatsapp || null,
+    contactEmail: contactEmail || null,
+    contactAddress: contactAddress || null,
+  };
+  await db.landingSettings.upsert({
+    where: { id: "main" },
+    create: { id: "main", ...data },
+    update: data,
+  });
+  await logActivity(
+    "UPDATE_LANDING_SETTINGS",
+    "update landing hero/contact success",
+  );
+  return redirect("/admin/landing?tab=hero&success=update");
+});
+
+//  ADMIN: LANDING LIST ITEM (FAQ & SYARAT)
+
+export const getAdminLandingList = query(async (section: "FAQ" | "SYARAT") => {
+  "use server";
+  await requireAdmin();
+  return db.landingListItem.findMany({
+    where: { section },
+    orderBy: { order: "asc" },
+  });
+}, "adminLandingList");
+
+export const createLandingListItem = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const section = String(formData.get("section")) as "FAQ" | "SYARAT";
+  const title = String(formData.get("title") || "").trim();
+  const body = String(formData.get("body") || "").trim();
+  const order = Number(formData.get("order") || 0);
+
+  if (!title || title.length < 3) return new Error("Teks minimal 3 karakter.");
+  if (section === "FAQ" && (!body || body.length < 3))
+    return new Error("Jawaban FAQ minimal 3 karakter.");
+
+  await db.landingListItem.create({
+    data: { section, title, body: section === "FAQ" ? body : null, order },
+  });
+  await logActivity(
+    section === "FAQ" ? "BUAT_FAQ" : "BUAT_SYARAT",
+    `create landing ${section.toLowerCase()} success (${title})`,
+  );
+  return redirect(`/admin/landing?tab=${section.toLowerCase()}&success=create`);
+});
+
+export const updateLandingListItem = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const section = String(formData.get("section")) as "FAQ" | "SYARAT";
+  const title = String(formData.get("title") || "").trim();
+  const body = String(formData.get("body") || "").trim();
+  const order = Number(formData.get("order") || 0);
+  const isActive = formData.get("isActive") === "on";
+
+  if (!title || title.length < 3) return new Error("Teks minimal 3 karakter.");
+  if (section === "FAQ" && (!body || body.length < 3))
+    return new Error("Jawaban FAQ minimal 3 karakter.");
+
+  await db.landingListItem.update({
+    where: { id },
+    data: { title, body: section === "FAQ" ? body : null, order, isActive },
+  });
+  await logActivity(
+    section === "FAQ" ? "UPDATE_FAQ" : "UPDATE_SYARAT",
+    `update landing ${section.toLowerCase()} success (${title})`,
+  );
+  return redirect(`/admin/landing?tab=${section.toLowerCase()}&success=update`);
+});
+
+export const deleteLandingListItem = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const section = String(formData.get("section")) as "FAQ" | "SYARAT";
+  const target = await db.landingListItem.findUnique({ where: { id } });
+  await db.landingListItem.delete({ where: { id } });
+  await logActivity(
+    section === "FAQ" ? "HAPUS_FAQ" : "HAPUS_SYARAT",
+    `delete landing ${section.toLowerCase()} success (${target?.title ?? ""})`,
+  );
+  return redirect(`/admin/landing?tab=${section.toLowerCase()}&success=delete`);
+});
+
+//  ADMIN: LANDING TESTIMONI
+
+export const getAdminTestimoni = query(async () => {
+  "use server";
+  await requireAdmin();
+  return db.landingTestimoni.findMany({ orderBy: { order: "asc" } });
+}, "adminTestimoni");
+
+export const createTestimoni = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const name = String(formData.get("name") || "").trim();
+  const roleInfo = String(formData.get("roleInfo") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+  const order = Number(formData.get("order") || 0);
+
+  if (!name || name.length < 2) return new Error("Nama minimal 2 karakter.");
+  if (!message || message.length < 5)
+    return new Error("Testimoni minimal 5 karakter.");
+
+  await db.landingTestimoni.create({
+    data: { name, roleInfo: roleInfo || null, message, order },
+  });
+  await logActivity("BUAT_TESTIMONI", `create testimoni success (${name})`);
+  return redirect("/admin/landing?tab=testimoni&success=create");
+});
+
+export const updateTestimoni = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const name = String(formData.get("name") || "").trim();
+  const roleInfo = String(formData.get("roleInfo") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+  const order = Number(formData.get("order") || 0);
+  const isActive = formData.get("isActive") === "on";
+
+  if (!name || name.length < 2) return new Error("Nama minimal 2 karakter.");
+  if (!message || message.length < 5)
+    return new Error("Testimoni minimal 5 karakter.");
+
+  await db.landingTestimoni.update({
+    where: { id },
+    data: { name, roleInfo: roleInfo || null, message, order, isActive },
+  });
+  await logActivity("UPDATE_TESTIMONI", `update testimoni success (${name})`);
+  return redirect("/admin/landing?tab=testimoni&success=update");
+});
+
+export const deleteTestimoni = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const id = String(formData.get("id"));
+  const target = await db.landingTestimoni.findUnique({ where: { id } });
+  await db.landingTestimoni.delete({ where: { id } });
+  await logActivity(
+    "HAPUS_TESTIMONI",
+    `delete testimoni success (${target?.name ?? "Testimoni"})`,
+  );
+  return redirect("/admin/landing?tab=testimoni&success=delete");
+});
+
+//  ADMIN: KUOTA MAGANG (PER BATCH + DIVISI)
+
+export const getAdminKuota = query(async (batchId?: string) => {
+  "use server";
+  await requireAdmin();
+  const divisiList = await db.divisi.findMany({ orderBy: { name: "asc" } });
+  if (!batchId)
+    return divisiList.map((d) => ({ divisi: d, quota: null, filled: 0 }));
+
+  const entries = await db.batchDivisiQuota.findMany({ where: { batchId } });
+  const entryMap = new Map(entries.map((e) => [e.divisiId, e]));
+  const filledCounts = await db.user.groupBy({
+    by: ["divisiId"],
+    where: { batchId, status: "AKTIF" },
+    _count: { _all: true },
+  });
+  const filledMap = new Map(
+    filledCounts
+      .filter((f) => f.divisiId)
+      .map((f) => [f.divisiId as string, f._count._all]),
+  );
+
+  return divisiList.map((d) => ({
+    divisi: d,
+    quota: entryMap.get(d.id)?.quota ?? null,
+    filled: filledMap.get(d.id) ?? 0,
+  }));
+}, "adminKuota");
+
+export const upsertKuota = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const batchId = String(formData.get("batchId"));
+  const divisiId = String(formData.get("divisiId"));
+  const quota = Number(formData.get("quota"));
+
+  if (!batchId) return new Error("Batch harus dipilih.");
+  if (!divisiId) return new Error("Divisi tidak valid.");
+  if (!Number.isFinite(quota) || quota < 0)
+    return new Error("Kuota harus berupa angka 0 atau lebih.");
+
+  await db.batchDivisiQuota.upsert({
+    where: { batchId_divisiId: { batchId, divisiId } },
+    create: { batchId, divisiId, quota },
+    update: { quota },
+  });
+  await logActivity(
+    "UPDATE_KUOTA",
+    `update kuota success (batch=${batchId}, divisi=${divisiId}, quota=${quota})`,
+  );
+  return redirect(`/admin/landing?tab=kuota&batchId=${batchId}&success=update`);
+});
+
+export const deleteKuota = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const batchId = String(formData.get("batchId"));
+  const divisiId = String(formData.get("divisiId"));
+  await db.batchDivisiQuota.deleteMany({ where: { batchId, divisiId } });
+  await logActivity(
+    "HAPUS_KUOTA",
+    `delete kuota success (batch=${batchId}, divisi=${divisiId})`,
+  );
+  return redirect(`/admin/landing?tab=kuota&batchId=${batchId}&success=delete`);
+});

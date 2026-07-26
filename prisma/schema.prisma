@@ -34,6 +34,11 @@ enum IzinStatus {
   REJECTED
 }
 
+enum LandingSection {
+  FAQ
+  SYARAT
+}
+
 model User {
   id        String   @id @default(uuid())
   username  String   @unique
@@ -63,7 +68,8 @@ model Divisi {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  users       User[]
+  users        User[]
+  kuotaEntries BatchDivisiQuota[]
 }
 
 model Absensi {
@@ -121,5 +127,52 @@ model BatchMagang {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  users       User[]
+  users        User[]
+  kuotaEntries BatchDivisiQuota[]
+}
+
+model LandingSettings {
+  id              String   @id @default("main")
+  heroTitle       String
+  heroSubtitle    String?
+  aboutText       String?  @db.Text
+  contactWhatsapp String?
+  contactEmail    String?
+  contactAddress  String?
+  updatedAt       DateTime @updatedAt
+}
+
+model LandingListItem {
+  id        String         @id @default(uuid())
+  section   LandingSection
+  title     String
+  body      String?        @db.Text
+  order     Int            @default(0)
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model LandingTestimoni {
+  id        String   @id @default(uuid())
+  name      String
+  roleInfo  String?
+  message   String   @db.Text
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BatchDivisiQuota {
+  id        String      @id @default(uuid())
+  batchId   String
+  batch     BatchMagang @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  divisiId  String
+  divisi    Divisi      @relation(fields: [divisiId], references: [id], onDelete: Cascade)
+  quota     Int
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([batchId, divisiId])
 }

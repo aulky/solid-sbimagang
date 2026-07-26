@@ -15,7 +15,7 @@ import {
 } from "solid-js";
 import { Portal } from "solid-js/web";
 import { createAsync } from "@solidjs/router";
-import { getUser, logout, logPageAccess } from "~/lib";
+import { getUser, getPublicUser, logout, logPageAccess } from "~/lib";
 import { toastMessage, setToastMessage } from "~/lib/toast";
 import "./app.css";
 
@@ -217,6 +217,7 @@ export default function App() {
             "/admin/laporan": "Laporan Absensi",
             "/admin/settings": "Pengaturan Sistem",
             "/admin/audit-log": "Audit Log Aktivitas",
+            "/admin/landing": "Kelola Landing Page",
           };
           const path = location.pathname;
           const pageTitle = titleMap[path] || "Absensi Magang";
@@ -244,11 +245,18 @@ export default function App() {
           "/admin/laporan",
           "/admin/settings",
           "/admin/audit-log",
+          "/admin/landing",
         ];
         const is404Page = () => !validPaths.includes(location.pathname);
+        const isPublicLandingPage = () => location.pathname === "/";
 
         const user = createAsync(
-          () => (isLoginPage() ? Promise.resolve(null) : getUser()),
+          () =>
+            isLoginPage()
+              ? Promise.resolve(null)
+              : isPublicLandingPage()
+                ? getPublicUser()
+                : getUser(),
           { deferStream: true },
         );
 
@@ -263,15 +271,19 @@ export default function App() {
 
           if (u === undefined) return; // Wait for load
 
+          if (path === "/") {
+            // Landing page publik: anonim tetap di sini, user login diarahkan ke dashboard
+            if (u) navigate(u.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
+            return;
+          }
+
           if (!u) {
             navigate("/login");
           } else {
             const userPaths = ["/dashboard", "/riwayat", "/izin"];
             const isUserPath = userPaths.includes(path);
 
-            if (path === "/") {
-              navigate(u.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
-            } else if (path.startsWith("/admin") && u.role !== "ADMIN") {
+            if (path.startsWith("/admin") && u.role !== "ADMIN") {
               navigate("/unauthorized");
             } else if (isUserPath && u.role === "ADMIN") {
               navigate("/unauthorized");
@@ -626,6 +638,29 @@ export default function App() {
                                 <line x1="3" y1="10" x2="21" y2="10" />
                               </svg>
                               <span>Batch Magang</span>
+                            </a>
+                            <a
+                              class="nav-link"
+                              classList={{
+                                active: location.pathname === "/admin/landing",
+                              }}
+                              href="/admin/landing"
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="2" y1="12" x2="22" y2="12" />
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                              </svg>
+                              <span>Landing Page</span>
                             </a>
                             <a
                               class="nav-link"

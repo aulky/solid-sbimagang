@@ -1,1 +1,0 @@
-function e(u,p){const s=[];if(p<=4)for(let h=1;h<=p;h++)s.push(h);else s.push(1),u<=2?(s.push(2),s.push("..."),s.push(p)):u>=p-1?(s.push("..."),s.push(p-1),s.push(p)):(s.push("..."),s.push(u),s.push("..."),s.push(p));return s}export{e as g};
