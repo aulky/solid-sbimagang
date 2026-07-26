@@ -452,8 +452,8 @@ export default function AdminBatch() {
       <Show when={batchList() && batchList()!.length > 0}>
         <div class="pagination-container">
           <div class="pagination-info">
-            Menampilkan {paginatedBatches().length} dari {batchList()!.length}{" "}
-            batch
+            Showing {paginatedBatches().length} of {batchList()!.length}{" "}
+            entries
           </div>
           <div class="pagination-buttons">
             <button
@@ -461,7 +461,7 @@ export default function AdminBatch() {
               disabled={currentPage() === 1}
               onClick={() => setCurrentPage(currentPage() - 1)}
             >
-              Sebelumnya
+              Previous
             </button>
             <For each={getPageNumbers(currentPage(), totalPages())}>
               {(page) => (
@@ -488,7 +488,7 @@ export default function AdminBatch() {
               disabled={currentPage() === totalPages()}
               onClick={() => setCurrentPage(currentPage() + 1)}
             >
-              Berikutnya
+              Next
             </button>
           </div>
         </div>

@@ -352,8 +352,7 @@ export default function AdminAuditLog() {
         <Show when={(logs()?.total ?? 0) > 0}>
           <div class="pagination-container">
             <div class="pagination-info">
-              Menampilkan {paginatedLogs().length} dari {logs()?.total ?? 0} log
-              aktivitas
+              Showing {paginatedLogs().length} of {logs()?.total ?? 0} entries
             </div>
             <div class="pagination-buttons">
               <button
@@ -361,7 +360,7 @@ export default function AdminAuditLog() {
                 disabled={currentPage() === 1}
                 onClick={() => setCurrentPage(currentPage() - 1)}
               >
-                Sebelumnya
+                Previous
               </button>
               <For each={getPageNumbers(currentPage(), totalPages())}>
                 {(page) => (
@@ -388,7 +387,7 @@ export default function AdminAuditLog() {
                 disabled={currentPage() === totalPages()}
                 onClick={() => setCurrentPage(currentPage() + 1)}
               >
-                Berikutnya
+                Next
               </button>
             </div>
           </div>

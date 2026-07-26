@@ -135,6 +135,18 @@ body {
     box-shadow 0.2s ease;
 }
 
+/* Halaman kartu form (Pengaturan Sistem, Profil, Kelola Landing Page):
+   lebar fluid mengikuti viewport - penuh di layar sempit, tumbuh
+   proporsional di desktop (74vw) dengan batas atas 1040px supaya baris
+   input tetap nyaman dibaca di monitor lebar. width:100% + max-width
+   berarti tidak pernah melebihi container -> aman di semua ukuran. */
+.form-page {
+  width: 100%;
+  max-width: clamp(600px, 74vw, 1040px);
+  margin-inline: auto;
+  text-align: left;
+}
+
 .settings-card {
   background: var(--surface-glass);
   backdrop-filter: blur(16px);
@@ -143,7 +155,18 @@ body {
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   width: 100%;
+  /* WAJIB: tanpa border-box, width 100% + padding 32px + border membuat
+     kartu meluber ~34px keluar tepi kanan viewport di mobile (terpotong
+     overflow-x hidden -> gap kiri-kanan terlihat tidak sama). */
+  box-sizing: border-box;
   box-shadow: var(--shadow-glass);
+}
+
+/* Layar sempit: padding kartu 32px terlalu boros, input jadi sempit. */
+@media (max-width: 640px) {
+  .settings-card {
+    padding: var(--space-4) var(--space-3);
+  }
 }
 
 .filter-card {
@@ -154,6 +177,7 @@ body {
   border-radius: var(--radius-md);
   padding: 12px 16px;
   width: 100%;
+  box-sizing: border-box; /* alasan sama dengan .settings-card */
   box-shadow: var(--shadow-glass);
   transition: none;
   display: flex;
@@ -1778,10 +1802,24 @@ a {
 .landing-page {
   /* Token lokal landing (DESIGN-LANDING.md §2) - jangan pindahkan ke :root. */
   --landing-max-width: 1000px;
-  --landing-hero-gradient: linear-gradient(
-    180deg,
-    rgba(225, 29, 72, 0.08),
-    transparent 70%
+  /* Glow radial multi-stop dari atas-tengah dengan radius px tetap: fade
+     bertahap ke transparent di segala arah, tanpa tepi terlihat. Dipasang
+     di .landing-page (full-width), BUKAN di .landing-hero - elemen hero
+     terkurung lebar shell 1000px sehingga gradasinya terpotong jadi kotak. */
+  --landing-hero-gradient: radial-gradient(
+    1100px 640px at 50% -120px,
+    rgba(225, 29, 72, 0.1) 0%,
+    rgba(225, 29, 72, 0.05) 45%,
+    rgba(225, 29, 72, 0.02) 70%,
+    transparent 100%
+  );
+  /* Glow penutup di dasar halaman (bookend gradient hero) - alasan full-width
+     yang sama: dipasang di .landing-page, bukan di .landing-footer. */
+  --landing-footer-gradient: radial-gradient(
+    1100px 520px at 50% calc(100% + 160px),
+    rgba(225, 29, 72, 0.07) 0%,
+    rgba(225, 29, 72, 0.03) 55%,
+    transparent 100%
   );
   --landing-card-radius: var(--radius-lg);
   --landing-header-h: 56px; /* dipakai scroll-margin-top; di-redeclare di ≤640px */
@@ -1794,9 +1832,9 @@ a {
   width: auto;
   margin: calc(var(--space-6) * -1) calc(var(--space-5) * -1);
   min-height: 100vh;
-  /* Sedikit lebih gelap dari --surface-base: area di luar .landing-shell
-     jadi "gutter" sehingga batas kiri-kanan kolom konten terbaca jelas. */
-  background: #f8fafc;
+  background-color: var(--surface-base);
+  background-image: var(--landing-hero-gradient), var(--landing-footer-gradient);
+  background-repeat: no-repeat;
   color: var(--color-text);
   text-align: left;
 }
@@ -1815,23 +1853,27 @@ a {
 }
 
 [data-theme="dark"] .landing-page {
-  /* Merah 8% praktis tak terlihat di atas #0f172a. */
-  --landing-hero-gradient: linear-gradient(
-    180deg,
-    rgba(225, 29, 72, 0.14),
-    transparent 70%
+  /* Opacity lebih tinggi: merah tipis praktis tak terlihat di atas #0f172a. */
+  --landing-hero-gradient: radial-gradient(
+    1100px 640px at 50% -120px,
+    rgba(251, 113, 133, 0.14) 0%,
+    rgba(251, 113, 133, 0.07) 45%,
+    rgba(225, 29, 72, 0.03) 70%,
+    transparent 100%
   );
-  background: #0b1120;
+  --landing-footer-gradient: radial-gradient(
+    1100px 520px at 50% calc(100% + 160px),
+    rgba(225, 29, 72, 0.12) 0%,
+    rgba(225, 29, 72, 0.05) 55%,
+    transparent 100%
+  );
 }
 
-/* Kolom konten berbatas: semua section + footer hidup di sini. Border samping
-   + latar surface-base yang kontras dengan gutter .landing-page membuat alur
-   baca halaman jelas dari atas ke bawah. */
+/* Kolom konten: sekadar pembatas lebar (tanpa border/gutter kontras -
+   halaman satu permukaan mulus, ritme dibentuk whitespace + eyebrow). */
 .landing-shell {
   max-width: var(--landing-max-width);
   margin-inline: auto;
-  background: var(--surface-base);
-  border-inline: 1px solid var(--color-border);
   min-height: calc(100vh - var(--landing-header-h));
 }
 
@@ -1934,7 +1976,8 @@ a {
 .landing-hero {
   padding: var(--space-8) var(--space-5);
   text-align: center;
-  background: var(--landing-hero-gradient);
+  /* Latar glow ada di .landing-page (lihat --landing-hero-gradient) supaya
+     membentang full-width, bukan terpotong di lebar shell. */
 }
 
 .landing-hero h1 {
@@ -2027,11 +2070,10 @@ a {
 }
 
 .landing-section {
-  /* max-width/margin auto pindah ke .landing-shell; section cukup padding. */
-  padding: var(--space-6) var(--space-5);
-  /* Garis pembatas antar-section: bersama border samping shell, tiap section
-     terbaca sebagai blok yang jelas awal-akhirnya. */
-  border-top: 1px solid var(--color-border);
+  /* max-width/margin auto pindah ke .landing-shell; section cukup padding.
+     Tanpa garis pembatas antar-section: pemisahan cukup lewat whitespace
+     (padding vertikal besar) + eyebrow sebagai penanda awal section. */
+  padding: var(--space-8) var(--space-5);
   /* Anchor jump mendarat di bawah header sticky, bukan tertutup olehnya. */
   scroll-margin-top: calc(var(--landing-header-h) + var(--space-3));
 }
@@ -2123,16 +2165,94 @@ a {
   box-shadow: var(--shadow-glass);
 }
 
+/* Baris kepala kartu: nama batch + chip status. flex-wrap supaya nama batch
+   CMS yang panjang turun baris alih-alih menabrak chip. */
+.landing-batch-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-1);
+}
+
 .landing-batch-card h3 {
   font-family: var(--font-headline);
-  margin: 0 0 var(--space-1);
+  margin: 0;
+  min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/* Chip status timeline batch (Sedang Berjalan / Akan Datang) - penting saat
+   banyak batch tampil bersamaan supaya pengunjung langsung tahu mana yang
+   aktif. Batch lewat endDate tidak pernah dirender (difilter server). */
+.landing-batch-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  flex-shrink: 0;
+  background-color: rgba(22, 163, 74, 0.12);
+  color: #166534;
+}
+
+.landing-batch-status.is-upcoming {
+  background-color: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+[data-theme="dark"] .landing-batch-status {
+  background-color: rgba(22, 163, 74, 0.2);
+  color: var(--color-success);
+}
+
+[data-theme="dark"] .landing-batch-status.is-upcoming {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
 }
 
 .landing-batch-meta {
   color: var(--color-text-secondary);
   font-size: 13px;
   margin-bottom: var(--space-3);
+}
+
+/* Ringkasan kuota total batch = penjumlahan seluruh kuota divisi (konsep
+   bisnis: batch tidak punya angka kuota sendiri). Panel tint merah halus
+   supaya terbaca sebagai agregat, beda kelas dengan row per-divisi. */
+.landing-batch-total {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: rgba(225, 29, 72, 0.05);
+  margin-bottom: var(--space-3);
+  font-size: 14px;
+}
+
+[data-theme="dark"] .landing-batch-total {
+  background: rgba(225, 29, 72, 0.1);
+}
+
+.landing-batch-total-label {
+  font-weight: 700;
+  font-family: var(--font-headline);
+}
+
+.landing-batch-total-meta {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.landing-batch-divisi-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2);
 }
 
 .landing-divisi-grid {
@@ -2166,9 +2286,10 @@ a {
 }
 
 /* DESIGN-LANDING §3.4: 13px/600 sentence case, bukan 12px UPPERCASE dashboard.
-   Selektor descendant dari .landing-divisi-row (satu-satunya file) -> tidak
-   bisa bocor ke .badge dashboard manapun. */
-.landing-divisi-row .badge {
+   Selektor descendant dari .landing-divisi-row/.landing-batch-total
+   (satu-satunya file) -> tidak bisa bocor ke .badge dashboard manapun. */
+.landing-divisi-row .badge,
+.landing-batch-total .badge {
   font-size: 13px;
   font-weight: 600;
   text-transform: none;
@@ -2178,16 +2299,20 @@ a {
 }
 
 /* Kontras teks badge dinaikkan agar lolos WCAG AA (dashboard tidak berubah). */
-.landing-divisi-row .badge-approved {
+.landing-divisi-row .badge-approved,
+.landing-batch-total .badge-approved {
   color: #166534; /* 5.94:1 di atas rgba(22,163,74,.15) pada surface terang */
 }
-.landing-divisi-row .badge-rejected {
+.landing-divisi-row .badge-rejected,
+.landing-batch-total .badge-rejected {
   color: #991b1b; /* 6.55:1 */
 }
-[data-theme="dark"] .landing-divisi-row .badge-approved {
+[data-theme="dark"] .landing-divisi-row .badge-approved,
+[data-theme="dark"] .landing-batch-total .badge-approved {
   color: var(--color-success); /* 4.51:1, sudah lolos */
 }
-[data-theme="dark"] .landing-divisi-row .badge-rejected {
+[data-theme="dark"] .landing-divisi-row .badge-rejected,
+[data-theme="dark"] .landing-batch-total .badge-rejected {
   color: #f87171; /* 5.88:1 */
 }
 
@@ -2215,7 +2340,8 @@ a {
   transition: width 300ms ease;
 }
 
-.landing-divisi-row.is-full .landing-divisi-bar-fill {
+.landing-divisi-row.is-full .landing-divisi-bar-fill,
+.landing-batch-total.is-full .landing-divisi-bar-fill {
   background-color: var(--color-error);
 }
 
@@ -2540,6 +2666,55 @@ a {
   color: #fb7185; /* 5.62:1 */
 }
 
+/* ---------- Marquee testimoni (>=3 item) ----------
+   Track berisi 2 salinan identik daftar kartu; keyframe menggeser separuh
+   lebar track + separuh gap antar salinan sehingga frame terakhir persis
+   sama dengan frame pertama = loop tanpa lompatan. */
+.landing-testimoni-marquee {
+  overflow: hidden;
+  /* Fade tepi kiri-kanan: kartu muncul/menghilang lembut, bukan terpotong. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+}
+
+.landing-testimoni-track {
+  display: flex;
+  gap: var(--space-3);
+  width: max-content;
+  /* Durasi dasar; dioverride inline proporsional jumlah item (7s/item). */
+  animation: landing-marquee 42s linear infinite;
+}
+
+.landing-testimoni-track .landing-testimoni-card {
+  width: min(340px, 78vw);
+  flex-shrink: 0;
+}
+
+/* Kursor di atas deretan kartu (atau fokus keyboard di dalamnya) -> berhenti;
+   kursor keluar -> jalan lagi. */
+.landing-testimoni-marquee:hover .landing-testimoni-track,
+.landing-testimoni-marquee:focus-within .landing-testimoni-track {
+  animation-play-state: paused;
+}
+
+@keyframes landing-marquee {
+  to {
+    transform: translateX(calc(-50% - var(--space-3) / 2));
+  }
+}
+
 .landing-testimoni-card .name {
   font-weight: 700;
   font-family: var(--font-headline);
@@ -2555,8 +2730,9 @@ a {
 /* ---------- Footer ---------- */
 
 .landing-footer {
-  border-top: 1px solid var(--color-border);
-  padding: var(--space-6) var(--space-5);
+  /* Tanpa latar/garis sendiri: glow penutup ada di .landing-page
+     (--landing-footer-gradient) supaya full-width, tidak terpotong shell. */
+  padding: var(--space-8) var(--space-5) var(--space-6);
   text-align: center;
   color: var(--color-text-secondary);
   scroll-margin-top: calc(var(--landing-header-h) + var(--space-3));
@@ -2659,18 +2835,11 @@ a {
   .landing-footer {
     padding-bottom: calc(var(--space-10) + env(safe-area-inset-bottom, 0px));
   }
-
-  /* Di bawah ~1024px shell praktis selebar layar (max-width 1000px): border
-     samping jadi garis nyasar di tepi viewport, gutter pun tak terlihat -
-     matikan saja. */
-  .landing-shell {
-    border-inline: none;
-  }
 }
 
 @media (max-width: 768px) {
   .landing-section {
-    padding: var(--space-5) var(--space-4);
+    padding: var(--space-6) var(--space-4);
   }
 }
 
@@ -2743,6 +2912,52 @@ a {
   .landing-page .skeleton,
   .landing-batch-skeleton .skeleton {
     animation: none;
+  }
+
+  /* Marquee diam; konten tetap bisa dijangkau lewat scroll horizontal.
+     Salinan duplikat (aria-hidden) tanpa animasi hanya membingungkan ->
+     sembunyikan. */
+  .landing-testimoni-track {
+    animation: none;
+  }
+
+  .landing-testimoni-marquee {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .landing-testimoni-track .landing-testimoni-card[aria-hidden="true"] {
+    display: none;
+  }
+}
+
+/* ---------- Reveal on scroll ----------
+   .reveal-ready dipasang via JS setelah IntersectionObserver terkonfirmasi
+   ada: tanpa JS/IO tidak ada elemen yang pernah disembunyikan (SSR utuh).
+   Pakai animation (bukan transition) supaya tidak bentrok dengan transition
+   hover milik kartu; fill-mode backwards menahan keadaan tersembunyi selama
+   --reveal-delay (stagger), lalu elemen kembali ke style normal setelah
+   selesai sehingga hover transform/box-shadow tetap berfungsi penuh. */
+@media (prefers-reduced-motion: no-preference) {
+  .landing-page.reveal-ready [data-reveal]:not(.is-revealed) {
+    opacity: 0;
+  }
+
+  .landing-page.reveal-ready [data-reveal].is-revealed {
+    animation: landing-reveal 550ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+}
+
+@keyframes landing-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 

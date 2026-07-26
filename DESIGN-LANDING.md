@@ -52,7 +52,12 @@ Dokumen ini adalah spesifikasi desain **khusus halaman landing publik** (`/`, `s
 ```css
 .landing-page {
   --landing-max-width: 1000px;      /* lebar konten section, sudah dipakai */
-  --landing-hero-gradient: linear-gradient(180deg, rgba(225,29,72,.08), transparent 70%);
+  /* Glow radial multi-stop dari atas-tengah (radius px tetap), fade bertahap
+     sampai transparent — dipasang sebagai background-image .landing-page
+     (full-width), bukan di .landing-hero yang terkurung lebar shell. */
+  --landing-hero-gradient: radial-gradient(1100px 640px at 50% -120px,
+    rgba(225,29,72,.10) 0%, rgba(225,29,72,.05) 45%,
+    rgba(225,29,72,.02) 70%, transparent 100%);
   --landing-card-radius: var(--radius-lg);
 }
 ```

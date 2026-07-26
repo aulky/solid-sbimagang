@@ -28,7 +28,7 @@ export default function AdminSettings() {
   });
 
   return (
-    <main style="max-width: 600px; margin: 0 auto; text-align: left;">
+    <main class="form-page">
       <h1 class="page-title">Pengaturan Sistem</h1>
 
       <Show

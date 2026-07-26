@@ -446,8 +446,8 @@ export default function Laporan() {
       <Show when={filteredRecords().length > 0}>
         <div class="pagination-container no-print">
           <div class="pagination-info">
-            Menampilkan {paginatedRecords().length} dari{" "}
-            {filteredRecords().length} rekap absensi
+            Showing {paginatedRecords().length} of{" "}
+            {filteredRecords().length} entries
           </div>
           <div class="pagination-buttons">
             <button
@@ -455,7 +455,7 @@ export default function Laporan() {
               disabled={currentPage() === 1}
               onClick={() => setCurrentPage(currentPage() - 1)}
             >
-              Sebelumnya
+              Previous
             </button>
             <For each={getPageNumbers(currentPage(), totalPages())}>
               {(page) => (
@@ -482,7 +482,7 @@ export default function Laporan() {
               disabled={currentPage() === totalPages()}
               onClick={() => setCurrentPage(currentPage() + 1)}
             >
-              Berikutnya
+              Next
             </button>
           </div>
         </div>

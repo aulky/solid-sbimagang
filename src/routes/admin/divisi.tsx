@@ -369,8 +369,8 @@ export default function AdminDivisi() {
       <Show when={divisiList() && divisiList()!.length > 0}>
         <div class="pagination-container">
           <div class="pagination-info">
-            Menampilkan {paginatedDivisi().length} dari {divisiList()!.length}{" "}
-            divisi
+            Showing {paginatedDivisi().length} of {divisiList()!.length}{" "}
+            entries
           </div>
           <div class="pagination-buttons">
             <button
@@ -378,7 +378,7 @@ export default function AdminDivisi() {
               disabled={currentPage() === 1}
               onClick={() => setCurrentPage(currentPage() - 1)}
             >
-              Sebelumnya
+              Previous
             </button>
             <For each={getPageNumbers(currentPage(), totalPages())}>
               {(page) => (
@@ -405,7 +405,7 @@ export default function AdminDivisi() {
               disabled={currentPage() === totalPages()}
               onClick={() => setCurrentPage(currentPage() + 1)}
             >
-              Berikutnya
+              Next
             </button>
           </div>
         </div>

@@ -58,7 +58,7 @@ export default function Profil() {
   });
 
   return (
-    <main style="max-width: 600px; margin: 0 auto; text-align: left;">
+    <main class="form-page">
       <h1 class="page-title">Profil Saya</h1>
 
       <Show

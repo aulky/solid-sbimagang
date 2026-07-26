@@ -1200,8 +1200,8 @@ export default function AdminUsers() {
         <Show when={(usersData()?.total ?? 0) > 0}>
           <div class="pagination-container">
             <div class="pagination-info">
-              Menampilkan {paginatedUsers().length} dari{" "}
-              {usersData()?.total ?? 0} pengguna
+              Showing {paginatedUsers().length} of{" "}
+              {usersData()?.total ?? 0} entries
             </div>
             <div class="pagination-buttons">
               <button
@@ -1209,7 +1209,7 @@ export default function AdminUsers() {
                 disabled={currentPage() === 1}
                 onClick={() => setCurrentPage(currentPage() - 1)}
               >
-                Sebelumnya
+                Previous
               </button>
               <For each={getPageNumbers(currentPage(), totalPages())}>
                 {(page) => (
@@ -1236,7 +1236,7 @@ export default function AdminUsers() {
                 disabled={currentPage() === totalPages()}
                 onClick={() => setCurrentPage(currentPage() + 1)}
               >
-                Berikutnya
+                Next
               </button>
             </div>
           </div>

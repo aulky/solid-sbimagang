@@ -1211,9 +1211,16 @@ export const getPublicUser = query(async () => {
     const session = await getSession();
     const userId = session.data.userId;
     if (!userId) return null;
-    const user = await db.user.findUnique({ where: { id: userId } });
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      include: { divisi: true },
+    });
     if (!user || (user as any).status === "NONAKTIF") return null;
-    return { fullName: user.fullName, role: user.role };
+    return {
+      fullName: user.fullName,
+      role: user.role,
+      divisi: user.divisi?.name ?? null,
+    };
   } catch {
     return null;
   }

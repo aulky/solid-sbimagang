@@ -394,8 +394,8 @@ export default function AdminIzin() {
         <Show when={(recordsData()?.total ?? 0) > 0}>
           <div class="pagination-container">
             <div class="pagination-info">
-              Menampilkan {paginatedRecords().length} dari{" "}
-              {recordsData()?.total ?? 0} pengajuan izin
+              Showing {paginatedRecords().length} of{" "}
+              {recordsData()?.total ?? 0} entries
             </div>
             <div class="pagination-buttons">
               <button
@@ -403,7 +403,7 @@ export default function AdminIzin() {
                 disabled={currentPage() === 1}
                 onClick={() => setCurrentPage(currentPage() - 1)}
               >
-                Sebelumnya
+                Previous
               </button>
               <For each={getPageNumbers(currentPage(), totalPages())}>
                 {(page) => (
@@ -430,7 +430,7 @@ export default function AdminIzin() {
                 disabled={currentPage() === totalPages()}
                 onClick={() => setCurrentPage(currentPage() + 1)}
               >
-                Berikutnya
+                Next
               </button>
             </div>
           </div>

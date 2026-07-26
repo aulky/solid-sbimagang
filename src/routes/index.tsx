@@ -49,6 +49,21 @@ const persenTerisi = (d: DivisiKuota) => {
 };
 
 /**
+ * Kuota batch = penjumlahan seluruh kuota divisi di batch tersebut (konsep
+ * bisnis: batch tidak punya angka kuota sendiri, ia agregat per-divisi).
+ */
+const batchTotals = (divisi: readonly DivisiKuota[]) => {
+  const quota = divisi.reduce((s, d) => s + d.quota, 0);
+  const filled = divisi.reduce((s, d) => s + d.filled, 0);
+  const sisa = Math.max(0, quota - filled);
+  const pct =
+    quota > 0
+      ? Math.min(100, Math.max(0, Math.round((filled / quota) * 100)))
+      : 100;
+  return { quota, filled, sisa, pct };
+};
+
+/**
  * Divisi dengan sisa kuota tampil lebih dulu, "Penuh" di bawah.
  * .slice() wajib: array ini milik cache createAsync, tidak boleh dimutasi.
  * Array#sort stabil (ES2019+) sehingga urutan alfabet dari server tetap
@@ -65,6 +80,56 @@ const initialOf = (name: string | null | undefined) => {
   if (!trimmed) return "?";
   return (Array.from(trimmed)[0] ?? "?").toUpperCase();
 };
+
+type TestimoniItem = {
+  name: string;
+  roleInfo: string | null;
+  message: string;
+};
+
+/** Kartu testimoni tunggal - dipakai grid statis (<3 item) & track marquee. */
+function TestimoniCard(props: {
+  t: TestimoniItem;
+  /** Salinan kedua track marquee: murni dekoratif, disembunyikan dari AT. */
+  dup?: boolean;
+  /** Delay reveal (mode grid); undefined = tanpa data-reveal (mode marquee). */
+  revealDelay?: string;
+}) {
+  return (
+    <div
+      class="landing-testimoni-card"
+      aria-hidden={props.dup ? "true" : undefined}
+      data-reveal={props.revealDelay !== undefined ? "" : undefined}
+      style={
+        props.revealDelay !== undefined
+          ? { "--reveal-delay": props.revealDelay }
+          : undefined
+      }
+    >
+      <div class="landing-testimoni-head">
+        <div class="user-avatar landing-testimoni-avatar" aria-hidden="true">
+          {initialOf(props.t.name)}
+        </div>
+        <div>
+          <div class="name">{props.t.name}</div>
+          <Show when={props.t.roleInfo}>
+            <div class="role">{props.t.roleInfo}</div>
+          </Show>
+        </div>
+      </div>
+      <p class="landing-testimoni-msg">&ldquo;{props.t.message}&rdquo;</p>
+    </div>
+  );
+}
+
+/**
+ * Status timeline batch untuk chip di kartu. Batch yang sudah lewat endDate
+ * tidak pernah sampai ke sini (sudah difilter server di getPublicKuota:
+ * endDate >= hari ini), jadi hasilnya hanya "berjalan" atau "akan-datang".
+ * endDate dianggap inklusif sampai akhir hari, konsisten dengan filter server.
+ */
+const batchStatus = (b: { startDate: string | Date }) =>
+  new Date() < new Date(b.startDate) ? "akan-datang" : "berjalan";
 
 const NAV_ITEMS = ["tentang", "alur", "kuota", "syarat", "faq", "kontak"] as const;
 const NAV_LABELS: Record<(typeof NAV_ITEMS)[number], string> = {
@@ -148,6 +213,20 @@ export default function Home() {
   const [activeId, setActiveId] = createSignal("");
   let pageRef!: HTMLDivElement;
 
+  // Scroll ke section tanpa menyentuh URL (tidak ada #hash): preventDefault
+  // membatalkan navigasi hash bawaan, scrollIntoView menghormati
+  // scroll-margin-top section sehingga judul mendarat di bawah header sticky.
+  // href="#id" tetap dipertahankan sebagai fallback no-JS/aksesibilitas.
+  const goTo = (id: string) => (e: MouseEvent) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    const reduce = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+  };
+
   // Sinkron dengan mekanisme tema app-wide: data-theme sudah di-set lebih
   // dulu oleh inline script anti-FOYT di entry-server.tsx (sebelum hydrate),
   // signal lokal ini hanya perlu dikoreksi sekali di onMount, persis pola
@@ -203,7 +282,9 @@ export default function Home() {
     const spyOffset = () => {
       const header = pageRef.querySelector<HTMLElement>(".landing-header");
       const h = header ? header.getBoundingClientRect().height : 56;
-      return h + 12;
+      // +18 > scroll-margin-top section (header + 16px): section yang baru
+      // di-scroll lewat goTo() langsung terhitung "aktif" oleh garis spy.
+      return h + 18;
     };
 
     const recompute = () => {
@@ -252,6 +333,43 @@ export default function Home() {
     });
   });
 
+  // Reveal-on-scroll: elemen [data-reveal] fade+slide halus saat masuk
+  // viewport, sekali saja. Dibangun ulang saat data async berubah supaya
+  // elemen yang baru dirender ikut diobservasi (elemen yang sudah ter-reveal
+  // mempertahankan class-nya karena node DOM-nya tidak dibuat ulang).
+  createEffect(() => {
+    void settings()?.aboutText;
+    void syarat()?.length;
+    void faq()?.length;
+    void kuota()?.length;
+    void testimoni()?.length;
+
+    if (typeof IntersectionObserver === "undefined") return;
+    // Penanda "JS + IO aktif": CSS hanya menyembunyikan elemen di bawah class
+    // ini, jadi tanpa JS/IO seluruh konten tetap terlihat normal.
+    pageRef.classList.add("reveal-ready");
+
+    const scroller = pageRef.closest<HTMLElement>(".app-main-content");
+    const els = Array.from(
+      pageRef.querySelectorAll<HTMLElement>("[data-reveal]:not(.is-revealed)"),
+    );
+    if (els.length === 0) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-revealed");
+            io.unobserve(entry.target);
+          }
+        }
+      },
+      { root: scroller, rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
+    );
+    for (const el of els) io.observe(el);
+    onCleanup(() => io.disconnect());
+  });
+
   return (
     <div class="landing-page" ref={pageRef}>
       <header class="landing-header">
@@ -262,7 +380,6 @@ export default function Home() {
             alt="Logo SIGMA"
             style="height: 36px;"
           />
-          <span>SIGMA</span>
         </div>
         <nav class="landing-nav">
           <For each={NAV_ITEMS}>
@@ -270,6 +387,7 @@ export default function Home() {
               <Show when={navWhen[id]()}>
                 <a
                   href={`#${id}`}
+                  onClick={goTo(id)}
                   classList={{ active: activeId() === id }}
                   aria-current={activeId() === id ? "true" : undefined}
                 >
@@ -359,15 +477,21 @@ export default function Home() {
       <div class="landing-shell">
 
       <section class="landing-hero">
-        <h1>
+        <h1 data-reveal="">
           {settings()?.heroTitle ??
             "Program Magang PT Solusi Bangun Indonesia Cilacap"}
         </h1>
         <Show when={settings()?.heroSubtitle}>
-          <p>{settings()!.heroSubtitle}</p>
+          <p data-reveal="" style={{ "--reveal-delay": "90ms" }}>
+            {settings()!.heroSubtitle}
+          </p>
         </Show>
-        <div class="landing-hero-actions">
-          <a href="#kuota" class="btn-primary landing-cta">
+        <div
+          class="landing-hero-actions"
+          data-reveal=""
+          style={{ "--reveal-delay": "180ms" }}
+        >
+          <a href="#kuota" class="btn-primary landing-cta" onClick={goTo("kuota")}>
             <span>Lihat Kuota Tersedia</span>
             <svg
               width="18"
@@ -384,14 +508,18 @@ export default function Home() {
               <polyline points="12 5 19 12 12 19" />
             </svg>
           </a>
-          <a href="#alur" class="btn-ghost landing-ghost-cta landing-ghost-cta-lg">
+          <a
+            href="#alur"
+            class="btn-ghost landing-ghost-cta landing-ghost-cta-lg"
+            onClick={goTo("alur")}
+          >
             Pelajari Alurnya
           </a>
         </div>
       </section>
 
       <Show when={settings()?.aboutText}>
-        <section class="landing-section" id="tentang" data-spy="">
+        <section class="landing-section" id="tentang" data-spy="" data-reveal="">
           <span class="landing-eyebrow">Profil Program</span>
           <h2 class="landing-section-title">Tentang Program</h2>
           <p style="color: var(--color-text-secondary); line-height: 1.7; text-align: center; max-width: 720px; margin: 0 auto;">
@@ -400,7 +528,7 @@ export default function Home() {
         </section>
       </Show>
 
-      <section class="landing-section" id="alur" data-spy="">
+      <section class="landing-section" id="alur" data-spy="" data-reveal="">
         <span class="landing-eyebrow">Langkah demi Langkah</span>
         <h2 class="landing-section-title">Alur Program Magang</h2>
         <p class="landing-section-sub">
@@ -410,7 +538,11 @@ export default function Home() {
         <ol class="landing-alur">
           <For each={ALUR_STEPS}>
             {(step, i) => (
-              <li class="landing-alur-step">
+              <li
+                class="landing-alur-step"
+                data-reveal=""
+                style={{ "--reveal-delay": `${i() * 70}ms` }}
+              >
                 <span class="landing-alur-num" aria-hidden="true">
                   {i() + 1}
                 </span>
@@ -421,12 +553,19 @@ export default function Home() {
           </For>
         </ol>
         <p class="landing-alur-cta">
-          Siap memulai? <a href="#kontak">Hubungi HRD</a> atau cek{" "}
-          <a href="#kuota">kuota yang tersedia</a>.
+          Siap memulai?{" "}
+          <a href="#kontak" onClick={goTo("kontak")}>
+            Hubungi HRD
+          </a>{" "}
+          atau cek{" "}
+          <a href="#kuota" onClick={goTo("kuota")}>
+            kuota yang tersedia
+          </a>
+          .
         </p>
       </section>
 
-      <section class="landing-section" id="kuota" data-spy="">
+      <section class="landing-section" id="kuota" data-spy="" data-reveal="">
         <span class="landing-eyebrow">Transparansi Kuota</span>
         <h2 class="landing-section-title">Kuota &amp; Periode Batch</h2>
         <Show
@@ -445,7 +584,11 @@ export default function Home() {
                 <p style="text-align: center; color: var(--color-text-secondary);">
                   Belum ada informasi batch magang yang dibuka saat ini.
                 </p>
-                <a href="#kontak" class="btn-ghost landing-ghost-cta">
+                <a
+                  href="#kontak"
+                  class="btn-ghost landing-ghost-cta"
+                  onClick={goTo("kontak")}
+                >
                   <span>Hubungi HRD untuk info batch berikutnya</span>
                   <svg
                     width="18"
@@ -470,9 +613,25 @@ export default function Home() {
               classList={{ "is-multi": (kuota()?.length ?? 0) > 1 }}
             >
               <For each={kuota()}>
-                {(batch) => (
-                  <div class="landing-batch-card">
-                    <h3>{batch.name}</h3>
+                {(batch, bi) => (
+                  <div
+                    class="landing-batch-card"
+                    data-reveal=""
+                    style={{ "--reveal-delay": `${bi() * 90}ms` }}
+                  >
+                    <div class="landing-batch-head">
+                      <h3>{batch.name}</h3>
+                      <span
+                        class="landing-batch-status"
+                        classList={{
+                          "is-upcoming": batchStatus(batch) === "akan-datang",
+                        }}
+                      >
+                        {batchStatus(batch) === "akan-datang"
+                          ? "Akan Datang"
+                          : "Sedang Berjalan"}
+                      </span>
+                    </div>
                     <div class="landing-batch-meta">
                       {formatDate(batch.startDate)} &ndash;{" "}
                       {formatDate(batch.endDate)}
@@ -490,6 +649,39 @@ export default function Home() {
                         </p>
                       }
                     >
+                      {(() => {
+                        const t = () => batchTotals(batch.divisi);
+                        return (
+                          <div
+                            class="landing-batch-total"
+                            classList={{ "is-full": t().sisa === 0 }}
+                          >
+                            <div class="landing-divisi-head">
+                              <span class="landing-batch-total-label">
+                                Kuota Batch
+                              </span>
+                              <span
+                                class={`badge ${t().sisa > 0 ? "badge-approved" : "badge-rejected"}`}
+                              >
+                                {t().sisa > 0 ? `${t().sisa} Tersedia` : "Penuh"}
+                              </span>
+                            </div>
+                            <div class="landing-divisi-bar" aria-hidden="true">
+                              <span
+                                class="landing-divisi-bar-fill"
+                                style={{ width: `${t().pct}%` }}
+                              />
+                            </div>
+                            <div class="landing-batch-total-meta">
+                              {t().filled} dari {t().quota} kuota terisi &mdash;
+                              total seluruh divisi
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      <div class="landing-batch-divisi-label">
+                        Rincian per Divisi
+                      </div>
                       <div class="landing-divisi-grid">
                         <For each={sortDivisi(batch.divisi)}>
                           {(d) => {
@@ -531,13 +723,13 @@ export default function Home() {
       </section>
 
       <Show when={syarat() && syarat()!.length > 0}>
-        <section class="landing-section" id="syarat" data-spy="">
+        <section class="landing-section" id="syarat" data-spy="" data-reveal="">
           <span class="landing-eyebrow">Sebelum Mendaftar</span>
           <h2 class="landing-section-title">Syarat &amp; Ketentuan</h2>
           <ul class="landing-syarat-list">
             <For each={syarat()}>
-              {(s) => (
-                <li>
+              {(s, i) => (
+                <li data-reveal="" style={{ "--reveal-delay": `${i() * 50}ms` }}>
                   <svg
                     width="16"
                     height="16"
@@ -560,12 +752,16 @@ export default function Home() {
       </Show>
 
       <Show when={faq() && faq()!.length > 0}>
-        <section class="landing-section" id="faq" data-spy="">
+        <section class="landing-section" id="faq" data-spy="" data-reveal="">
           <span class="landing-eyebrow">FAQ</span>
           <h2 class="landing-section-title">Pertanyaan Umum</h2>
           <For each={faq()}>
-            {(f) => (
-              <details class="landing-faq-item">
+            {(f, i) => (
+              <details
+                class="landing-faq-item"
+                data-reveal=""
+                style={{ "--reveal-delay": `${i() * 60}ms` }}
+              >
                 <summary>
                   <span>{f.title}</span>
                   <svg
@@ -590,39 +786,45 @@ export default function Home() {
       </Show>
 
       <Show when={(testimoni()?.length ?? 0) > 0}>
-        <section class="landing-section" id="testimoni">
+        <section class="landing-section" id="testimoni" data-reveal="">
           <span class="landing-eyebrow">Testimoni Alumni</span>
           <h2 class="landing-section-title">Kata Mereka</h2>
           <p class="landing-section-sub">
             Cerita langsung dari para alumni magang PT SBI Cilacap.
           </p>
-          <div class="landing-testimoni-grid">
-            <For each={testimoni()}>
-              {(t) => (
-                <div class="landing-testimoni-card">
-                  <div class="landing-testimoni-head">
-                    <div
-                      class="user-avatar landing-testimoni-avatar"
-                      aria-hidden="true"
-                    >
-                      {initialOf(t.name)}
-                    </div>
-                    <div>
-                      <div class="name">{t.name}</div>
-                      <Show when={t.roleInfo}>
-                        <div class="role">{t.roleInfo}</div>
-                      </Show>
-                    </div>
-                  </div>
-                  <p class="landing-testimoni-msg">&ldquo;{t.message}&rdquo;</p>
-                </div>
-              )}
-            </For>
-          </div>
+          {/* >=3 testimoni: marquee berjalan otomatis, berhenti saat kursor
+              di atasnya. <3: track terlalu pendek untuk loop mulus (celah
+              kosong terlihat) - pakai grid statis biasa. */}
+          <Show
+            when={(testimoni()?.length ?? 0) >= 3}
+            fallback={
+              <div class="landing-testimoni-grid">
+                <For each={testimoni()}>
+                  {(t, i) => (
+                    <TestimoniCard t={t} revealDelay={`${i() * 80}ms`} />
+                  )}
+                </For>
+              </div>
+            }
+          >
+            <div class="landing-testimoni-marquee">
+              <div
+                class="landing-testimoni-track"
+                style={{
+                  "animation-duration": `${testimoni()!.length * 7}s`,
+                }}
+              >
+                <For each={testimoni()}>{(t) => <TestimoniCard t={t} />}</For>
+                <For each={testimoni()}>
+                  {(t) => <TestimoniCard t={t} dup />}
+                </For>
+              </div>
+            </div>
+          </Show>
         </section>
       </Show>
 
-      <footer class="landing-footer" id="kontak" data-spy="">
+      <footer class="landing-footer" id="kontak" data-spy="" data-reveal="">
         <p class="landing-section-title" style="margin-bottom: var(--space-2);">
           Hubungi Kami
         </p>

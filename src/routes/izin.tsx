@@ -441,8 +441,8 @@ export default function Izin() {
               <Show when={filteredHistory().length > 0}>
                 <div class="pagination-container">
                   <div class="pagination-info">
-                    Menampilkan {paginatedList().length} dari{" "}
-                    {filteredHistory().length} pengajuan izin
+                    Showing {paginatedList().length} of{" "}
+                    {filteredHistory().length} entries
                   </div>
                   <div class="pagination-buttons">
                     <button
@@ -450,7 +450,7 @@ export default function Izin() {
                       disabled={currentPage() === 1}
                       onClick={() => setCurrentPage(currentPage() - 1)}
                     >
-                      Sebelumnya
+                      Previous
                     </button>
                     <For each={getPageNumbers(currentPage(), totalPages())}>
                       {(page) => (
@@ -477,7 +477,7 @@ export default function Izin() {
                       disabled={currentPage() === totalPages()}
                       onClick={() => setCurrentPage(currentPage() + 1)}
                     >
-                      Berikutnya
+                      Next
                     </button>
                   </div>
                 </div>

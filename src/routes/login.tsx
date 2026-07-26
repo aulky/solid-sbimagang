@@ -34,11 +34,17 @@ export default function Login(props: RouteSectionProps) {
   return (
     <main class="login-container">
       <div class="login-card" style="text-align: center;">
-        <img
-          src={theme() === "dark" ? "/logo-sigma-putih.png" : "/logo-sigma.png"}
-          alt="SIGMA - Sistem Informasi dan Manajemen Magang"
-          style="height: 55px; width: auto; object-fit: contain; margin-bottom: var(--space-4);"
-        />
+        <a
+          href="/"
+          title="Kembali ke halaman utama"
+          style="display: inline-block; margin-bottom: var(--space-4);"
+        >
+          <img
+            src={theme() === "dark" ? "/logo-sigma-putih.png" : "/logo-sigma.png"}
+            alt="SIGMA - Sistem Informasi dan Manajemen Magang"
+            style="height: 55px; width: auto; object-fit: contain; display: block;"
+          />
+        </a>
 
         <form action={loginOrRegister} method="post">
           <input
