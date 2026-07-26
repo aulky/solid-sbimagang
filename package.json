@@ -15,18 +15,18 @@
     "seed": "node prisma/seed.js"
   },
   "devDependencies": {
-    "@types/node": "^24.7.0",
+    "@types/node": "^24.13.3",
     "jimp": "^1.6.1"
   },
   "dependencies": {
-    "@prisma/client": "^5.12.1",
-    "@solidjs/router": "^0.15.0",
-    "@solidjs/start": "2.0.0-alpha.2",
-    "@solidjs/vite-plugin-nitro-2": "^0.1.0",
-    "prisma": "^5.12.1",
-    "solid-js": "^1.9.5",
-    "vite": "^7.3.5",
-    "xlsx": "^0.18.5"
+    "@prisma/client": "^5.22.0",
+    "@solidjs/router": "^0.15.4",
+    "@solidjs/start": "2.0.0-rc.3",
+    "@solidjs/vite-plugin-nitro-2": "^0.3.2",
+    "prisma": "^5.22.0",
+    "solid-js": "^1.9.14",
+    "vite": "^7.3.6",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "engines": {
     "node": ">=22"

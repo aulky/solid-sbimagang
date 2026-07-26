@@ -4,3 +4,9 @@ allowBuilds:
   "@prisma/engines": true
   esbuild: true
   prisma: true
+minimumReleaseAgeExclude:
+  - '@solidjs/start@2.0.0-rc.3'
+overrides:
+  "minimatch@<10": ">=10.2.5"
+  "serialize-javascript": ">=7.0.5"
+  "esbuild@>=0.27.3 <0.28.1": ">=0.28.1"

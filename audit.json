@@ -1,0 +1,931 @@
+{
+  "advisories": {
+    "1108110": {
+      "findings": [
+        {
+          "version": "0.18.5",
+          "paths": [
+            ".>xlsx"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1108110,
+      "title": "Prototype Pollution in sheetJS",
+      "module_name": "xlsx",
+      "vulnerable_versions": "<0.19.3",
+      "patched_versions": ">=0.19.3",
+      "severity": "high",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-4r6h-8v6p-xvw6",
+      "url": "https://github.com/advisories/GHSA-4r6h-8v6p-xvw6"
+    },
+    "1108111": {
+      "findings": [
+        {
+          "version": "0.18.5",
+          "paths": [
+            ".>xlsx"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1108111,
+      "title": "SheetJS Regular Expression Denial of Service (ReDoS)",
+      "module_name": "xlsx",
+      "vulnerable_versions": "<0.20.2",
+      "patched_versions": ">=0.20.2",
+      "severity": "high",
+      "cwe": "CWE-1333",
+      "github_advisory_id": "GHSA-5pgg-2g8v-p4x9",
+      "url": "https://github.com/advisories/GHSA-5pgg-2g8v-p4x9"
+    },
+    "1113686": {
+      "findings": [
+        {
+          "version": "6.0.2",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@rollup/plugin-terser>serialize-javascript"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1113686,
+      "title": "Serialize JavaScript is Vulnerable to RCE via RegExp.flags and Date.prototype.toISOString()",
+      "module_name": "serialize-javascript",
+      "vulnerable_versions": "<=7.0.2",
+      "patched_versions": ">=7.0.3",
+      "severity": "high",
+      "cwe": "CWE-96",
+      "github_advisory_id": "GHSA-5c6j-r48x-rmvq",
+      "url": "https://github.com/advisories/GHSA-5c6j-r48x-rmvq"
+    },
+    "1114302": {
+      "findings": [
+        {
+          "version": "7.5.10",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>@mapbox/node-pre-gyp>tar"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1114302,
+      "title": "node-tar Symlink Path Traversal via Drive-Relative Linkpath",
+      "module_name": "tar",
+      "vulnerable_versions": "<=7.5.10",
+      "patched_versions": ">=7.5.11",
+      "severity": "high",
+      "cwe": "CWE-22",
+      "github_advisory_id": "GHSA-9ppj-qmqm-q256",
+      "url": "https://github.com/advisories/GHSA-9ppj-qmqm-q256"
+    },
+    "1114876": {
+      "findings": [
+        {
+          "version": "2.0.1-rc.4",
+          "paths": [
+            ".>@solidjs/start>h3"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1114876,
+      "title": "h3 has a Path Traversal via Percent-Encoded Dot Segments in serveStatic Allows Arbitrary File Read",
+      "module_name": "h3",
+      "vulnerable_versions": ">=2.0.0 <=2.0.1-rc.14",
+      "patched_versions": ">=2.0.1",
+      "severity": "moderate",
+      "cwe": "CWE-22, CWE-116",
+      "github_advisory_id": "GHSA-wr4h-v87w-p3r7",
+      "url": "https://github.com/advisories/GHSA-wr4h-v87w-p3r7"
+    },
+    "1115115": {
+      "findings": [
+        {
+          "version": "2.0.1-rc.4",
+          "paths": [
+            ".>@solidjs/start>h3"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115115,
+      "title": "h3: SSE Event Injection via Unsanitized Carriage Return (`\\r`) in EventStream Data and Comment Fields (Bypass of CVE Fix)",
+      "module_name": "h3",
+      "vulnerable_versions": ">=2.0.0-beta.0 <=2.0.1-rc.16",
+      "patched_versions": ">=2.0.1",
+      "severity": "moderate",
+      "cwe": "CWE-74",
+      "github_advisory_id": "GHSA-4hxc-9384-m385",
+      "url": "https://github.com/advisories/GHSA-4hxc-9384-m385"
+    },
+    "1115159": {
+      "findings": [
+        {
+          "version": "2.0.1-rc.4",
+          "paths": [
+            ".>@solidjs/start>h3"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115159,
+      "title": "h3 has a middleware bypass with one gadget",
+      "module_name": "h3",
+      "vulnerable_versions": ">=2.0.0-0 <2.0.1-rc.15",
+      "patched_versions": ">=2.0.1-rc.15",
+      "severity": "high",
+      "cwe": "CWE-290",
+      "github_advisory_id": "GHSA-3vj8-jmxq-cgj5",
+      "url": "https://github.com/advisories/GHSA-3vj8-jmxq-cgj5"
+    },
+    "1115162": {
+      "findings": [
+        {
+          "version": "2.0.1-rc.4",
+          "paths": [
+            ".>@solidjs/start>h3"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115162,
+      "title": "h3 has a Server-Sent Events Injection via Unsanitized Newlines in Event Stream Fields",
+      "module_name": "h3",
+      "vulnerable_versions": ">=2.0.0 <=2.0.1-rc.14",
+      "patched_versions": ">=2.0.1",
+      "severity": "high",
+      "cwe": "CWE-93",
+      "github_advisory_id": "GHSA-22cc-p3c6-wpvm",
+      "url": "https://github.com/advisories/GHSA-22cc-p3c6-wpvm"
+    },
+    "1115262": {
+      "findings": [
+        {
+          "version": "2.0.1-rc.4",
+          "paths": [
+            ".>@solidjs/start>h3"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115262,
+      "title": "H3: Unbounded Chunked Cookie Count in Session Cleanup Loop may Lead to Denial of Service",
+      "module_name": "h3",
+      "vulnerable_versions": ">=2.0.0-beta.4 <2.0.1-rc.18",
+      "patched_versions": ">=2.0.1-rc.18",
+      "severity": "moderate",
+      "cwe": "CWE-400",
+      "github_advisory_id": "GHSA-q5pr-72pq-83v3",
+      "url": "https://github.com/advisories/GHSA-q5pr-72pq-83v3"
+    },
+    "1115530": {
+      "findings": [
+        {
+          "version": "2.0.1-rc.4",
+          "paths": [
+            ".>@solidjs/start>h3"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115530,
+      "title": "h3: Missing Path Segment Boundary Check in `mount()` Causes Middleware Execution on Unrelated Prefix-Matching Routes",
+      "module_name": "h3",
+      "vulnerable_versions": ">=2.0.1-alpha.0 <=2.0.1-rc.16",
+      "patched_versions": ">=2.0.1",
+      "severity": "low",
+      "cwe": "CWE-706",
+      "github_advisory_id": "GHSA-2j6q-whv2-gh6w",
+      "url": "https://github.com/advisories/GHSA-2j6q-whv2-gh6w"
+    },
+    "1115537": {
+      "findings": [
+        {
+          "version": "0.9.8",
+          "paths": [
+            ".>@solidjs/start>h3>srvx",
+            ".>@solidjs/start>srvx"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "version": "0.11.8",
+          "paths": [
+            ".>@solidjs/start>h3>crossws>srvx"
+          ],
+          "dev": false,
+          "optional": true,
+          "bundled": false
+        }
+      ],
+      "id": 1115537,
+      "title": "srvx is vulnerable to middleware bypass via absolute URI in request line ",
+      "module_name": "srvx",
+      "vulnerable_versions": "<0.11.13",
+      "patched_versions": ">=0.11.13",
+      "severity": "moderate",
+      "cwe": "CWE-706",
+      "github_advisory_id": "GHSA-p36q-q72m-gchr",
+      "url": "https://github.com/advisories/GHSA-p36q-q72m-gchr"
+    },
+    "1115541": {
+      "findings": [
+        {
+          "version": "2.0.2",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>archiver-utils>glob>minimatch>brace-expansion",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>readdir-glob>minimatch>brace-expansion",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>zip-stream>archiver-utils>glob>minimatch>brace-expansion"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115541,
+      "title": "brace-expansion: Zero-step sequence causes process hang and memory exhaustion",
+      "module_name": "brace-expansion",
+      "vulnerable_versions": ">=2.0.0 <2.0.3",
+      "patched_versions": ">=2.0.3",
+      "severity": "moderate",
+      "cwe": "CWE-400",
+      "github_advisory_id": "GHSA-f886-m6hf-6m8v",
+      "url": "https://github.com/advisories/GHSA-f886-m6hf-6m8v"
+    },
+    "1115543": {
+      "findings": [
+        {
+          "version": "5.0.4",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>glob>minimatch>brace-expansion"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115543,
+      "title": "brace-expansion: Zero-step sequence causes process hang and memory exhaustion",
+      "module_name": "brace-expansion",
+      "vulnerable_versions": ">=4.0.0 <5.0.5",
+      "patched_versions": ">=5.0.5",
+      "severity": "moderate",
+      "cwe": "CWE-400",
+      "github_advisory_id": "GHSA-f886-m6hf-6m8v",
+      "url": "https://github.com/advisories/GHSA-f886-m6hf-6m8v"
+    },
+    "1115545": {
+      "findings": [
+        {
+          "version": "1.3.3",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>listhen>node-forge"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115545,
+      "title": "Forge has a basicConstraints bypass in its certificate chain verification (RFC 5280 violation)",
+      "module_name": "node-forge",
+      "vulnerable_versions": "<=1.3.3",
+      "patched_versions": ">=1.3.4",
+      "severity": "high",
+      "cwe": "CWE-295",
+      "github_advisory_id": "GHSA-2328-f5f3-gj25",
+      "url": "https://github.com/advisories/GHSA-2328-f5f3-gj25"
+    },
+    "1115546": {
+      "findings": [
+        {
+          "version": "1.3.3",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>listhen>node-forge"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115546,
+      "title": "Forge has signature forgery in Ed25519 due to missing S > L check",
+      "module_name": "node-forge",
+      "vulnerable_versions": "<1.4.0",
+      "patched_versions": ">=1.4.0",
+      "severity": "high",
+      "cwe": "CWE-347",
+      "github_advisory_id": "GHSA-q67f-28xg-22rw",
+      "url": "https://github.com/advisories/GHSA-q67f-28xg-22rw"
+    },
+    "1115548": {
+      "findings": [
+        {
+          "version": "1.3.3",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>listhen>node-forge"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115548,
+      "title": "Forge has Denial of Service via Infinite Loop in BigInteger.modInverse() with Zero Input",
+      "module_name": "node-forge",
+      "vulnerable_versions": "<1.4.0",
+      "patched_versions": ">=1.4.0",
+      "severity": "high",
+      "cwe": "CWE-835",
+      "github_advisory_id": "GHSA-5m6q-g25r-mvwx",
+      "url": "https://github.com/advisories/GHSA-5m6q-g25r-mvwx"
+    },
+    "1115573": {
+      "findings": [
+        {
+          "version": "8.3.0",
+          "paths": [
+            ".>@solidjs/start>path-to-regexp"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115573,
+      "title": "path-to-regexp vulnerable to Denial of Service via sequential optional groups",
+      "module_name": "path-to-regexp",
+      "vulnerable_versions": ">=8.0.0 <8.4.0",
+      "patched_versions": ">=8.4.0",
+      "severity": "high",
+      "cwe": "CWE-400, CWE-1333",
+      "github_advisory_id": "GHSA-j3q9-mxjg-w52f",
+      "url": "https://github.com/advisories/GHSA-j3q9-mxjg-w52f"
+    },
+    "1115582": {
+      "findings": [
+        {
+          "version": "8.3.0",
+          "paths": [
+            ".>@solidjs/start>path-to-regexp"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115582,
+      "title": "path-to-regexp vulnerable to Regular Expression Denial of Service via multiple wildcards",
+      "module_name": "path-to-regexp",
+      "vulnerable_versions": ">=8.0.0 <8.4.0",
+      "patched_versions": ">=8.4.0",
+      "severity": "moderate",
+      "cwe": "CWE-1333",
+      "github_advisory_id": "GHSA-27v5-c462-wpq7",
+      "url": "https://github.com/advisories/GHSA-27v5-c462-wpq7"
+    },
+    "1115612": {
+      "findings": [
+        {
+          "version": "1.3.3",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>listhen>node-forge"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115612,
+      "title": "Forge has signature forgery in RSA-PKCS due to ASN.1 extra field  ",
+      "module_name": "node-forge",
+      "vulnerable_versions": "<1.4.0",
+      "patched_versions": ">=1.4.0",
+      "severity": "high",
+      "cwe": "CWE-20, CWE-347",
+      "github_advisory_id": "GHSA-ppp5-5v6c-4jwp",
+      "url": "https://github.com/advisories/GHSA-ppp5-5v6c-4jwp"
+    },
+    "1115806": {
+      "findings": [
+        {
+          "version": "4.17.23",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>archiver-utils>lodash",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>zip-stream>archiver-utils>lodash"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115806,
+      "title": "lodash vulnerable to Code Injection via `_.template` imports key names",
+      "module_name": "lodash",
+      "vulnerable_versions": ">=4.0.0 <=4.17.23",
+      "patched_versions": ">=4.17.24",
+      "severity": "high",
+      "cwe": "CWE-94",
+      "github_advisory_id": "GHSA-r5fr-rjxr-66jc",
+      "url": "https://github.com/advisories/GHSA-r5fr-rjxr-66jc"
+    },
+    "1115810": {
+      "findings": [
+        {
+          "version": "4.17.23",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>archiver-utils>lodash",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>zip-stream>archiver-utils>lodash"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1115810,
+      "title": "lodash vulnerable to Prototype Pollution via array path bypass in `_.unset` and `_.omit`",
+      "module_name": "lodash",
+      "vulnerable_versions": "<=4.17.23",
+      "patched_versions": ">=4.17.24",
+      "severity": "moderate",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-f23m-r3pf-42rh",
+      "url": "https://github.com/advisories/GHSA-f23m-r3pf-42rh"
+    },
+    "1116102": {
+      "findings": [
+        {
+          "version": "6.1.4",
+          "paths": [
+            ".>@solidjs/start>defu",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>c12>defu",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>c12>giget>defu",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>c12>rc9>defu",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>defu",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>listhen>defu",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>serve-placeholder>defu",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>untyped>defu"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1116102,
+      "title": "defu: Prototype pollution via `__proto__` key in defaults argument",
+      "module_name": "defu",
+      "vulnerable_versions": "<=6.1.4",
+      "patched_versions": ">=6.1.5",
+      "severity": "high",
+      "cwe": "CWE-1321",
+      "github_advisory_id": "GHSA-737v-mqg7-c878",
+      "url": "https://github.com/advisories/GHSA-737v-mqg7-c878"
+    },
+    "1118993": {
+      "findings": [
+        {
+          "version": "2.13.1",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1118993,
+      "title": "Nitro has a proxy scope bypass via percent-encoded path traversal in `routeRules`",
+      "module_name": "nitropack",
+      "vulnerable_versions": "<2.13.4",
+      "patched_versions": ">=2.13.4",
+      "severity": "moderate",
+      "cwe": "CWE-22",
+      "github_advisory_id": "GHSA-5w89-w975-hf9q",
+      "url": "https://github.com/advisories/GHSA-5w89-w975-hf9q"
+    },
+    "1119440": {
+      "findings": [
+        {
+          "version": "6.0.2",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@rollup/plugin-terser>serialize-javascript"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1119440,
+      "title": "Serialize JavaScript has CPU Exhaustion Denial of Service via crafted array-like objects",
+      "module_name": "serialize-javascript",
+      "vulnerable_versions": ">=5.0.0 <7.0.5",
+      "patched_versions": ">=7.0.5",
+      "severity": "moderate",
+      "cwe": "CWE-400, CWE-834",
+      "github_advisory_id": "GHSA-qj8w-gfj5-8c6v",
+      "url": "https://github.com/advisories/GHSA-qj8w-gfj5-8c6v"
+    },
+    "1120263": {
+      "findings": [
+        {
+          "version": "2.13.1",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120263,
+      "title": "Nitro has an Open Redirect via Protocol-Relative URL Bypass in Wildcard Route Rules",
+      "module_name": "nitropack",
+      "vulnerable_versions": "<2.13.4",
+      "patched_versions": ">=2.13.4",
+      "severity": "moderate",
+      "cwe": "CWE-601",
+      "github_advisory_id": "GHSA-9phm-9p8f-hw5m",
+      "url": "https://github.com/advisories/GHSA-9phm-9p8f-hw5m"
+    },
+    "1120311": {
+      "findings": [
+        {
+          "version": "5.0.4",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>glob>minimatch>brace-expansion"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120311,
+      "title": "brace-expansion: Large numeric range defeats documented `max` DoS protection",
+      "module_name": "brace-expansion",
+      "vulnerable_versions": ">=5.0.0 <5.0.6",
+      "patched_versions": ">=5.0.6",
+      "severity": "moderate",
+      "cwe": "CWE-400",
+      "github_advisory_id": "GHSA-jxxr-4gwj-5jf2",
+      "url": "https://github.com/advisories/GHSA-jxxr-4gwj-5jf2"
+    },
+    "1120680": {
+      "findings": [
+        {
+          "version": "0.27.7",
+          "paths": [
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>vite>esbuild",
+            ".>@solidjs/start>vite>esbuild",
+            ".>@solidjs/start>vite-plugin-solid>vite>esbuild",
+            ".>@solidjs/start>vite-plugin-solid>vitefu>vite>esbuild",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>esbuild",
+            ".>@solidjs/vite-plugin-nitro-2>vite>esbuild",
+            ".>vite>esbuild"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120680,
+      "title": "esbuild allows arbitrary file read when running the development server on Windows",
+      "module_name": "esbuild",
+      "vulnerable_versions": ">=0.27.3 <0.28.1",
+      "patched_versions": ">=0.28.1",
+      "severity": "low",
+      "cwe": "CWE-22",
+      "github_advisory_id": "GHSA-g7r4-m6w7-qqqr",
+      "url": "https://github.com/advisories/GHSA-g7r4-m6w7-qqqr"
+    },
+    "1120782": {
+      "findings": [
+        {
+          "version": "7.5.10",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>@mapbox/node-pre-gyp>tar"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1120782,
+      "title": "node-tar applies PAX size override to intermediary GNU long-name/long-link headers, causing tar parser interpretation differential (file smuggling)",
+      "module_name": "tar",
+      "vulnerable_versions": "<=7.5.15",
+      "patched_versions": ">=7.5.16",
+      "severity": "moderate",
+      "cwe": "CWE-436",
+      "github_advisory_id": "GHSA-vmf3-w455-68vh",
+      "url": "https://github.com/advisories/GHSA-vmf3-w455-68vh"
+    },
+    "1123528": {
+      "findings": [
+        {
+          "version": "7.29.0",
+          "paths": [
+            ".>@solidjs/start>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@babel/plugin-syntax-jsx>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@babel/plugin-syntax-typescript>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@tanstack/router-utils>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@tanstack/router-utils>@babel/preset-typescript>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@tanstack/router-utils>@babel/preset-typescript>@babel/plugin-syntax-jsx>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@tanstack/router-utils>@babel/preset-typescript>@babel/plugin-transform-modules-commonjs>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@tanstack/router-utils>@babel/preset-typescript>@babel/plugin-transform-modules-commonjs>@babel/helper-module-transforms>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@tanstack/router-utils>@babel/preset-typescript>@babel/plugin-transform-typescript>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@tanstack/router-utils>@babel/preset-typescript>@babel/plugin-transform-typescript>@babel/helper-create-class-features-plugin>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@tanstack/router-utils>@babel/preset-typescript>@babel/plugin-transform-typescript>@babel/helper-create-class-features-plugin>@babel/helper-replace-supers>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>@tanstack/router-utils>@babel/preset-typescript>@babel/plugin-transform-typescript>@babel/plugin-syntax-typescript>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>@tanstack/directive-functions-plugin>babel-dead-code-elimination>@babel/core",
+            ".>@solidjs/start>@tanstack/server-functions-plugin>babel-dead-code-elimination>@babel/core",
+            ".>@solidjs/start>vite-plugin-solid>@babel/core",
+            ".>@solidjs/start>vite-plugin-solid>babel-preset-solid>@babel/core",
+            ".>@solidjs/start>vite-plugin-solid>babel-preset-solid>babel-plugin-jsx-dom-expressions>@babel/core",
+            ".>@solidjs/start>vite-plugin-solid>babel-preset-solid>babel-plugin-jsx-dom-expressions>@babel/plugin-syntax-jsx>@babel/core"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123528,
+      "title": "@babel/core: Arbitrary File Read via sourceMappingURL Comment",
+      "module_name": "@babel/core",
+      "vulnerable_versions": "<=7.29.0",
+      "patched_versions": ">=7.29.1",
+      "severity": "low",
+      "cwe": "CWE-22, CWE-200",
+      "github_advisory_id": "GHSA-4x5r-pxfx-6jf8",
+      "url": "https://github.com/advisories/GHSA-4x5r-pxfx-6jf8"
+    },
+    "1123896": {
+      "findings": [
+        {
+          "version": "2.0.2",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>archiver-utils>glob>minimatch>brace-expansion",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>readdir-glob>minimatch>brace-expansion",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>zip-stream>archiver-utils>glob>minimatch>brace-expansion"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123896,
+      "title": "brace-expansion: DoS via exponential-time expansion of consecutive non-expanding {} groups",
+      "module_name": "brace-expansion",
+      "vulnerable_versions": ">=2.0.0 <2.1.2",
+      "patched_versions": ">=2.1.2",
+      "severity": "high",
+      "cwe": "CWE-400, CWE-407",
+      "github_advisory_id": "GHSA-3jxr-9vmj-r5cp",
+      "url": "https://github.com/advisories/GHSA-3jxr-9vmj-r5cp"
+    },
+    "1123898": {
+      "findings": [
+        {
+          "version": "5.0.4",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>glob>minimatch>brace-expansion"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123898,
+      "title": "brace-expansion: DoS via exponential-time expansion of consecutive non-expanding {} groups",
+      "module_name": "brace-expansion",
+      "vulnerable_versions": ">=3.0.0 <5.0.7",
+      "patched_versions": ">=5.0.7",
+      "severity": "high",
+      "cwe": "CWE-400, CWE-407",
+      "github_advisory_id": "GHSA-3jxr-9vmj-r5cp",
+      "url": "https://github.com/advisories/GHSA-3jxr-9vmj-r5cp"
+    },
+    "1123939": {
+      "findings": [
+        {
+          "version": "7.5.10",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>@mapbox/node-pre-gyp>tar"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123939,
+      "title": "node-tar: Process crash via PAX numeric path type confusion",
+      "module_name": "tar",
+      "vulnerable_versions": "<=7.5.17",
+      "patched_versions": ">=7.5.18",
+      "severity": "moderate",
+      "cwe": "CWE-704",
+      "github_advisory_id": "GHSA-w8wr-v893-vjvp",
+      "url": "https://github.com/advisories/GHSA-w8wr-v893-vjvp"
+    },
+    "1123940": {
+      "findings": [
+        {
+          "version": "7.5.10",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>@mapbox/node-pre-gyp>tar"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123940,
+      "title": "node-tar: Decompression/parse DoS via unlimited input",
+      "module_name": "tar",
+      "vulnerable_versions": "<=7.5.18",
+      "patched_versions": ">=7.5.19",
+      "severity": "critical",
+      "cwe": "CWE-770",
+      "github_advisory_id": "GHSA-23hp-3jrh-7fpw",
+      "url": "https://github.com/advisories/GHSA-23hp-3jrh-7fpw"
+    },
+    "1123941": {
+      "findings": [
+        {
+          "version": "7.5.10",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>@mapbox/node-pre-gyp>tar"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123941,
+      "title": "node-tar: Negative tar entry size causes infinite loop in archive replace",
+      "module_name": "tar",
+      "vulnerable_versions": "<=7.5.17",
+      "patched_versions": ">=7.5.18",
+      "severity": "high",
+      "cwe": "CWE-835",
+      "github_advisory_id": "GHSA-8x88-c5mf-7j5w",
+      "url": "https://github.com/advisories/GHSA-8x88-c5mf-7j5w"
+    },
+    "1123942": {
+      "findings": [
+        {
+          "version": "7.5.10",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>@mapbox/node-pre-gyp>tar"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1123942,
+      "title": "node-tar: Uncaught Exception DoS via NUL byte in PAX path/linkpath records",
+      "module_name": "tar",
+      "vulnerable_versions": "<=7.5.16",
+      "patched_versions": ">=7.5.17",
+      "severity": "moderate",
+      "cwe": "CWE-248",
+      "github_advisory_id": "GHSA-gvwx-54wh-qm9j",
+      "url": "https://github.com/advisories/GHSA-gvwx-54wh-qm9j"
+    },
+    "1124287": {
+      "findings": [
+        {
+          "version": "7.5.10",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>@mapbox/node-pre-gyp>tar"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1124287,
+      "title": "node-tar: Uncontrolled recursion in mapHas/filesFilter allows uncatchable stack-overflow DoS via crafted long-path tar with member selection",
+      "module_name": "tar",
+      "vulnerable_versions": "<=7.5.20",
+      "patched_versions": ">=7.5.21",
+      "severity": "moderate",
+      "cwe": "CWE-400, CWE-674",
+      "github_advisory_id": "GHSA-r292-9mhp-454m",
+      "url": "https://github.com/advisories/GHSA-r292-9mhp-454m"
+    },
+    "1124299": {
+      "findings": [
+        {
+          "version": "1.5.0",
+          "paths": [
+            ".>@solidjs/router>solid-js>seroval",
+            ".>@solidjs/router>solid-js>seroval-plugins>seroval",
+            ".>@solidjs/start>@solidjs/meta>solid-js>seroval",
+            ".>@solidjs/start>@solidjs/meta>solid-js>seroval-plugins>seroval",
+            ".>@solidjs/start>seroval",
+            ".>@solidjs/start>seroval-plugins>seroval",
+            ".>@solidjs/start>solid-js>seroval",
+            ".>@solidjs/start>solid-js>seroval-plugins>seroval",
+            ".>@solidjs/start>terracotta>solid-js>seroval",
+            ".>@solidjs/start>terracotta>solid-js>seroval-plugins>seroval",
+            ".>@solidjs/start>terracotta>solid-use>solid-js>seroval",
+            ".>@solidjs/start>terracotta>solid-use>solid-js>seroval-plugins>seroval",
+            ".>@solidjs/start>vite-plugin-solid>babel-preset-solid>solid-js>seroval",
+            ".>@solidjs/start>vite-plugin-solid>babel-preset-solid>solid-js>seroval-plugins>seroval",
+            ".>@solidjs/start>vite-plugin-solid>solid-js>seroval",
+            ".>@solidjs/start>vite-plugin-solid>solid-js>seroval-plugins>seroval",
+            ".>@solidjs/start>vite-plugin-solid>solid-refresh>solid-js>seroval",
+            ".>@solidjs/start>vite-plugin-solid>solid-refresh>solid-js>seroval-plugins>seroval",
+            ".>solid-js>seroval",
+            ".>solid-js>seroval-plugins>seroval"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1124299,
+      "title": "seroval: `seroval.fromJSON()` Promise resolver type confusion invokes attacker-controlled methods during deserialization",
+      "module_name": "seroval",
+      "vulnerable_versions": "<=1.5.2",
+      "patched_versions": ">=1.5.3",
+      "severity": "critical",
+      "cwe": "CWE-502, CWE-843",
+      "github_advisory_id": "GHSA-mv8w-475r-vwqw",
+      "url": "https://github.com/advisories/GHSA-mv8w-475r-vwqw"
+    },
+    "1124334": {
+      "findings": [
+        {
+          "version": "5.0.4",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>@vercel/nft>glob>minimatch>brace-expansion"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "version": "2.0.2",
+          "paths": [
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>archiver-utils>glob>minimatch>brace-expansion",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>readdir-glob>minimatch>brace-expansion",
+            ".>@solidjs/vite-plugin-nitro-2>nitropack>archiver>zip-stream>archiver-utils>glob>minimatch>brace-expansion"
+          ],
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "id": 1124334,
+      "title": "brace-expansion: DoS via unbounded expansion length causing an out-of-memory process crash",
+      "module_name": "brace-expansion",
+      "vulnerable_versions": "<=5.0.7",
+      "patched_versions": ">=5.0.8",
+      "severity": "high",
+      "cwe": "CWE-400, CWE-770",
+      "github_advisory_id": "GHSA-mh99-v99m-4gvg",
+      "url": "https://github.com/advisories/GHSA-mh99-v99m-4gvg"
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 3,
+      "moderate": 16,
+      "high": 17,
+      "critical": 2
+    },
+    "dependencies": 476,
+    "devDependencies": 61,
+    "optionalDependencies": 94,
+    "totalDependencies": 631
+  }
+}

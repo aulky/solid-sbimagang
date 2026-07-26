@@ -1,0 +1,1 @@
+import{k as o}from"./routing-6H_yOrLq.js";const[l,e]=o(null);let t;function c(a,s="error"){e({message:a,type:s}),clearTimeout(t),t=setTimeout(()=>{e(null)},s==="success"?4e3:1e4)}export{c as a,e as s,l as t};
