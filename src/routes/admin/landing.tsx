@@ -826,8 +826,6 @@ export default function AdminLanding() {
 
   return (
     <main>
-      <h1 class="page-title">Kelola Landing Page</h1>
-
       <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4);">
         <For each={tabs}>
           {(t) => (

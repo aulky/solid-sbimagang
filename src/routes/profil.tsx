@@ -59,8 +59,6 @@ export default function Profil() {
 
   return (
     <main class="form-page">
-      <h1 class="page-title">Profil Saya</h1>
-
       <Show
         when={user()}
         fallback={

@@ -80,12 +80,6 @@ export default function AdminAbsensi() {
 
   return (
     <main>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3); text-align: left;">
-        <h1 class="page-title" style="margin-bottom: 0;">
-          Monitor Absensi
-        </h1>
-      </div>
-
       <div class="filter-card" style="margin-bottom: var(--space-4);">
         <div class="form-group">
           <label>Cari Nama/Username</label>

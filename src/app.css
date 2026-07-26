@@ -488,8 +488,71 @@ body {
   height: 100vh;
   max-height: 100vh;
   overflow-y: auto;
-  padding: var(--space-6) var(--space-5);
+  /* Padding pindah ke .app-content-body: scroller harus polos supaya
+     .content-topbar bisa position:sticky menempel rata di tepi atasnya
+     (Chrome menghitung batas sticky dari content edge scroller). */
+  padding: 0;
   width: auto;
+}
+
+/* Top bar konten: judul halaman + slot aksi (#topbar-actions), konsisten
+   desktop & mobile. Dirender app.tsx di luar blok route yang di-key
+   sehingga persisten lintas navigasi. */
+.content-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50; /* di bawah sidebar(100)/backdrop drawer(995)/modal(1000+) */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  min-height: 64px;
+  padding: var(--space-2) var(--space-5);
+  background: var(--surface-base);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.content-topbar-lead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Hamburger hidup di dalam top bar; hanya relevan di mobile (drawer). */
+.content-topbar .hamburger-btn {
+  display: none;
+}
+
+.content-topbar-title {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--color-text);
+  text-align: left;
+}
+
+/* Selektor > div WAJIB ikut: Solid <Portal> membungkus children dalam div
+   anonim - tanpa ini tombol-tombol jatuh ke block layout dan menumpuk. */
+.content-topbar-actions,
+.content-topbar-actions > div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Saat bar sempit dan aksi turun ke baris kedua, tetap rapat kanan. */
+.content-topbar-actions {
+  margin-left: auto;
+}
+
+/* Konten halaman di bawah top bar. */
+.app-content-body {
+  padding: var(--space-5);
 }
 
 .app-layout.has-sidebar .app-main-content {
@@ -1083,10 +1146,6 @@ a {
   font-weight: 700;
 }
 
-.mobile-header {
-  display: none;
-}
-
 .mobile-sidebar-backdrop {
   display: none;
 }
@@ -1176,23 +1235,26 @@ a {
 
 /* Responsive Styling */
 @media (max-width: 768px) {
-  html,
-  body,
-  #app {
+  html {
     height: auto;
     max-height: none;
-    /* overflow-x tetap hidden (bukan visible) - kalau tidak, elemen mana pun
-       yang sedikit lebih lebar dari viewport membuat seluruh halaman bisa
-       digeser/di-pan ke samping. overflow-y tetap visible supaya scroll
-       vertikal native (bukan internal .app-main-content) yang dipakai. */
+    /* Di elemen root, overflow dipropagasi ke viewport: hidden di sini
+       mencegah pan horizontal tanpa membuat scroll container perantara. */
     overflow-x: hidden;
     overflow-y: visible;
   }
 
+  body,
+  #app,
   .app-layout {
     height: auto;
     max-height: none;
-    overflow-x: hidden;
+    /* clip, BUKAN hidden: overflow-x hidden pada ancestor mana pun membuat
+       elemen itu jadi scroll container (overflow-y ter-compute auto) dan
+       position:sticky .content-topbar mengikat ke situ alih-alih ke scroll
+       dokumen - sticky tidak pernah menempel. clip memotong overflow tanpa
+       membuat scroll container. */
+    overflow-x: clip;
     overflow-y: visible;
   }
 
@@ -1200,29 +1262,10 @@ a {
     flex-direction: column;
   }
 
-  /* Mobile Header & Hamburger (Mobile - visible) */
-  .mobile-header {
+  /* Hamburger tampil di dalam .content-topbar (satu-satunya top bar mobile;
+     header "Absensi Magang" terpisah sudah dihapus). */
+  .content-topbar .hamburger-btn {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50px;
-    background: var(--surface-glass);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--color-border);
-    padding: 0 var(--space-4);
-    z-index: 990;
-    box-sizing: border-box;
-  }
-
-  .mobile-header img {
-    height: 28px !important;
-    width: auto !important;
-    object-fit: contain !important;
   }
 
   .hamburger-btn {
@@ -1325,12 +1368,32 @@ a {
 
   .app-layout.has-sidebar .app-main-content {
     margin-left: 0 !important;
-    padding: var(--space-4) var(--space-3) !important;
-    padding-top: 70px !important; /* height of header + offset */
+    /* Padding konten pindah ke .app-content-body. .content-topbar adalah
+       satu-satunya bar (berisi hamburger + judul + aksi), sticky di top:0
+       terhadap scroll dokumen. */
+    padding: 0 !important;
     height: auto !important;
     max-height: none !important;
-    overflow-x: hidden !important;
+    /* clip, BUKAN hidden: overflow-x hidden membuat elemen ini jadi scroll
+       container (overflow-y ikut ter-compute auto) sehingga .content-topbar
+       sticky mengikat ke sini alih-alih ke scroll dokumen dan tidak pernah
+       menempel. clip memotong tanpa membuat scroll container. */
+    overflow-x: clip !important;
     overflow-y: visible !important;
+  }
+
+  .content-topbar {
+    top: 0;
+    min-height: 54px;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .content-topbar-title {
+    font-size: 18px;
+  }
+
+  .app-content-body {
+    padding: var(--space-4) var(--space-3);
   }
 
   /* Modals on Mobile */
@@ -1825,12 +1888,12 @@ a {
   --landing-header-h: 56px; /* dipakai scroll-margin-top; di-redeclare di ≤640px */
   --landing-grid-min: 320px;
 
-  /* Full-bleed: batalkan padding .app-main-content (48px/32px) supaya header
+  /* Full-bleed: batalkan padding .app-content-body (32px) supaya header
      glass & gradient hero sampai ke tepi. width:auto WAJIB - width:100% +
      margin negatif akan overflow ke kanan dan memicu scrollbar horizontal.
      Ini hanya FALLBACK untuk browser tanpa :has() - lihat rule di bawah. */
   width: auto;
-  margin: calc(var(--space-6) * -1) calc(var(--space-5) * -1);
+  margin: calc(var(--space-5) * -1);
   min-height: 100vh;
   background-color: var(--surface-base);
   background-image: var(--landing-hero-gradient), var(--landing-footer-gradient);
@@ -1839,16 +1902,13 @@ a {
   text-align: left;
 }
 
-/* Padding scroll container ikut menggeser pin position:sticky (Chrome
-   menghitung batas sticky dari content edge scroller, sehingga header
-   "mengambang" 48px di bawah tepi atas saat discroll - bug lama yang baru
-   terlihat setelah gutter diberi warna). Untuk halaman landing, buang padding
-   container sekalian; margin negatif fallback di atas ikut dinolkan. */
-.app-main-content:has(.landing-page) {
+/* Untuk halaman landing, buang padding pembungkus konten sekalian;
+   margin negatif fallback di atas ikut dinolkan. */
+.app-content-body:has(.landing-page) {
   padding: 0;
 }
 
-.app-main-content:has(.landing-page) .landing-page {
+.app-content-body:has(.landing-page) .landing-page {
   margin: 0;
 }
 

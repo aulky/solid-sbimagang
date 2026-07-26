@@ -9,6 +9,7 @@ import { For, Show, createSignal, createEffect } from "solid-js";
 import { Portal } from "solid-js/web";
 import { getUserIzinList, submitIzin, getPageNumbers } from "~/lib";
 import { showToast } from "~/lib/toast";
+import TopbarActions from "~/components/TopbarActions";
 
 export const route = {
   preload: () => {
@@ -104,10 +105,7 @@ export default function Izin() {
 
   return (
     <main class="p-4" style="text-align: left;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3);">
-        <h1 class="page-title" style="margin-bottom: 0;">
-          Pengajuan Izin Magang
-        </h1>
+      <TopbarActions>
         <button
           class="btn-primary"
           style="width: auto; padding: 0 var(--space-4); height: 40px;"
@@ -115,7 +113,7 @@ export default function Izin() {
         >
           Ajukan Izin
         </button>
-      </div>
+      </TopbarActions>
 
       <Show when={showCreate()}>
         <Portal>

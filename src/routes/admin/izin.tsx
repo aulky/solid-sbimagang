@@ -91,8 +91,6 @@ export default function AdminIzin() {
 
   return (
     <main>
-      <h1 class="page-title">Kelola Pengajuan Izin</h1>
-
       <div class="filter-card" style="margin-bottom: var(--space-4);">
         <div class="form-group">
           <label>Cari Nama</label>

@@ -1,6 +1,7 @@
 import { createAsync, type RouteDefinition } from "@solidjs/router";
 import { For, Show, createSignal } from "solid-js";
 import { getLaporan, getAllDivisi, getPageNumbers } from "~/lib";
+import TopbarActions from "~/components/TopbarActions";
 
 export const route = {
   preload() {
@@ -161,30 +162,22 @@ export default function Laporan() {
 
   return (
     <main>
-      <div
-        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3);"
-        class="no-print"
-      >
-        <h1 class="page-title" style="margin-bottom: 0;">
-          Laporan Absensi
-        </h1>
-        <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
-          <button
-            onClick={downloadXLSX}
-            class="btn-primary"
-            style="width: auto; padding: 0 var(--space-3); height: 38px;"
-          >
-            Export Excel
-          </button>
-          <button
-            onClick={printReport}
-            class="btn-ghost"
-            style="width: auto; padding: 0 var(--space-3); height: 38px;"
-          >
-            Cetak PDF
-          </button>
-        </div>
-      </div>
+      <TopbarActions>
+        <button
+          onClick={downloadXLSX}
+          class="btn-primary"
+          style="width: auto; padding: 0 var(--space-3); height: 38px;"
+        >
+          Export Excel
+        </button>
+        <button
+          onClick={printReport}
+          class="btn-ghost"
+          style="width: auto; padding: 0 var(--space-3); height: 38px;"
+        >
+          Cetak PDF
+        </button>
+      </TopbarActions>
 
       <div class="filter-card no-print" style="margin-bottom: var(--space-4);">
         <div class="form-group">
@@ -517,6 +510,10 @@ export default function Laporan() {
             max-width: 100% !important;
             height: auto !important;
             overflow: visible !important;
+          }
+          .app-content-body {
+            padding: 0 !important;
+            margin: 0 !important;
           }
           body {
             background: #ffffff !important;

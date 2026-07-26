@@ -51,10 +51,6 @@ export default function Riwayat() {
 
   return (
     <div>
-      <h1 class="page-title" style="text-align: left;">
-        Riwayat Absensi
-      </h1>
-
       <div class="filter-card" style="margin-bottom: var(--space-4);">
         <div class="form-group">
           <label>Filter Tanggal</label>

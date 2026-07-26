@@ -14,6 +14,7 @@ import {
   getPageNumbers,
 } from "~/lib";
 import { showToast } from "~/lib/toast";
+import TopbarActions from "~/components/TopbarActions";
 
 export const route = {
   preload() {
@@ -144,10 +145,7 @@ export default function AdminBatch() {
 
   return (
     <main class="p-4">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3); text-align: left;">
-        <h1 class="page-title" style="margin-bottom: 0;">
-          Kelola Batch Magang
-        </h1>
+      <TopbarActions>
         <button
           class="btn-primary"
           style="width: auto; padding: 0 var(--space-4); height: 40px;"
@@ -155,7 +153,7 @@ export default function AdminBatch() {
         >
           Tambah Batch
         </button>
-      </div>
+      </TopbarActions>
 
       <Show when={showCreate()}>
         <Portal>

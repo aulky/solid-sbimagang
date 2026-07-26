@@ -29,8 +29,6 @@ export default function AdminSettings() {
 
   return (
     <main class="form-page">
-      <h1 class="page-title">Pengaturan Sistem</h1>
-
       <Show
         when={settings()}
         fallback={

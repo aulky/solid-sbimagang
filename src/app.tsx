@@ -200,27 +200,29 @@ export default function App() {
           }
         });
 
+        // Satu sumber judul halaman: dipakai document.title DAN top bar konten.
+        const titleMap: Record<string, string> = {
+          "/dashboard": "Dashboard",
+          "/riwayat": "Riwayat Absensi",
+          "/izin": "Pengajuan Izin",
+          "/profil": "Profil Saya",
+          "/login": "Masuk Sistem",
+          "/unauthorized": "Akses Ditolak",
+          "/admin/dashboard": "Dashboard Admin",
+          "/admin/users": "Kelola Pengguna",
+          "/admin/divisi": "Kelola Divisi",
+          "/admin/batch": "Kelola Batch Magang",
+          "/admin/absensi": "Monitor Absensi",
+          "/admin/izin": "Kelola Pengajuan Izin",
+          "/admin/laporan": "Laporan Absensi",
+          "/admin/settings": "Pengaturan Sistem",
+          "/admin/audit-log": "Audit Log Aktivitas",
+          "/admin/landing": "Kelola Landing Page",
+        };
+        const topbarTitle = () => titleMap[location.pathname] || "";
+
         createEffect(() => {
-          const titleMap: Record<string, string> = {
-            "/dashboard": "Dashboard",
-            "/riwayat": "Riwayat Absensi",
-            "/izin": "Pengajuan Izin",
-            "/profil": "Profil Saya",
-            "/login": "Masuk Sistem",
-            "/unauthorized": "Akses Ditolak",
-            "/admin/dashboard": "Dashboard Admin",
-            "/admin/users": "Kelola Pengguna",
-            "/admin/divisi": "Kelola Divisi",
-            "/admin/batch": "Kelola Batch Magang",
-            "/admin/absensi": "Monitor Absensi",
-            "/admin/izin": "Kelola Pengajuan Izin",
-            "/admin/laporan": "Laporan Absensi",
-            "/admin/settings": "Pengaturan Sistem",
-            "/admin/audit-log": "Audit Log Aktivitas",
-            "/admin/landing": "Kelola Landing Page",
-          };
-          const path = location.pathname;
-          const pageTitle = titleMap[path] || "Absensi Magang";
+          const pageTitle = topbarTitle() || "Absensi Magang";
           document.title = `${pageTitle} | SIGMA - Sistem Informasi dan Manajemen Magang`;
         });
 
@@ -408,25 +410,6 @@ export default function App() {
                 {(u) => (
                   <>
                     <Show when={!is404Page()}>
-                      <header
-                        class="mobile-header no-print"
-                        style="justify-content: flex-start; gap: 8px;"
-                      >
-                        <button
-                          type="button"
-                          class="hamburger-btn"
-                          onClick={() =>
-                            setMobileSidebarOpen(!mobileSidebarOpen())
-                          }
-                          title="Menu"
-                        >
-                          ☰
-                        </button>
-                        <span style="font-family: var(--font-headline); font-weight: 700; font-size: 14px; color: var(--color-text);">
-                          Absensi Magang
-                        </span>
-                      </header>
-
                       <Show when={mobileSidebarOpen()}>
                         <div
                           class="mobile-sidebar-backdrop no-print"
@@ -1112,8 +1095,36 @@ export default function App() {
               </Show>
 
               <main class="app-main-content">
+                {/* Top bar konten: judul halaman + slot tombol aksi. Sengaja
+                    di LUAR blok keyed supaya persisten lintas navigasi -
+                    #topbar-actions tidak dibuat ulang, Portal TopbarActions
+                    tiap halaman tetap menemukan mount yang sama. */}
+                <Show
+                  when={
+                    user() && !is404Page() && !isPublicLandingPage() && !isLoginPage()
+                  }
+                >
+                  <header class="content-topbar no-print">
+                    <div class="content-topbar-lead">
+                      {/* Hamburger hanya tampil <=768px (CSS) - satu-satunya
+                          top bar di mobile, tidak ada header terpisah lagi. */}
+                      <button
+                        type="button"
+                        class="hamburger-btn"
+                        onClick={() =>
+                          setMobileSidebarOpen(!mobileSidebarOpen())
+                        }
+                        title="Menu"
+                      >
+                        ☰
+                      </button>
+                      <h1 class="content-topbar-title">{topbarTitle()}</h1>
+                    </div>
+                    <div class="content-topbar-actions" id="topbar-actions"></div>
+                  </header>
+                </Show>
                 <Show when={location.pathname} keyed>
-                  <div class="fade-in">{props.children}</div>
+                  <div class="fade-in app-content-body">{props.children}</div>
                 </Show>
               </main>
             </div>

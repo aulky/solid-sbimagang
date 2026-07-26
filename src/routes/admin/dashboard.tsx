@@ -510,9 +510,6 @@ export default function AdminDashboard() {
         class="fade-in-up"
         style="margin-bottom: var(--space-5); text-align: left;"
       >
-        <h1 class="page-title" style="margin-bottom: var(--space-1);">
-          Dashboard Admin
-        </h1>
         <p style="color: var(--color-text-secondary); font-size: 15px; margin: 0;">
           Selamat datang kembali, <strong>{user()?.fullName}</strong>. Berikut
           rekap operasional program magang hari ini.

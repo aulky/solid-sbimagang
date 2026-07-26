@@ -124,12 +124,12 @@ export default function Dashboard() {
           style="height: 48px; width: auto; object-fit: contain; flex-shrink: 0;"
         />
         <div>
-          <h1
+          <h2
             class="page-title"
             style="margin-bottom: 4px; font-size: 1.8rem; line-height: 1.2;"
           >
             Selamat datang, {user()?.fullName}!
-          </h1>
+          </h2>
           <p style="color: var(--color-text-secondary); margin: 0; font-size: 14px;">
             Divisi: {user()?.divisi ?? "-"}
           </p>
