@@ -1,6 +1,6 @@
-# Product Requirement Document (PRD) - Sistem Absensi Magang PT SBI Cilacap
+# Product Requirement Document (PRD) - Sistem Absensi Magang
 
-Dokumen Persyaratan Produk (PRD) ini menjelaskan fungsionalitas, alur sistem, hak akses pengguna, serta spesifikasi teknis dari aplikasi **Sistem Absensi Magang PT Solusi Bangun Indonesia (PT SBI) Cilacap**.
+Dokumen Persyaratan Produk (PRD) ini menjelaskan fungsionalitas, alur sistem, hak akses pengguna, serta spesifikasi teknis dari aplikasi **Sistem Absensi Magang**.
 
 ---
 
@@ -39,9 +39,9 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
    * Pengguna masuk menggunakan `username` dan `password`.
    * Dilengkapi tombol toggle visibilitas password (ikon mata).
    * Form login diam terhadap efek tracking cursor, animasi hover hanya diterapkan pada tombol "Masuk".
-   * Logo PT SBI menyesuaikan tema (putih untuk dark mode, merah untuk light mode).
+   * Logo menyesuaikan tema (putih untuk dark mode, merah untuk light mode).
 2. **Route Guarding**:
-   * Sesi dijamin oleh HttpOnly cookie bernama `sbi_session` yang terenkripsi aman menggunakan `SESSION_SECRET`.
+   * Sesi dijamin oleh HttpOnly cookie bernama `absensi_session` yang terenkripsi aman menggunakan `SESSION_SECRET`.
    * Pengguna tanpa sesi otomatis dialihkan ke halaman `/login`.
    * Pengguna dengan role `USER` yang mencoba mengakses direktori `/admin/...` diblokir dan dialihkan ke halaman `/unauthorized`.
    * Admin yang mencoba akses halaman user (`/dashboard`, `/riwayat`, `/izin`) juga dialihkan ke `/unauthorized`.
@@ -167,7 +167,7 @@ Sistem membedakan hak akses secara ketat berdasarkan peran (role) pengguna:
 2. **Export Excel (XLS)**:
    * Menghasilkan file `.xls` (HTML table dengan MIME Excel) dengan styling: header merah `#E11D48`, teks putih tebal, status berwarna (hijau/kuning/biru/merah).
 3. **Cetak PDF Landscape**:
-   * **Kop Surat Resmi**: Logo PT SBI dan alamat pabrik Cilacap di header cetak.
+   * **Kop Surat Resmi**: Logo dan alamat di header cetak.
    * **Layout Bersih**: Hanya border horizontal tipis, zebra-striping, tanpa border vertikal.
    * **Semua Data**: Mencetak seluruh data (tanpa pagination) dengan menyembunyikan sidebar, filter, dan navigasi via CSS `@media print`.
    * **Layout Paksa**: `margin-left: 0 !important`, `padding: 0 !important` untuk menyembunyikan sidebar sepenuhnya.

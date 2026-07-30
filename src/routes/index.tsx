@@ -479,7 +479,7 @@ export default function Home() {
       <section class="landing-hero">
         <h1 data-reveal="">
           {settings()?.heroTitle ??
-            "Program Magang PT Solusi Bangun Indonesia Cilacap"}
+            "Program Absensi Magang"}
         </h1>
         <Show when={settings()?.heroSubtitle}>
           <p data-reveal="" style={{ "--reveal-delay": "90ms" }}>
@@ -533,7 +533,7 @@ export default function Home() {
         <h2 class="landing-section-title">Alur Program Magang</h2>
         <p class="landing-section-sub">
           Dari pendaftaran sampai resmi menjadi alumni &mdash; begini perjalanan
-          magang di PT SBI Cilacap.
+          absensi magang.
         </p>
         <ol class="landing-alur">
           <For each={ALUR_STEPS}>
@@ -790,7 +790,7 @@ export default function Home() {
           <span class="landing-eyebrow">Testimoni Alumni</span>
           <h2 class="landing-section-title">Kata Mereka</h2>
           <p class="landing-section-sub">
-            Cerita langsung dari para alumni magang PT SBI Cilacap.
+            Cerita langsung dari para alumni absensi magang.
           </p>
           {/* >=3 testimoni: marquee berjalan otomatis, berhenti saat kursor
               di atasnya. <3: track terlalu pendek untuk loop mulus (celah
@@ -857,7 +857,7 @@ export default function Home() {
           <p style="margin: 0 0 var(--space-3);">{settings()!.contactAddress}</p>
         </Show>
         <p style="margin: 0; font-size: 13px;">
-          &copy; PT Solusi Bangun Indonesia &mdash; Cilacap. Sistem Informasi dan
+          &copy; Absensi Magang. Sistem Informasi dan
           Manajemen Magang.
         </p>
       </footer>

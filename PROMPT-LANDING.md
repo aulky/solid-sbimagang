@@ -4,7 +4,7 @@
 
 ---
 
-Kamu bekerja di project **SIGMA** (Sistem Informasi dan Manajemen Magang, SolidJS + SolidStart 2.0 + Prisma/MySQL) milik PT Solusi Bangun Indonesia (PT SBI) Cilacap, di `d:\CODING\solid-sbimagang`.
+Kamu bekerja di project **SIGMA** (Sistem Informasi dan Manajemen Magang, SolidJS + SolidStart 2.0 + Prisma/MySQL) untuk program Absensi Magang di `d:\CODING\solid-sbimagang`.
 
 **Tugas**: implementasikan peningkatan UI/UX pada halaman landing publik (`/`) sesuai spesifikasi yang sudah didokumentasikan di repo ini. Sebelum menulis kode apa pun, baca dulu ketiga dokumen berikut secara penuh:
 

@@ -227,3 +227,28 @@ sudo nginx -t
 sudo systemctl restart nginx
 ```
 Aplikasi Anda kini terpublikasi dengan aman di port HTTPS produksi!
+
+---
+
+## 6. Preview Antarmuka Aplikasi (Screenshots)
+
+Berikut adalah tangkapan layar antarmuka sistem absensi magang baik untuk panel Admin maupun User.
+
+### Panel Admin (Role Admin)
+
+| | | |
+|:---:|:---:|:---:|
+| **Dashboard Utama**<br><img src="assets/roleadmin1.png" width="300" alt="Dashboard Admin" /> | **Statistik Donut & Line**<br><img src="assets/roleadmin2.png" width="300" alt="Grafik Statistik" /> | **Menu sidebar & filter**<br><img src="assets/roleadmin3.png" width="300" alt="Sidebar Admin" /> |
+| **Pencegah FOYT**<br><img src="assets/roleadmin4.png" width="300" alt="FOYT Handling" /> | **Manajemen Data Pengguna**<br><img src="assets/roleadmin5.png" width="300" alt="Daftar User" /> | **Tambah User Baru**<br><img src="assets/roleadmin6.png" width="300" alt="Tambah User" /> |
+| **Edit Data User**<br><img src="assets/roleadmin7.png" width="300" alt="Edit User" /> | **Hapus Akun Konfirmasi**<br><img src="assets/roleadmin8.png" width="300" alt="Hapus User" /> | **Penyaringan Divisi**<br><img src="assets/roleadmin9.png" width="300" alt="Kelola Divisi" /> |
+| **Tambah Unit Divisi**<br><img src="assets/roleadmin10.png" width="300" alt="Tambah Divisi" /> | **Edit Deskripsi Divisi**<br><img src="assets/roleadmin11.png" width="300" alt="Edit Divisi" /> | **Log Monitor Absensi**<br><img src="assets/roleadmin12.png" width="300" alt="Monitor Absensi" /> |
+| **Audit Persetujuan Izin**<br><img src="assets/roleadmin13.png" width="300" alt="Approval Izin" /> | **Detail Alasan Ellipsis**<br><img src="assets/roleadmin14.png" width="300" alt="Alasan Izin" /> | **Export Laporan Excel**<br><img src="assets/roleadmin15.png" width="300" alt="Laporan Excel" /> |
+| **Cetak PDF Lanskap**<br><img src="assets/roleadmin16.png" width="300" alt="Cetak PDF" /> | **Pengaturan Jam Kerja**<br><img src="assets/roleadmin17.png" width="300" alt="Pengaturan Absensi" /> | |
+
+### Panel User (Role User / Anak Magang)
+
+| | | |
+|:---:|:---:|:---:|
+| **Dashboard Pengguna**<br><img src="assets/roleuser1.png" width="300" alt="Dashboard User" /> | **Tombol Absensi Harian**<br><img src="assets/roleuser2.png" width="300" alt="Absen Checkin Checkout" /> | **Pengajuan Izin Magang**<br><img src="assets/roleuser3.png" width="300" alt="Ajukan Izin" /> |
+| **Riwayat Kehadiran**<br><img src="assets/roleuser4.png" width="300" alt="Riwayat Absen" /> | **Pengaturan Profil**<br><img src="assets/roleuser5.png" width="300" alt="Edit Profil" /> | **Ubah Sandi Sesi**<br><img src="assets/roleuser6.png" width="300" alt="Ubah Password" /> |
+

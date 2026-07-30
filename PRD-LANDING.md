@@ -1,6 +1,6 @@
 # Product Requirement Document (PRD) - Landing Page SIGMA
 
-Dokumen ini menjelaskan fungsionalitas, konten, dan spesifikasi teknis dari **halaman landing publik** (`/`) aplikasi **SIGMA** (Sistem Informasi dan Manajemen Magang) milik PT Solusi Bangun Indonesia (PT SBI) Cilacap. Dokumen ini melengkapi [PRD.md](PRD.md) yang fokus pada sistem absensi internal (setelah login) — PRD ini fokus khusus pada halaman publik sebelum login beserta CMS admin yang mengelola kontennya.
+Dokumen ini menjelaskan fungsionalitas, konten, dan spesifikasi teknis dari **halaman landing publik** (`/`) aplikasi **SIGMA** (Sistem Informasi dan Manajemen Magang) untuk program Absensi Magang. Dokumen ini melengkapi [PRD.md](PRD.md) yang fokus pada sistem absensi internal (setelah login) — PRD ini fokus khusus pada halaman publik sebelum login beserta CMS admin yang mengelola kontennya.
 
 ---
 

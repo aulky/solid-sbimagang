@@ -342,7 +342,7 @@ export default function Dashboard() {
               </h2>
               <p style="margin: 2px 0 0; font-size: 13px; color: var(--color-text-secondary);">
                 Batch magangmu sudah selesai. Terima kasih atas kontribusimu di
-                PT SBI Cilacap.
+                program Absensi Magang.
               </p>
             </div>
           </div>
@@ -365,7 +365,7 @@ export default function Dashboard() {
                     required
                     minLength={10}
                     maxLength={TESTIMONI_MAX}
-                    placeholder="Ceritakan pengalaman, ilmu baru, dan kesan selama magang di PT SBI Cilacap..."
+                    placeholder="Ceritakan pengalaman, ilmu baru, dan kesan selama absensi magang..."
                     onInput={(e) => setTestimoniLen(e.currentTarget.value.length)}
                   />
                   <div style="display: flex; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">

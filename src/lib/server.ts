@@ -62,7 +62,7 @@ export async function register(username: string, password: string) {
       username: username,
       password: hashedPassword,
       fullName: username,
-      email: `${username}@magang.sbi.co.id`,
+      email: `${username}@absensimagang.co.id`,
       role: "USER",
       isActive: true,
     },
@@ -71,10 +71,10 @@ export async function register(username: string, password: string) {
 
 export function getSession() {
   return useSession({
-    name: "sbi_session",
+    name: "absensi_session",
     password:
       process.env.SESSION_SECRET ??
-      "areallylongsecretthatyoushouldreplace_solusibangunindonesia_cilacap_2026",
+      "areallylongsecretthatyoushouldreplace_absensimagang_cilacap_2026",
     cookie: {
       secure: process.env.COOKIE_SECURE === "true",
       sameSite: "lax",

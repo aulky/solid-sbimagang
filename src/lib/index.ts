@@ -1234,7 +1234,7 @@ export const getLandingSettings = query(async () => {
   return (
     settings ?? {
       id: "main",
-      heroTitle: "Program Magang PT Solusi Bangun Indonesia Cilacap",
+      heroTitle: "Program Absensi Magang",
       heroSubtitle: "Kembangkan kompetensimu bersama SIGMA",
       aboutText: null,
       contactWhatsapp: null,

@@ -1,8 +1,8 @@
-# Landing Page Design Spec — SIGMA (PT SBI Cilacap)
+# Landing Page Design Spec — SIGMA
 
 Dokumen ini adalah spesifikasi desain **khusus halaman landing publik** (`/`, `src/routes/index.tsx`), ditulis agar AI agent dapat langsung mengimplementasikan/meningkatkan UI tanpa perlu menebak keputusan desain. Untuk konteks fitur & data, lihat [PRD-LANDING.md](PRD-LANDING.md). Untuk token desain umum aplikasi (dipakai juga di dashboard admin/user), lihat [DESIGN.md](DESIGN.md) — dokumen ini **mewarisi token yang sama** (jangan buat token baru yang bentrok) dan menambahkan spesifikasi UI yang spesifik untuk tiap section landing page.
 
-**Tujuan halaman**: mengonversi pengunjung anonim (calon peserta magang) menjadi pendaftar, dengan membangun kepercayaan (kredibilitas PT SBI), transparansi (kuota real-time), dan mengurangi friksi (FAQ, kontak jelas).
+**Tujuan halaman**: mengonversi pengunjung anonim (calon peserta magang) menjadi pendaftar, dengan membangun kepercayaan, transparansi (kuota real-time), dan mengurangi friksi (FAQ, kontak jelas).
 
 ---
 
@@ -74,7 +74,7 @@ Urutan section (top → bottom), semua conditional kecuali Header/Hero/Kuota/Foo
 │                                        FAQ Kontak   [Login]│
 ├───────────────────────────────────────────────────────────┤
 │                        HERO (center)                       │
-│              H1 Judul Program Magang PT SBI                │
+│              H1 Judul Program Absensi Magang               │
 │                 Subjudul (opsional)                         │
 │              [ Lihat Kuota Tersedia → ]                     │
 ├───────────────────────────────────────────────────────────┤

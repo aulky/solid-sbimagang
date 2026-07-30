@@ -35,8 +35,8 @@ async function main() {
     data: {
       username: "admin",
       password: adminPassword,
-      fullName: "Admin SBI",
-      email: "admin@solusibangunindonesia.co.id",
+      fullName: "Admin Absensi Magang",
+      email: "admin@absensimagang.co.id",
       phone: "081234567890",
       role: "ADMIN",
       status: "AKTIF"
@@ -50,7 +50,7 @@ async function main() {
       username: "alif",
       password: user1Password,
       fullName: "Alif Zawjati Randri",
-      email: "alif.zawjati@magang.sbi.co.id",
+      email: "alif.zawjati@absensimagang.co.id",
       phone: "089876543210",
       role: "USER",
       batchId: batch1.id,
@@ -65,7 +65,7 @@ async function main() {
       username: "jekifauzan",
       password: user2Password,
       fullName: "Muhammad Zaki Fauzan",
-      email: "jeki.fauzan@magang.sbi.co.id",
+      email: "jeki.fauzan@absensimagang.co.id",
       phone: "085678901234",
       role: "USER",
       batchId: batch1.id,
