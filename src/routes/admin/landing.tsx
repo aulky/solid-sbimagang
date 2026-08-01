@@ -14,6 +14,7 @@ import {
   updateLandingListItem,
   deleteLandingListItem,
   getAdminTestimoni,
+  createTestimoniAdmin,
   updateTestimoni,
   deleteTestimoni,
   getAdminKuota,
@@ -535,6 +536,7 @@ function LandingListTab(props: { section: "FAQ" | "SYARAT"; label: string }) {
 
 function TestimoniTab() {
   const list = createAsync(() => getAdminTestimoni());
+  const [showCreate, setShowCreate] = createSignal(false);
   const [editingItem, setEditingItem] = createSignal<{
     id: string;
     name: string;
@@ -548,9 +550,16 @@ function TestimoniTab() {
     name: string;
   } | null>(null);
 
+  const creating = useSubmission(createTestimoniAdmin);
   const updating = useSubmission(updateTestimoni);
   const deleting = useSubmission(deleteTestimoni);
 
+  let prevCreatingPending = false;
+  createEffect(() => {
+    const pending = !!creating.pending;
+    if (prevCreatingPending && !pending && !creating.error) setShowCreate(false);
+    prevCreatingPending = pending;
+  });
   let prevUpdatingPending = false;
   createEffect(() => {
     const pending = !!updating.pending;
@@ -565,6 +574,10 @@ function TestimoniTab() {
   });
 
   createEffect(() => {
+    if (creating.result instanceof Error)
+      showToast(creating.result.message, "error");
+  });
+  createEffect(() => {
     if ((updating.result as any) instanceof Error)
       showToast((updating.result as any as Error).message, "error");
   });
@@ -575,31 +588,85 @@ function TestimoniTab() {
 
   return (
     <div>
-      <div
-        style="display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); background: rgba(37, 99, 235, 0.08); border-left: 4px solid var(--color-info); border-radius: var(--radius-md); font-size: 13px; color: var(--color-text-secondary); line-height: 1.5;"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          style="flex-shrink: 0; margin-top: 2px; color: var(--color-info);"
-          aria-hidden="true"
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); flex-wrap: wrap; gap: var(--space-2);">
+        <div
+          style="display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3) var(--space-4); background: rgba(37, 99, 235, 0.08); border-left: 4px solid var(--color-info); border-radius: var(--radius-md); font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; flex: 1; min-width: 280px;"
         >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="16" x2="12" y2="12" />
-          <line x1="12" y1="8" x2="12.01" y2="8" />
-        </svg>
-        <span>
-          Testimoni dikirim langsung oleh <strong>alumni</strong> dari dashboard
-          mereka setelah batch magang selesai. Admin hanya dapat mengedit,
-          menonaktifkan, atau menghapus testimoni yang masuk.
-        </span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="flex-shrink: 0; margin-top: 2px; color: var(--color-info);"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span>
+            Testimoni dikirim langsung oleh <strong>alumni</strong> dari dashboard mereka. Admin juga dapat menambahkan testimoni secara manual lewat tombol di samping.
+          </span>
+        </div>
+        <button
+          class="btn-primary"
+          style="width: auto; padding: 0 var(--space-4); height: 40px; white-space: nowrap;"
+          onClick={() => setShowCreate(true)}
+        >
+          + Tambah Testimoni
+        </button>
       </div>
+
+      <Show when={showCreate()}>
+        <Portal>
+          <div class="modal-overlay" onClick={() => setShowCreate(false)}>
+            <div class="modal modal-animate" onClick={(e) => e.stopPropagation()}>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">
+                <h3 style="margin: 0; font-family: var(--font-headline); font-weight: 700;">
+                  Tambah Testimoni
+                </h3>
+                <button
+                  class="theme-toggle"
+                  style="font-size: 24px; padding: 0; cursor: pointer;"
+                  onClick={() => setShowCreate(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <form action={createTestimoniAdmin} method="post">
+                <div class="form-group">
+                  <label>Nama Pengirim</label>
+                  <input name="name" placeholder="contoh: Budi Santoso" required minLength={2} />
+                </div>
+                <div class="form-group">
+                  <label>Peran / Divisi (opsional)</label>
+                  <input name="roleInfo" placeholder="contoh: Alumni Divisi IT, Batch 2025" />
+                </div>
+                <div class="form-group">
+                  <label>Pesan Testimoni</label>
+                  <textarea name="message" rows="4" placeholder="Tuliskan ulasan atau testimoni magang..." required minLength={5}></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Urutan Tampil</label>
+                  <input type="number" name="order" value="0" />
+                </div>
+                <div style="display: flex; gap: var(--space-2); margin-top: var(--space-4);">
+                  <button class="btn-primary" type="submit" disabled={creating.pending}>
+                    {creating.pending ? "Menyimpan..." : "Simpan Testimoni"}
+                  </button>
+                  <button class="btn-ghost" type="button" onClick={() => setShowCreate(false)}>
+                    Batal
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </Portal>
+      </Show>
 
       <Show when={editingItem()}>
         {(item) => (

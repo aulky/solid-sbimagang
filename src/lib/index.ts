@@ -1497,6 +1497,31 @@ export const getAdminTestimoni = query(async () => {
   });
 }, "adminTestimoni");
 
+export const createTestimoniAdmin = action(async (formData: FormData) => {
+  "use server";
+  await requireAdmin();
+  const name = String(formData.get("name") || "").trim();
+  const roleInfo = String(formData.get("roleInfo") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+  const order = Number(formData.get("order") || 0);
+
+  if (!name || name.length < 2) return new Error("Nama minimal 2 karakter.");
+  if (!message || message.length < 5)
+    return new Error("Testimoni minimal 5 karakter.");
+
+  await db.landingTestimoni.create({
+    data: {
+      name,
+      roleInfo: roleInfo || null,
+      message,
+      order,
+      isActive: true,
+    },
+  });
+  await logActivity("BUAT_TESTIMONI_ADMIN", `admin create testimoni success (${name})`);
+  return redirect("/admin/landing?tab=testimoni&success=create");
+});
+
 export const updateTestimoni = action(async (formData: FormData) => {
   "use server";
   await requireAdmin();
