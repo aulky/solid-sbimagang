@@ -2790,18 +2790,104 @@ a {
 /* ---------- Footer ---------- */
 
 .landing-footer {
-  /* Tanpa latar/garis sendiri: glow penutup ada di .landing-page
-     (--landing-footer-gradient) supaya full-width, tidak terpotong shell. */
-  padding: var(--space-8) var(--space-5) var(--space-6);
-  text-align: center;
+  width: 100%;
+  margin-top: var(--space-8);
+  padding: var(--space-8) 0 var(--space-6);
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--color-border);
   color: var(--color-text-secondary);
   scroll-margin-top: calc(var(--landing-header-h) + var(--space-3));
 }
 
-.landing-footer a:not(.btn-primary):not(.btn-secondary) {
-  color: var(--color-primary);
-  font-weight: 600;
+.landing-footer-inner {
+  max-width: var(--landing-max-width);
+  margin-inline: auto;
+  padding-inline: var(--space-5);
+}
+
+.landing-footer-top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+@media (min-width: 768px) {
+  .landing-footer-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+.landing-footer-brand {
+  max-width: 320px;
+}
+
+.landing-footer-brand img {
+  display: block;
+}
+
+.landing-footer-brand p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.landing-footer-nav {
+  display: flex;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.landing-footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 120px;
+}
+
+.landing-footer-col h4 {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-headline);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.landing-footer-col a {
+  color: var(--color-text-secondary);
+  font-size: 13px;
   text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.landing-footer-col a:hover {
+  color: var(--color-primary);
+}
+
+.landing-footer-address {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  max-width: 200px;
+  line-height: 1.5;
+}
+
+.landing-footer-bottom {
+  padding-top: var(--space-5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: 13px;
+}
+
+.landing-footer-bottom p {
+  margin: 0;
 }
 
 /* ---------- Floating WhatsApp FAB ---------- */

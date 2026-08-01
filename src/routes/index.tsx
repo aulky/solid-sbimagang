@@ -822,46 +822,70 @@ export default function Home() {
         </section>
       </Show>
 
-      <footer class="landing-footer" id="kontak" data-spy="" data-reveal="">
-        <p class="landing-section-title" style="margin-bottom: var(--space-2);">
-          Hubungi Kami
-        </p>
-        <p style="margin: 0 0 var(--space-4); max-width: 480px; margin-left: auto; margin-right: auto;">
-          Ada pertanyaan seputar program magang? Hubungi tim HRD kami.
-        </p>
-        <div style="display: flex; gap: var(--space-2); justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-4);">
-          <Show when={waLink()}>
-            <a
-              href={waLink()!}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="btn-primary"
-              style="width: auto; padding: 0 var(--space-4); height: 40px; text-decoration: none; display: inline-flex; align-items: center;"
-            >
-              Chat WhatsApp
-            </a>
-          </Show>
-          <Show when={settings()?.contactEmail}>
-            <a
-              href={`mailto:${settings()!.contactEmail}`}
-              class="btn-secondary"
-              style="width: auto; padding: 0 var(--space-4); height: 40px; text-decoration: none; display: inline-flex; align-items: center;"
-            >
-              Email: {settings()!.contactEmail}
-            </a>
-          </Show>
-        </div>
-        <Show when={settings()?.contactAddress}>
-          <p style="margin: 0 0 var(--space-3);">{settings()!.contactAddress}</p>
-        </Show>
-        <p style="margin: 0; font-size: 13px;">
-          &copy; Absensi Magang. Sistem Informasi dan
-          Manajemen Magang.
-        </p>
-      </footer>
-
       </div>
       {/* ^ penutup .landing-shell */}
+
+      <footer class="landing-footer" id="kontak" data-spy="" data-reveal="">
+        <div class="landing-footer-inner">
+          <div class="landing-footer-top">
+            <div class="landing-footer-brand">
+              <img
+                src={theme() === "dark" ? "/logo-sigma-putih.png" : "/logo-sigma.png"}
+                alt="Logo SIGMA"
+                style="height: 36px; margin-bottom: var(--space-3);"
+              />
+              <p>
+                Sistem Informasi dan Manajemen Magang (SIGMA) &mdash; Platform pengelolaan absensi, kuota divisi, dan kegiatan magang secara transparan dan terstruktur.
+              </p>
+            </div>
+
+            <div class="landing-footer-nav">
+              <div class="landing-footer-col">
+                <h4>Navigasi</h4>
+                <a href="#tentang" onClick={goTo("tentang")}>Tentang</a>
+                <a href="#alur" onClick={goTo("alur")}>Alur Program</a>
+                <a href="#kuota" onClick={goTo("kuota")}>Kuota &amp; Batch</a>
+              </div>
+
+              <div class="landing-footer-col">
+                <h4>Informasi</h4>
+                <Show when={(syarat()?.length ?? 0) > 0}>
+                  <a href="#syarat" onClick={goTo("syarat")}>Syarat &amp; Ketentuan</a>
+                </Show>
+                <Show when={(faq()?.length ?? 0) > 0}>
+                  <a href="#faq" onClick={goTo("faq")}>FAQ</a>
+                </Show>
+                <Show when={(testimoni()?.length ?? 0) > 0}>
+                  <a href="#testimoni" onClick={goTo("testimoni")}>Testimoni</a>
+                </Show>
+              </div>
+
+              <div class="landing-footer-col">
+                <h4>Bantuan &amp; Kontak</h4>
+                <Show when={waLink()}>
+                  <a href={waLink()!} target="_blank" rel="noopener noreferrer">
+                    Chat WhatsApp HRD
+                  </a>
+                </Show>
+                <Show when={settings()?.contactEmail}>
+                  <a href={`mailto:${settings()!.contactEmail}`}>
+                    Email HRD
+                  </a>
+                </Show>
+                <Show when={settings()?.contactAddress}>
+                  <span class="landing-footer-address">{settings()!.contactAddress}</span>
+                </Show>
+              </div>
+            </div>
+          </div>
+
+          <div class="landing-footer-bottom">
+            <p>
+              &copy; {new Date().getFullYear()} SIGMA &bull; Absensi Magang. Hak cipta dilindungi.
+            </p>
+          </div>
+        </div>
+      </footer>
 
       {/* Floating WhatsApp button (mobile/tablet). Dirender via <Portal> ke
           document.body karena .fade-in (pembungkus route di app.tsx) punya
