@@ -9,6 +9,6 @@ export default defineConfig({
   ],
   ssr: { external: ["@prisma/client"] },
   server: {
-    allowedHosts: ["sapa.aulky.app"]
+    allowedHosts: ["sigma.aulky.app"]
   }
 });
