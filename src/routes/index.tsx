@@ -131,14 +131,13 @@ function TestimoniCard(props: {
 const batchStatus = (b: { startDate: string | Date }) =>
   new Date() < new Date(b.startDate) ? "akan-datang" : "berjalan";
 
-const NAV_ITEMS = ["tentang", "alur", "kuota", "syarat", "faq", "kontak"] as const;
+const NAV_ITEMS = ["tentang", "alur", "kuota", "syarat", "faq"] as const;
 const NAV_LABELS: Record<(typeof NAV_ITEMS)[number], string> = {
   tentang: "Tentang",
   alur: "Alur",
   kuota: "Kuota",
   syarat: "Syarat",
   faq: "FAQ",
-  kontak: "Kontak",
 };
 
 /**
@@ -207,7 +206,6 @@ export default function Home() {
     kuota: () => true,
     syarat: () => (syarat()?.length ?? 0) > 0,
     faq: () => (faq()?.length ?? 0) > 0,
-    kontak: () => true,
   };
 
   const [activeId, setActiveId] = createSignal("");
